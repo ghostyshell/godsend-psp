@@ -138,6 +138,11 @@ All notable changes to GODsend PSP. Newest first.
 
 ### Fixed
 
+- Publish commits both the README table and docs/downloads.json again (the
+  site feed was left uncommitted, so Pages kept serving the old version).
+
+### Fixed
+
 - Homebrew install badges were wrong: the installed check joined an empty
   folder name, so any existing PSP/GAME counted as installed. It now scans
   for a real EBOOT folder matching the catalog name (folder or PARAM.SFO
