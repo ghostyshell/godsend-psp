@@ -151,6 +151,8 @@ pub fn convert_audio(
 /// Encoder settings for the PSP AVC preset.
 #[derive(Debug, Clone)]
 pub struct VideoQuality {
+    /// x264 speed preset (veryslow is best quality per bit).
+    pub preset: String,
     /// x264 CRF, lower is better.
     pub crf: u32,
     pub fps: u32,
@@ -162,9 +164,10 @@ pub struct VideoQuality {
 impl Default for VideoQuality {
     fn default() -> Self {
         Self {
-            crf: 18,
+            preset: "veryslow".into(),
+            crf: 16,
             fps: 30,
-            audio_kbps: 192,
+            audio_kbps: 256,
             resolution: "480x272".into(),
         }
     }
@@ -197,7 +200,7 @@ pub fn convert_video(
         "-c:v".into(), "libx264".into(),
         "-profile:v".into(), "main".into(),
         "-level:v".into(), "3.0".into(),
-        "-preset".into(), "medium".into(),
+        "-preset".into(), quality.preset.clone(),
         "-crf".into(), crf,
         "-vf".into(), vf,
         "-pix_fmt".into(), "yuv420p".into(),

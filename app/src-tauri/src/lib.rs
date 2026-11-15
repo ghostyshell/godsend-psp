@@ -396,6 +396,7 @@ fn video_push(
     let ffprobe = media::find_ffprobe(&config.ffprobe_path);
     let make_thm = thm && config.video_thumbnails;
     let quality = media::VideoQuality {
+        preset: config.video_preset.clone(),
         crf: config.video_crf,
         fps: config.video_fps,
         audio_kbps: config.video_audio_kbps,

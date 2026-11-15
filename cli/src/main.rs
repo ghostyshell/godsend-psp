@@ -556,7 +556,8 @@ fn push_video(
             let thm_dest = if thm { Some(video.join(format!("{}.THM", name))) } else { None };
             let probe = media::find_ffprobe(&config.ffprobe_path);
             let quality = media::VideoQuality {
-                crf: config.video_crf,
+                preset: config.video_preset.clone(),
+        crf: config.video_crf,
                 fps: config.video_fps,
                 audio_kbps: config.video_audio_kbps,
                 resolution: config.video_resolution.clone(),

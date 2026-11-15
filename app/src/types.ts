@@ -14,6 +14,7 @@ export interface Config {
   video_thumbnails: boolean;
   convert_music: boolean;
   convert_video: boolean;
+  video_preset: string;
   video_crf: number;
   video_fps: number;
   video_audio_kbps: number;
