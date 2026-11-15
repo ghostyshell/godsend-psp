@@ -4,7 +4,13 @@ All notable changes to GODsend PSP. Newest first.
 
 ## Unreleased
 
-Nothing yet.
+### Added
+
+- Guides under docs/guides: connecting the PSP, homebrew and CFW, music and
+  video, disc images, saves and mods, troubleshooting, building from source.
+- CI release job: pushing a v* tag builds all platforms and attaches the
+  artifacts to a GitHub Release.
+- README download table and guide index.
 
 ## 0.1.0 - 2026-11-15
 
