@@ -1,4 +1,0 @@
-User-agent: *
-Allow: /
-
-Sitemap: https://ghostyshell.github.io/godsend-psp/sitemap.xml
