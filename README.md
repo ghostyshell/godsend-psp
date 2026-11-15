@@ -12,21 +12,20 @@ GODsend 360 and Keepsake Atelier, built on the Keepsake Atelier code stack
 
 ## Download
 
-Latest release (all platforms, built by CI): **[github.com/ghostyshell/godsend-psp/releases/latest](https://github.com/ghostyshell/godsend-psp/releases/latest)**
+<!-- downloads:start -->
+_No mirrors published yet. Run `scripts/publish-release.sh` to upload the
+current build to GoFile (primary) and file.kiwi (backup); the table is
+rewritten automatically._
+<!-- downloads:end -->
 
-| Build | File | Platform |
-| --- | --- | --- |
-| Desktop app (Apple Silicon) | `godsend-psp-0.2.0-arm64.dmg` | macOS 12+ |
-| Desktop app (Intel) | `godsend-psp-0.2.0-x64.dmg` | macOS 12+ |
-| Desktop app | `godsend-psp-0.2.0-x64-setup.exe` | Windows 10/11 |
-| Desktop app | `godsend-psp-0.2.0-linux-x64.AppImage` | Linux |
-| Desktop app | `godsend-psp-0.2.0-linux-x64.deb` | Debian/Ubuntu |
-| Headless CLI | `godsend-psp-cli-<platform>.tar.gz` / `.zip` | all of the above |
-
-The CLI is a single self-contained binary covering the entire feature set;
-the desktop builds share the same engine. The macOS DMG is not notarized:
-right-click, Open, Open on first launch (or
+Mirrors follow the sibling projects: **GoFile** is the primary host and
+**file.kiwi** is the encrypted backup. Links are refreshed weekly by
+`scripts/refresh-release-links.sh` (launchd, Sundays 03:47) because GoFile
+expires free-tier files. The desktop builds are not notarized: right-click,
+Open, Open on first launch (or
 `xattr -dr com.apple.quarantine "/Applications/GODsend PSP.app"`).
+CI still builds every platform on each `v*` tag; the publish script pulls
+those artifacts and uploads them.
 
 ## Guides
 

@@ -1,35 +1,183 @@
 #!/bin/bash
-# Upload release artifacts to GoFile and (optionally) file.kiwi, mirroring
-# the godsend-360 / keepsake-atelier release flow.
+# Upload release artifacts to GoFile (primary) and file.kiwi (backup), rewrite
+# the README download table, commit and push.
 #
-# Usage: scripts/publish-release.sh <artifact-file> [<artifact-file> ...]
-# Requires: curl, jq. Prints the download links at the end.
-
+#   scripts/publish-release.sh --artifacts /path/to/dist
+#   scripts/publish-release.sh                 # build the current version first
+#
+# Environment:
+#   GOFILE_TOKEN   overrides .gofile-io-token
+#   SKIP_PUSH=1    commit but do not push
 set -euo pipefail
 
-if [ $# -eq 0 ]; then
-  echo "usage: $0 <artifact-file> [artifact...]" >&2
-  exit 1
+SELF=$(cd "$(dirname "$0")" && pwd)
+REPO=$(cd "$SELF/.." && pwd)
+cd "$REPO"
+
+ARTIFACTS=""
+while [ $# -gt 0 ]; do
+  case "$1" in
+    --artifacts) ARTIFACTS=$2; shift 2 ;;
+    *) echo "unknown option: $1" >&2; exit 2 ;;
+  esac
+done
+
+log() { printf '[%s] %s\n' "$(date '+%F %T')" "$*" >&2; }
+die() { log "FAILED: $*"; exit 1; }
+
+for tool in python3 curl git shasum tar; do
+  command -v "$tool" >/dev/null 2>&1 || die "$tool not found on PATH ($PATH)"
+done
+
+V=$(python3 - <<'PY'
+import json
+print(json.load(open("app/src-tauri/tauri.conf.json"))["version"])
+PY
+)
+[ -n "$V" ] || die "could not read the version"
+
+RUN=".release-${V}-$(date +%Y%m%d)"
+LINKS="$RUN/links.txt"
+mkdir -p "$RUN"
+touch "$LINKS"
+
+LOCK=.release-publish.lock
+if ! mkdir "$LOCK" 2>/dev/null; then
+  pid=$(cat "$LOCK/pid" 2>/dev/null || true)
+  if [ -n "${pid:-}" ] && kill -0 "$pid" 2>/dev/null; then
+    log "another publish is already running (pid $pid) - exiting"
+    exit 0
+  fi
+  rm -rf "$LOCK"
+  mkdir "$LOCK"
+fi
+printf '%s\n' "$$" > "$LOCK/pid"
+trap 'rm -rf "$LOCK"' EXIT
+
+find . -maxdepth 1 -name '.release-*' -type d -mtime +30 -exec rm -rf {} + 2>/dev/null || true
+
+TOKEN=${GOFILE_TOKEN:-$(cat "$REPO/.gofile-io-token" 2>/dev/null || true)}
+[ -n "$TOKEN" ] || die "no GoFile token: write .gofile-io-token or set GOFILE_TOKEN"
+
+log "publishing GODsend PSP $V"
+
+# --- 1. Artifacts ---------------------------------------------------------------
+if [ -n "$ARTIFACTS" ]; then
+  [ -d "$ARTIFACTS" ] || die "no artifact directory at $ARTIFACTS"
+  DIST=$(cd "$ARTIFACTS" && pwd)
+else
+  DIST="$RUN/artifacts"
+  mkdir -p "$DIST"
+  log "downloading the latest CI run artifacts"
+  command -v gh >/dev/null 2>&1 || die "gh not found (needed to fetch CI artifacts)"
+  RUN_ID=$(gh run list --repo ghostyshell/godsend-psp --workflow build --json databaseId,conclusion \
+    --jq '[.[] | select(.conclusion=="success")][0].databaseId' 2>/dev/null || true)
+  [ -n "$RUN_ID" ] || die "no successful CI run found"
+  gh run download "$RUN_ID" --repo ghostyshell/godsend-psp --dir "$DIST" \
+    || die "artifact download failed"
+  # Flatten the per-OS subdirectories.
+  find "$DIST" -mindepth 2 -type f -exec mv {} "$DIST/" \; 2>/dev/null || true
+  find "$DIST" -mindepth 1 -type d -empty -delete 2>/dev/null || true
 fi
 
-for f in "$@"; do
-  [ -f "$f" ] || { echo "not a file: $f" >&2; exit 1; }
+FILES=()
+for f in "$DIST"/*.dmg "$DIST"/*.tar.gz "$DIST"/*.zip "$DIST"/*.AppImage "$DIST"/*.deb "$DIST"/*setup.exe; do
+  [ -f "$f" ] && FILES+=("$(basename "$f")")
+done
+[ ${#FILES[@]} -gt 0 ] || die "no release files in $DIST"
+log "artifacts: ${FILES[*]}"
+
+# --- 2. Upload ------------------------------------------------------------------
+field() { grep -F "$1 |" "$LINKS" 2>/dev/null | tail -1 | cut -d'|' -f"$2" | sed 's/^ *//;s/ *$//' || true; }
+row() {
+  grep -v -F "$1 |" "$LINKS" > "$LINKS.tmp" 2>/dev/null || true
+  mv "$LINKS.tmp" "$LINKS"
+  printf '%s | %s | %s | %s | %s\n' "$1" "$2" "$3" "$4" "$5" >> "$LINKS"
+}
+
+human_size() {
+  python3 - "$1" <<'PY'
+import os, sys
+b = os.path.getsize(sys.argv[1])
+for unit in ("B", "KiB", "MiB", "GiB"):
+    if b < 1024 or unit == "GiB":
+        print(f"{b:.1f} {unit}" if unit != "B" else f"{b} B")
+        break
+    b /= 1024.0
+PY
+}
+
+put_gofile() {
+  local f=$1 url=""
+  for attempt in 1 2 3; do
+    url=$(curl -sS --max-time 3600 -X POST \
+      "https://upload.gofile.io/contents/uploadfile" \
+      -H "Authorization: Bearer $TOKEN" \
+      -F "file=@$DIST/$f" 2>/dev/null \
+      | python3 -c 'import json,sys
+try:
+    print(json.load(sys.stdin).get("data", {}).get("downloadPage", ""))
+except Exception:
+    print("")' 2>/dev/null) || url=""
+    if [ -n "$url" ]; then printf '%s\n' "$url"; return 0; fi
+    log "  gofile attempt $attempt/3 failed for $f; retrying in 30s"
+    sleep 30
+  done
+  return 1
+}
+
+put_kiwi() {
+  FORCE_COLOR=0 npx -y @file-kiwi/node "$DIST/$1" --title "$1" 2>&1 \
+    | grep -Eo 'https://file\.kiwi/[A-Za-z0-9][A-Za-z0-9#_+/=-]*' | tail -1 || true
+}
+
+incomplete=0
+for f in "${FILES[@]}"; do
+  gf=$(field "$f" 2)
+  kw=$(field "$f" 3)
+  if [ -n "$gf" ] && [ "$gf" != "EMPTY" ] && [ -n "$kw" ] && [ "$kw" != "EMPTY" ]; then
+    log "[skip] $f already uploaded"
+    continue
+  fi
+  size=$(human_size "$DIST/$f")
+  sha=$(shasum -a 256 "$DIST/$f" | cut -d' ' -f1)
+  log "[start] $f ($size)"
+  if [ -z "$gf" ] || [ "$gf" = "EMPTY" ]; then
+    gf=$(put_gofile "$f") || gf="EMPTY"
+  fi
+  if [ -z "$kw" ] || [ "$kw" = "EMPTY" ]; then
+    kw=$(put_kiwi "$f")
+  fi
+  [ -n "$gf" ] && [ "$gf" != "EMPTY" ] || incomplete=1
+  [ -n "$kw" ] && [ "$kw" != "EMPTY" ] || incomplete=1
+  log "[done] $f | ${gf:-EMPTY} | ${kw:-EMPTY}"
+  row "$f" "${gf:-EMPTY}" "${kw:-EMPTY}" "$size" "$sha"
 done
 
-links_file=".release-links-$(date +%Y%m%d-%H%M%S).txt"
-: > "$links_file"
+# --- 3. Rewrite the README table -------------------------------------------------
+python3 -I scripts/patch-release-links.py "$LINKS" || die "could not patch README"
 
-for f in "$@"; do
-  echo "uploading $f ..."
-  # GoFile: get a guest account token, then upload.
-  token=$(curl -s -X POST https://api.gofile.io/accounts | jq -r '.data.token')
-  server=$(curl -s -H "Authorization: Bearer $token" https://api.gofile.io/servers | jq -r '.data[0].name')
-  url=$(curl -s -H "Authorization: Bearer $token" \
-    -F "file=@${f}" "https://${server}.gofile.io/contents/uploadfile" | jq -r '.data.downloadPage')
-  echo "$url  $f" >> "$links_file"
-  echo "  -> $url"
-done
+# --- 4. Commit and push ----------------------------------------------------------
+if git diff --quiet -- README.md; then
+  log "download links already current - nothing to commit"
+else
+  git add README.md
+  git commit -q -m "docs: refresh ${V} download links (GoFile + file.kiwi)
 
-echo
-echo "links written to $links_file:"
-cat "$links_file"
+Weekly mirror refresh: the current version is rebuilt and re-uploaded to
+GoFile (primary) and file.kiwi (backup). Free-tier links expire, so the
+README table is repointed at the fresh mirrors." || die "git commit failed"
+  if [ "${SKIP_PUSH:-0}" = "1" ]; then
+    log "SKIP_PUSH=1: links committed locally; not pushed"
+  else
+    git push -q origin main || die "git push failed"
+    log "pushed refreshed ${V} links"
+  fi
+fi
+
+if [ "$incomplete" -ne 0 ]; then
+  log "WARNING: at least one mirror is missing - run again to finish"
+else
+  log "all mirrors uploaded"
+fi
+log "done"
