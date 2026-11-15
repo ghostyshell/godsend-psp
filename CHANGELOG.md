@@ -37,6 +37,13 @@ All notable changes to GODsend PSP. Newest first.
 
 ### Fixed
 
+- Installer DMG attach uses an explicit mountpoint (the old field parse
+  broke on the space in "GODsend PSP") and convert retries before failing.
+- fetch-ffmpeg no longer renames the binary onto itself on non-Windows
+  targets.
+
+### Fixed
+
 - CI no longer reuses stale ffmpeg binaries: the fetched arm64 pair had been
   committed (gitignore only covered `ffmpeg*`), which broke the x64 macOS
   and Linux jobs with "Bad CPU type". The binaries are untracked and the
