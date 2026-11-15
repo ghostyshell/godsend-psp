@@ -15,6 +15,8 @@ GODsend 360 and Keepsake Atelier, built on the Keepsake Atelier code stack
 | ![Console](docs/site-console.png) | ![Homebrew](docs/site-homebrew.png) |
 
 
+[Watch the video guides](https://ghostyshell.github.io/godsend-psp/video-guides.html) - one short recording per tab.
+
 ## Download
 
 <!-- downloads:start -->

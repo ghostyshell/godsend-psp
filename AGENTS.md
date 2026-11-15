@@ -63,3 +63,7 @@ app/src-tauri/icons/icon.png` (only when the mark changes).
   the mock bridge fixtures must mirror real shapes.
 - Errors: core returns `godsend_core::Result<T>`; the Tauri error type
   serializes as the Display string.
+
+## Demo videos and guides - demo-reels
+
+Skill: `docs/agents/skills/demo-reels.md` (global copy `~/.claude/skills/demo-reels/SKILL.md`, tooling `~/Code/demo-reels`). Desktop app, recorded from the renderer's `?mock=1` bridge. Guides data `docs/guides.json`, page `docs/video-guides.html`. Any user-visible change (new, changed or removed feature) updates its video and guides entry in the same change: new = new reel plus a guides entry, changed = re-record, removed = delete both. Then `node publish.mjs godsendpsp` and `node ~/Code/demo-reels/build-site.mjs godsendpsp` and add a CHANGELOG line.
