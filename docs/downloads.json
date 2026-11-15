@@ -1,31 +1,7 @@
 {
-  "version": "0.2.0",
+  "version": "0.2.16",
   "updated": "2026-11-15",
   "artifacts": [
-    {
-      "name": "godsend-psp-0.2.0-linux-x64.AppImage",
-      "label": "Linux (x86_64, AppImage)",
-      "gofile": "https://gofile.io/d/N99KRGtn",
-      "kiwi": "https://file.kiwi/f89e4cca#ACGgVrNjPb2uloUcbgpUWg",
-      "size": "79.8 MiB",
-      "sha256": "7ca9b679cd8508cff888271168ce7ca5d50ad67f353d96d9d48bb4a28485c34d"
-    },
-    {
-      "name": "godsend-psp-cli-0.2.16-0.2.0-linux-x64.tar.gz",
-      "label": "Linux (x86_64, CLI)",
-      "gofile": "https://gofile.io/d/GTnl3mG5",
-      "kiwi": "https://file.kiwi/a5fe320e#2TdiMWN-b7MAWfCMSBrUpw",
-      "size": "1.9 MiB",
-      "sha256": "4434199f41b24dfd377c1e44b44d457c38c616ba0c2555207d33ccd55c09c57b"
-    },
-    {
-      "name": "godsend-psp-cli-0.2.16-0.2.0-windows-x64.zip",
-      "label": "Windows (x86_64, CLI)",
-      "gofile": "https://gofile.io/d/vkem1MlJ",
-      "kiwi": "https://file.kiwi/c35290b6#qK0xhp2uBjstdoq1l3QJkA",
-      "size": "2.0 MiB",
-      "sha256": "29d2f4f0d2e90bf9e71515a069363182d2e2b6d4c071955ef8172fb7437a51ae"
-    },
     {
       "name": "godsend-psp-cli-0.2.16-macos-arm64.tar.gz",
       "label": "macOS (Apple Silicon, CLI)",
@@ -35,28 +11,12 @@
       "sha256": "55bb030e16d5717e4573559191a47e424884e8e5bdffa96cdebf9e1ef042903d"
     },
     {
-      "name": "godsend-psp-0.2.0-linux-x64.deb",
-      "label": "Linux (x86_64, deb)",
-      "gofile": "https://gofile.io/d/zaB1wpii",
-      "kiwi": "https://file.kiwi/2cd6f832#-6SzK2Ccpg_NmWim3yc7qg",
-      "size": "5.0 MiB",
-      "sha256": "172fb152b98f7ef65a8aee0b0148da78310a7f8b16d8d3a5a46273c28eada178"
-    },
-    {
       "name": "godsend-psp-0.2.16-arm64.dmg",
       "label": "macOS (Apple Silicon)",
       "gofile": "https://gofile.io/d/e0tmrSL1",
       "kiwi": "https://file.kiwi/1c8346d9#ixOa0zrOWZs9uS3fGr64kA",
       "size": "44.1 MiB",
       "sha256": "2216a3ad8fa62eb81420f66b10c61000c193636a209c8466e0b591439ef7e739"
-    },
-    {
-      "name": "godsend-psp-0.2.0-x64-setup.exe",
-      "label": "Windows (x86_64, installer)",
-      "gofile": "https://gofile.io/d/Enb8xqsf",
-      "kiwi": "https://file.kiwi/b13b7e73#lOLT0Q7x08bhqPop5Vux9A",
-      "size": "3.3 MiB",
-      "sha256": "27f3eac6f90265d6995113f8d0e1b804b6366a9b78a217d545b01af7579e7d81"
     }
   ]
 }
