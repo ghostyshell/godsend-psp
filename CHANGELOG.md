@@ -3,6 +3,9 @@
 All notable changes to GODsend PSP. Newest first.
 
 
+## [0.2.12] - 2026-11-15
+
+
 ## [0.2.11] - 2026-11-15
 
 
