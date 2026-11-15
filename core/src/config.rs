@@ -33,7 +33,8 @@ pub struct Config {
     pub tb_api_key: String,
     /// game-search service base URL (the debrid.link-style index).
     pub gamesearch_base: String,
-    /// Public R2 cover/animation base. Empty = rely on catalog cover URLs.
+    /// Public cover base. Default is the production covers host; empty falls
+    /// back to catalog cover URLs only.
     pub covers_base: String,
     /// Mods catalog base (JSON per serial). Empty = mods disabled.
     pub mods_base: String,
@@ -58,8 +59,8 @@ impl Default for Config {
             rd_api_key: String::new(),
             tb_api_key: String::new(),
             gamesearch_base: "http://localhost:3011".into(),
-            covers_base: String::new(),
-            mods_base: String::new(),
+            covers_base: "https://covers.debrid.in".into(),
+            mods_base: "https://ghostyshell.github.io/godsend-psp".into(),
             mcp_enabled: true,
             mcp_port: 8849,
         }

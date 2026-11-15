@@ -3,7 +3,17 @@
 All notable changes to GODsend PSP. Newest first.
 
 
+## [0.2.17] - 2026-11-15
+
+
 ## [0.2.16] - 2026-11-15
+
+### Changed
+
+- Store sources ship production defaults: `covers_base` is
+  https://covers.debrid.in (R2 covers, `<base>/games/<slug>.<ext>`) and
+  `mods_base` is the project site, which now serves `psp/covers/<SERIAL>.png`
+  and `psp/mods/<SERIAL>.json`. Both can be cleared in Settings.
 
 ### Changed
 
