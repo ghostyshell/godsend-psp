@@ -31,7 +31,8 @@ fi
 
 TMP=$(mktemp -u).dmg
 hdiutil create -srcfolder "$STAGE" -volname "$VOL" -fs HFS+ -format UDRW -ov "$TMP" >/dev/null
-MNT=$(hdiutil attach -readwrite -noverify -noautoopen "$TMP" | awk '/^\/dev\/disk/{print $3; exit}')
+MNT=$(mktemp -d)
+hdiutil attach "$TMP" -nobrowse -noautoopen -readwrite -mountpoint "$MNT" >/dev/null
 if [ -n "$BG" ] && [ -f "$BG" ]; then
   APPNAME="$APPNAME" VOLUME_NAME="$VOL" osascript <<'OSA' 2>/dev/null || true
 set appName to system attribute "APPNAME"
@@ -59,7 +60,13 @@ end tell
 OSA
 fi
 sync
-hdiutil detach "$MNT" >/dev/null 2>&1 || true
-hdiutil convert "$TMP" -format UDZO -o "$OUT" >/dev/null
+hdiutil detach "$MNT" >/dev/null 2>&1 || hdiutil detach "$MNT" -force >/dev/null 2>&1 || true
+for attempt in 1 2 3; do
+  if hdiutil convert "$TMP" -format UDZO -o "$OUT" >/dev/null 2>&1; then
+    break
+  fi
+  [ "$attempt" = 3 ] && { echo "hdiutil convert failed" >&2; exit 1; }
+  sleep 3
+done
 rm -rf "$STAGE" "$TMP"
 echo "built $OUT (app + Applications link + Read Me + background)"

@@ -21,7 +21,9 @@ for tool in ffmpeg ffprobe; do
   echo "[fetch] ${tool}-${PLAT}"
   curl -fsSL --retry 3 --max-time 600 "$BASE/${tool}-${PLAT}.gz" -o "$RES/${tool}.gz"
   gunzip -f "$RES/${tool}.gz"
-  mv "$RES/$tool" "$out"
+  if [ -n "$suffix" ]; then
+    mv -f "$RES/$tool" "$out"
+  fi
   chmod +x "$out" 2>/dev/null || true
 done
 
