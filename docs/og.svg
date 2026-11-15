@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#56e8f5"/><stop offset=".52" stop-color="#6d8bff"/><stop offset="1" stop-color="#8678ff"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="630" fill="#04060c"/>
+  <circle cx="980" cy="80" r="320" fill="url(#g)" opacity=".12"/>
+  <rect x="90" y="210" width="90" height="90" rx="26" fill="url(#g)"/>
+  <rect x="114" y="234" width="42" height="42" rx="12" fill="#04060c"/>
+  <text x="210" y="285" font-family="Chakra Petch, sans-serif" font-weight="700" font-size="64" fill="#eef2fb">GODsend PSP</text>
+  <text x="90" y="380" font-family="JetBrains Mono, monospace" font-size="24" fill="#56e8f5">STORE · HOMEBREW · MEDIA · MODS</text>
+  <text x="90" y="470" font-family="Chakra Petch, sans-serif" font-size="26" fill="#a5b0c7">Manage the whole memory stick from one window.</text>
+</svg>

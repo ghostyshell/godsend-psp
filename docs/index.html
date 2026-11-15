@@ -1,0 +1,160 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>GODsend PSP - game library, homebrew and mods for the PSP</title>
+<meta name="description" content="Desktop workshop for the PSP over USB: store with debrid and Internet Archive sources, homebrew, music, video, ISO/CSO, saves, mods and a library with covers." />
+<meta property="og:title" content="GODsend PSP" />
+<meta property="og:description" content="Manage the PSP memory stick from one window: store, homebrew, media, saves, mods." />
+<meta property="og:type" content="website" />
+<meta property="og:image" content="og.svg" />
+<link rel="icon" type="image/png" href="icon.png" />
+<link rel="stylesheet" href="site.css" />
+</head>
+<body>
+<div class="glow"></div>
+<header>
+  <a class="brand" href="./"><span class="mark"></span><span>GODsend PSP</span></a>
+  <nav>
+    <a href="#features">Features</a>
+    <a href="#screens">Screens</a>
+    <a href="#downloads">Downloads</a>
+    <a href="guides/index.md">Guides</a>
+    <a href="https://github.com/ghostyshell/godsend-psp">GitHub</a>
+  </nav>
+</header>
+
+<main>
+  <section class="hero">
+    <div class="eyebrow">USB MASS STORAGE · NO DRIVERS</div>
+    <h1>A workshop for<br /><span class="laser">your PSP.</span></h1>
+    <p class="lead">
+      Plug the console in, open one window. Browse the store with debrid and
+      Internet Archive sources, install homebrew and custom firmware, push
+      music and video, convert ISO to CSO, back up saves, manage plugins, and
+      keep a local library of games with covers and mods.
+    </p>
+    <div class="cta">
+      <a class="btn primary" href="#downloads">Download</a>
+      <a class="btn" href="guides/index.md">Read the guides</a>
+      <a class="btn" href="https://discord.gg/d3sFnrgpJn">Discord</a>
+    </div>
+    <div class="chips">
+      <span class="chip"><i class="dot"></i>macOS, Windows, Linux</span>
+      <span class="chip"><i class="dot"></i>Rust engine + Tauri</span>
+      <span class="chip"><i class="dot"></i>aria2c downloads</span>
+      <span class="chip"><i class="dot"></i>Real-Debrid + TorBox</span>
+    </div>
+  </section>
+
+  <section id="screens" class="screens">
+    <img src="site-console.png" alt="Console page with device status, checks and activity" loading="lazy" />
+    <img src="site-games.png" alt="Game library with cover tiles" loading="lazy" />
+    <img src="site-homebrew.png" alt="Homebrew catalog with installers" loading="lazy" />
+  </section>
+
+  <section id="features">
+    <h2>Everything on the stick</h2>
+    <div class="grid">
+      <article>
+        <h3>Store</h3>
+        <p>Search the game-search debrid index (PSP platform) and Internet
+        Archive megathread sets. Per-game link lists with ddl, torrent and
+        magnet entries, resolved through Real-Debrid or TorBox.</p>
+      </article>
+      <article>
+        <h3>aria2c</h3>
+        <p>Sixteen-connection downloads on every platform, with a single
+        connection fallback. Configurable download folder and a Downloads
+        page for the queue.</p>
+      </article>
+      <article>
+        <h3>Library</h3>
+        <p>PSP and local libraries side by side. A serial-keyed local database
+        keeps titles, covers and animation URLs; copy games between the stick
+        and the computer in one click.</p>
+      </article>
+      <article>
+        <h3>Homebrew and CFW</h3>
+        <p>Catalog installers for ARK-4, ARK-5, FrogGBA, TempGBA4PSP-mod and
+        DaedalusX64 with layout detection; import any homebrew zip.</p>
+      </article>
+      <article>
+        <h3>Media</h3>
+        <p>Music to PSP/MUSIC and video to PSP/VIDEO with ffmpeg presets
+        (MP3/M4A, AVC 480x272) and .THM thumbnails.</p>
+      </article>
+      <article>
+        <h3>Images and saves</h3>
+        <p>Pure Rust ISO to CSO conversion, UMD metadata from the ISO tree,
+        save backup and restore, and a two-pane file manager.</p>
+      </article>
+      <article>
+        <h3>Mods</h3>
+        <p>Per-game mods catalog keyed by serial, pulled into the download
+        folder. seplugins toggles and XMB theme installs too.</p>
+      </article>
+      <article>
+        <h3>CLI</h3>
+        <p>The same engine headless: devices, scan, catalog, install, music,
+        video, iso-import, convert, saves, plugins, themes, doctor.</p>
+      </article>
+    </div>
+  </section>
+
+  <section id="downloads">
+    <h2>Downloads</h2>
+    <p class="muted" id="downloads-note">
+      GoFile is the primary mirror, file.kiwi the encrypted backup. Links are
+      refreshed weekly because free-tier files expire.
+    </p>
+    <div class="downloads" id="downloads-table">
+      <p class="muted">Loading the current links from downloads.json...</p>
+    </div>
+  </section>
+
+  <section id="guides">
+    <h2>Guides</h2>
+    <div class="grid guides">
+      <a href="guides/connect-your-psp.md">Connect your PSP</a>
+      <a href="guides/homebrew-and-cfw.md">Homebrew and custom firmware</a>
+      <a href="guides/music-and-video.md">Music and video</a>
+      <a href="guides/disc-images.md">Disc images</a>
+      <a href="guides/saves-and-mods.md">Saves and mods</a>
+      <a href="guides/troubleshooting.md">Troubleshooting</a>
+      <a href="guides/build-from-source.md">Build from source</a>
+      <a href="https://github.com/ghostyshell/godsend-psp">Source on GitHub</a>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <a class="brand" href="./"><span class="mark"></span><span>GODsend PSP</span></a>
+  <div class="links">
+    <a href="https://ko-fi.com/ghosty99">Ko-fi</a>
+    <a href="https://discord.gg/d3sFnrgpJn">Discord</a>
+    <a href="https://etherscan.io/address/0xbBef115aD853236a350EaF04777a2AdB2e7c0317">ETH</a>
+    <a href="https://github.com/ghostyshell/godsend-psp">GitHub</a>
+  </div>
+  <p class="muted">MIT. Not affiliated with Sony. Use with content you own.</p>
+</footer>
+
+<script>
+fetch("downloads.json").then(r => r.json()).then(data => {
+  const el = document.getElementById("downloads-table");
+  if (!data.artifacts || !data.artifacts.length) return;
+  let html = '<table><thead><tr><th>Build</th><th>GoFile</th><th>file.kiwi</th><th>Size</th></tr></thead><tbody>';
+  for (const a of data.artifacts) {
+    const g = a.gofile && a.gofile !== "EMPTY" ? `<a href="${a.gofile}">Download</a>` : "pending";
+    const k = a.kiwi && a.kiwi !== "EMPTY" ? `<a href="${a.kiwi}">Mirror</a>` : "pending";
+    html += `<tr><td><code>${a.name}</code></td><td>${g}</td><td>${k}</td><td>${a.size || ""}</td></tr>`;
+  }
+  html += "</tbody></table>";
+  el.innerHTML = html;
+  const note = document.getElementById("downloads-note");
+  if (data.version) note.textContent += ` Current build: ${data.version}.`;
+}).catch(() => {});
+</script>
+</body>
+</html>
