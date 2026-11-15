@@ -3,6 +3,9 @@
 All notable changes to GODsend PSP. Newest first.
 
 
+## [0.2.30] - 2026-11-16
+
+
 ## [0.2.29] - 2026-11-16
 
 
@@ -187,6 +190,12 @@ All notable changes to GODsend PSP. Newest first.
 
 
 ## [0.2.4] - 2026-11-15
+
+### Fixed
+
+- Store source points at the real production index:
+  https://game-debrid.link/api. Cover resolution prefers the index RAWG art
+  and then the R2 mirror using the index slug.
 
 ### Fixed
 
