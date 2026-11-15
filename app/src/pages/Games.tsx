@@ -211,9 +211,10 @@ function GameTile({
         {iconUrl ? (
           <img src={iconUrl} alt={`${game.title} icon`} />
         ) : (
-          <span className="monogram" aria-hidden="true">
-            {game.folder.slice(0, 2).toUpperCase()}
-          </span>
+          <div className="cover-fallback">
+            <span className="cf-title">{game.title}</span>
+            <span className="cf-serial">{game.title_id ?? game.kind}</span>
+          </div>
         )}
       </div>
       <div className="body">
