@@ -3,6 +3,9 @@
 All notable changes to GODsend PSP. Newest first.
 
 
+## [0.2.25] - 2026-11-15
+
+
 ## [0.2.24] - 2026-11-15
 
 
@@ -91,6 +94,12 @@ All notable changes to GODsend PSP. Newest first.
 
 
 ## [0.2.15] - 2026-11-15
+
+### Added
+
+- Hosted theme catalog: Mods > Themes lists `<mods_base>/psp/themes.json`
+  and installs a chosen `.ptf`/`.ctf` straight into PSP/THEME. The default
+  base is now https://psp-mods.debrid.in.
 
 ### Added
 

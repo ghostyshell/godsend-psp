@@ -73,7 +73,7 @@ impl Default for Config {
             tb_api_key: String::new(),
             gamesearch_base: "http://localhost:3011".into(),
             covers_base: "https://covers.debrid.in".into(),
-            mods_base: "https://ghostyshell.github.io/godsend-psp".into(),
+            mods_base: "https://psp-mods.debrid.in".into(),
             mcp_enabled: true,
             mcp_port: 8849,
         }

@@ -671,6 +671,30 @@ fn themes_list(state: State<'_, AppState>) -> Result<Vec<ThemeEntry>> {
 }
 
 #[tauri::command]
+fn themes_remote(state: State<'_, AppState>) -> Result<Vec<themes::RemoteTheme>> {
+    let config = state.config();
+    themes::remote_list(&config)
+}
+
+#[tauri::command]
+fn theme_install_remote(
+    state: State<'_, AppState>,
+    name: String,
+    url: String,
+    format: Option<String>,
+) -> Result<ThemeEntry> {
+    let (_, paths) = state.paths()?;
+    let config = state.config();
+    let theme = themes::RemoteTheme {
+        name,
+        url,
+        format: format.unwrap_or_default(),
+        size_bytes: 0,
+    };
+    themes::install_remote(&config, &theme, &paths)
+}
+
+#[tauri::command]
 fn theme_install(state: State<'_, AppState>, file: String) -> Result<ThemeEntry> {
     let (_, paths) = state.paths()?;
     themes::install(&paths, Path::new(&file))
@@ -1300,6 +1324,8 @@ pub fn run() {
             plugin_add,
             plugin_remove,
             themes_list,
+            themes_remote,
+            theme_install_remote,
             theme_install,
             theme_delete,
             doctor_run,
