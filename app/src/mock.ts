@@ -296,6 +296,10 @@ async function invoke(cmd: string, args: Record<string, any> = {}): Promise<unkn
       if (i >= 0) list.splice(i, 1);
       return null;
     }
+    case "themes_remote":
+      return [];
+    case "theme_install_remote":
+      return { name: fileName(args.name), format: "ctf", size_bytes: 2 * MB };
     case "themes_list":
       return themes;
     case "theme_install":

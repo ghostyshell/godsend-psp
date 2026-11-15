@@ -86,6 +86,9 @@ export const api = {
 
   themesList: () => invoke<ThemeEntry[]>("themes_list"),
   themeInstall: (file: string) => invoke<ThemeEntry>("theme_install", { file }),
+  themesRemote: () => invoke<import("./types").RemoteTheme[]>("themes_remote"),
+  themeInstallRemote: (name: string, url: string, format: string) =>
+    invoke<ThemeEntry>("theme_install_remote", { name, url, format }),
   themeDelete: (name: string) => invoke<void>("theme_delete", { name }),
 
   doctorRun: () => invoke<Check[]>("doctor_run"),

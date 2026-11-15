@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { api, pickers } from "../api";
-import type { CatalogEntry, PluginsView, ThemeEntry } from "../types";
+import type { CatalogEntry, PluginsView, RemoteTheme, ThemeEntry } from "../types";
 import type { PageProps } from "../App";
 import { Btn, Chip, Empty, Seg, Toggle, confirmDialog, fmtBytes } from "../ui";
 
@@ -158,6 +158,7 @@ function PluginsPanel({ snap, reload, toast, refreshKey }: PageProps) {
 
 function ThemesPanel({ snap, reload, toast, refreshKey }: PageProps) {
   const [themes, setThemes] = useState<ThemeEntry[]>([]);
+  const [remote, setRemote] = useState<RemoteTheme[]>([]);
   const connected = !!snap.volumes.find((v) => v.is_psp);
 
   useEffect(() => {
@@ -169,6 +170,10 @@ function ThemesPanel({ snap, reload, toast, refreshKey }: PageProps) {
       .themesList()
       .then(setThemes)
       .catch(() => setThemes([]));
+    void api
+      .themesRemote()
+      .then(setRemote)
+      .catch(() => setRemote([]));
   }, [connected, refreshKey]);
 
   return (
@@ -197,6 +202,43 @@ function ThemesPanel({ snap, reload, toast, refreshKey }: PageProps) {
           Themes land in PSP/THEME.
         </p>
       </div>
+
+      {remote.length > 0 ? (
+        <section className="card panel">
+          <div className="panel-head">
+            <h2>Hosted themes</h2>
+            <div className="spacer" />
+            <Chip tone="laser">{remote.length}</Chip>
+          </div>
+          <div className="rows">
+            {remote.map((theme) => (
+              <div className="row" key={theme.url}>
+                <Chip tone={theme.format === "ctf" ? "laser" : "neutral"}>
+                  {theme.format || "ctf"}
+                </Chip>
+                <div className="grow">
+                  <div className="title">{theme.name}</div>
+                  <div className="sub">
+                    {theme.size_bytes ? fmtBytes(theme.size_bytes) : "hosted catalog"}
+                  </div>
+                </div>
+                <Btn
+                  small
+                  variant="primary"
+                  disabled={!connected}
+                  onClick={async () => {
+                    await api.themeInstallRemote(theme.name, theme.url, theme.format);
+                    toast(`theme installed: ${theme.name}`);
+                    reload();
+                  }}
+                >
+                  Install
+                </Btn>
+              </div>
+            ))}
+          </div>
+        </section>
+      ) : null}
 
       {themes.length === 0 ? (
         <Empty title="No themes installed" hint="Drop a .ptf or .ctf file to customize the XMB." />

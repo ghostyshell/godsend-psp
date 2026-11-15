@@ -241,3 +241,10 @@ export interface GameInfo {
   animation: string | null;
   mods: ModEntry[];
 }
+
+export interface RemoteTheme {
+  name: string;
+  url: string;
+  format: string;
+  size_bytes: number;
+}

@@ -1,11 +1,81 @@
 //! XMB theme management: `.ptf` (official themes) and `.ctf` (CXMB custom
 //! themes, only active when the CXMB plugin is enabled for VSH).
 
+use crate::config::Config;
 use crate::device::PspPaths;
 use crate::error::{Error, Result};
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 use std::fs;
 use std::path::Path;
+
+/// A theme advertised by the remote catalog (`<base>/psp/themes.json`).
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct RemoteTheme {
+    pub name: String,
+    pub url: String,
+    #[serde(default)]
+    pub format: String,
+    #[serde(default)]
+    pub size_bytes: u64,
+}
+
+/// Fetch the hosted theme catalog. Missing catalog is an empty list.
+pub fn remote_list(config: &Config) -> Result<Vec<RemoteTheme>> {
+    if config.mods_base.is_empty() {
+        return Ok(Vec::new());
+    }
+    let url = format!("{}/psp/themes.json", config.mods_base.trim_end_matches('/'));
+    let agent = ureq::AgentBuilder::new()
+        .timeout(std::time::Duration::from_secs(15))
+        .build();
+    match agent.get(&url).call() {
+        Ok(response) => Ok(response.into_json::<Vec<RemoteTheme>>()?),
+        Err(ureq::Error::Status(404, _)) => Ok(Vec::new()),
+        Err(e) => Err(Error::Http(format!("theme catalog: {e}"))),
+    }
+}
+
+/// Download and install a hosted theme into PSP/THEME.
+pub fn install_remote(config: &Config, theme: &RemoteTheme, paths: &PspPaths) -> Result<ThemeEntry> {
+    let agent = ureq::AgentBuilder::new()
+        .timeout(std::time::Duration::from_secs(120))
+        .build();
+    let response = agent.get(&theme.url).call()?;
+    let mut bytes: Vec<u8> = Vec::new();
+    use std::io::Read;
+    response.into_reader().take(32 * 1024 * 1024).read_to_end(&mut bytes)?;
+    if bytes.len() > 32 * 1024 * 1024 {
+        return Err(Error::Invalid("theme file is too large".into()));
+    }
+    let name = theme
+        .name
+        .rsplit('/')
+        .next()
+        .unwrap_or("theme.ctf")
+        .to_string();
+    let ext = name
+        .rsplit_once('.')
+        .map(|(_, e)| e.to_lowercase())
+        .unwrap_or_else(|| if theme.format.is_empty() { "ctf".into() } else { theme.format.clone() });
+    if ext != "ptf" && ext != "ctf" {
+        return Err(Error::Invalid("hosted theme is not .ptf or .ctf".into()));
+    }
+    let dir = paths.theme();
+    std::fs::create_dir_all(&dir)?;
+    let file_name = if name.to_lowercase().ends_with(&format!(".{ext}")) {
+        name
+    } else {
+        format!("{}.{ext}", crate::media::fat_safe_name(&name))
+    };
+    let dest = dir.join(&file_name);
+    std::fs::write(&dest, &bytes)?;
+    let _ = config;
+    Ok(ThemeEntry {
+        name: file_name,
+        format: ext,
+        size_bytes: bytes.len() as u64,
+    })
+}
 
 #[derive(Debug, Clone, Serialize)]
 pub struct ThemeEntry {
