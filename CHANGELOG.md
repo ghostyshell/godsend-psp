@@ -3,10 +3,19 @@
 All notable changes to GODsend PSP. Newest first.
 
 
+## [0.2.6] - 2026-11-15
+
+
 ## [0.2.5] - 2026-11-15
 
 
 ## [0.2.4] - 2026-11-15
+
+### Changed
+
+- Logo assets are PNG everywhere: the app topbar, window icon set and site
+  (header, footer, downloads page) use the derived PNG; the SVG mark and the
+  SVG social card are gone, replaced by a rendered og.png.
 
 ### Changed
 
