@@ -39,12 +39,14 @@ offers GODsend 360 style features for the PSP.
 - Savedata operations must skip `ARK_01234` (CFW payload, not a save).
 - Installs prune `__MACOSX`, `._*` and `.DS_Store` from the stick (ARK-4
   ships the same fix on-console; do it at the source).
-- **Every change ships complete.** Running "build and upload" means:
-  bump the version, regenerate screenshots (`app/scripts/capture-screens.mjs`
-  against the mock UI), run `scripts/publish-release.sh` (CI build, GoFile +
-  file.kiwi upload, README/site repoint), and confirm the live feed. A change
-  is not done with source commits alone. Recordings, when they change, go
-  through the demo-reels pipeline and the pages under docs/.
+- **Every change ships complete, built by the session.** Running "build and
+  upload" means: bump the version, regenerate screenshots
+  (`app/scripts/capture-screens.mjs` against the mock UI), then run
+  `scripts/publish-release.sh`, which **builds locally on this machine**
+  (no GitHub Actions), uploads to GoFile + file.kiwi, repoints the README
+  and site, and verifies the live feed. A change is not done with source
+  commits alone. The workflow file exists only for optional cross-platform
+  builds; it is not part of the release path.
 - **Releases are not done until the live feed proves it.** After running
   `scripts/publish-release.sh`, confirm
   `https://ghostyshell.github.io/godsend-psp/downloads.json` (cache-busted)
@@ -81,6 +83,10 @@ app/src-tauri/icons/icon.png` (only when the mark changes).
   the mock bridge fixtures must mirror real shapes.
 - Errors: core returns `godsend_core::Result<T>`; the Tauri error type
   serializes as the Display string.
+- The macOS title bar is an overlay: `main.tsx` sets `data-os="mac"` (real
+  app only) and the stylesheet uses an 84px row with `padding-top: 22px`.
+  Never pad left; the brand must sit under the traffic lights, not right of
+  them. Browser mock screenshots cannot verify this.
 
 ## Demo videos and guides - demo-reels
 

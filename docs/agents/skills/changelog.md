@@ -43,8 +43,10 @@
    ```
    Outputs `docs/site-console.png`, `site-library.png`, `site-games.png`,
    `site-store.png`, `site-homebrew.png`.
-3. Commit, then `scripts/publish-release.sh` to build all platforms and
-   upload to GoFile + file.kiwi.
+3. Commit, then `scripts/publish-release.sh`. It builds on this machine
+   (macOS DMG + CLI locally; cross-platform artifacts from `dist/` when
+   present), uploads to GoFile + file.kiwi and repoints the docs. GitHub
+   Actions is not part of the release path.
 4. Confirm the live feed check the script prints.
 
 ## Release

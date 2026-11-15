@@ -30,10 +30,11 @@ and raw hex in components is banned.
 6. Design: follow DESIGN.md tokens and motion rules; respect the
    reduced-motion kill switch; keep state chips dot+word so nothing is
    color-only.
-7. Ship complete: every change bumps the version, refreshes the site
-   screenshots (`node scripts/capture-screens.mjs` with the mock dev server),
-   and runs `scripts/publish-release.sh` (build, GoFile + file.kiwi upload,
-   README/site repoint, live-feed check) before it counts as done.
+7. Ship complete, built here: every change bumps the version, refreshes the
+   site screenshots (`node scripts/capture-screens.mjs` with the mock dev
+   server), and runs `scripts/publish-release.sh`, which builds locally
+   (never dispatches CI), uploads to GoFile + file.kiwi, repoints the docs
+   and checks the live feed before it counts as done.
 8. Releases: after `scripts/publish-release.sh`, verify the live site feed
    (`downloads.json?v=<timestamp>`) reports the new version. Local files or
    a pushed commit are not proof; GitHub Pages caches for ten minutes and

@@ -50,7 +50,7 @@ Everything below is implemented in `app/src/styles.css`. Tokens live on
 Five regions on a CSS grid:
 
 ```
-topbar      62px (84px on macOS for the overlay title bar), drag region
+topbar      62px (84px on macOS, padding-top 22px, drag region)
 rail        236px nav, 9 sections, two-letter mono glyphs, collapses to
             icon-only under 1080px
 workspace   one scrolling page, content max-width 980px
@@ -58,6 +58,12 @@ inspector   fixed right column 300px: device card + job queue, hidden
             under 1240px
 statusbar   34px: device dot, ffmpeg state, eject, version
 ```
+
+On macOS the window uses an overlay title bar. `app/src/main.tsx` sets
+`data-os="mac"` inside the real Tauri app and the stylesheet pads the topbar
+22px from the top inside an 84px row, so the brand clears the traffic lights.
+Do not use `padding-left`; it shifts the brand sideways instead. Browser
+previews have no traffic lights and cannot show the inset.
 
 ## Ambient backdrop
 
