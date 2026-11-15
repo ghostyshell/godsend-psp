@@ -25,6 +25,11 @@ All notable changes to GODsend PSP. Newest first.
 
 ### Fixed
 
+- Publish clears the artifacts directory before downloading, so a retried
+  run no longer fails with "file exists" while extracting the CI archive.
+
+### Fixed
+
 - Installer DMGs now carry an Applications drop target, a Read Me with
   first-launch steps, and a background with arranged icons
   (`scripts/make-dmg.sh`), instead of a bare app bundle.

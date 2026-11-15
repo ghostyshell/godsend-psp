@@ -67,6 +67,7 @@ if [ -n "$ARTIFACTS" ]; then
   DIST=$(cd "$ARTIFACTS" && pwd)
 else
   DIST="$RUN/artifacts"
+  rm -rf "$DIST"
   mkdir -p "$DIST"
   command -v gh >/dev/null 2>&1 || die "gh not found (needed to run the CI build)"
   SLUG=ghostyshell/godsend-psp
