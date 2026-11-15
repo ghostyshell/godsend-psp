@@ -3,6 +3,9 @@
 All notable changes to GODsend PSP. Newest first.
 
 
+## [0.2.14] - 2026-11-15
+
+
 ## [0.2.13] - 2026-11-15
 
 
@@ -48,6 +51,13 @@ All notable changes to GODsend PSP. Newest first.
 - CI fetches the bundled ffmpeg pair before unit tests; the resource config
   previously made the Tauri build script fail during `cargo test` on all
   three platforms, which blocked the 0.2.7 publish.
+
+### Added
+
+- Covers and animations come straight from the game files: ICON0.PNG is
+  preferred from the EBOOT folder, PBP section or UMD image, and the
+  game's own ICON1.PMF animated icon is transcoded to a looping MP4 that
+  plays over the cover on hover. Remote index covers remain the fallback.
 
 ### Added
 

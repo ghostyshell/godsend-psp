@@ -70,8 +70,8 @@ pub fn analyze(path: &Path) -> Result<IsoInfo> {
     Ok(info)
 }
 
-/// Read `PSP_GAME/ICON0.PNG` bytes (cover art) from a UMD image.
-pub fn read_icon0(path: &Path) -> Result<Option<Vec<u8>>> {
+/// Read any file under `PSP_GAME/` from a UMD image.
+pub fn read_psp_file(path: &Path, file_name: &str) -> Result<Option<Vec<u8>>> {
     let mut f = File::open(path)?;
     let pvd = read_sector(&mut f, PVD_SECTOR)?;
     if !is_pvd(&pvd) {
@@ -83,7 +83,7 @@ pub fn read_icon0(path: &Path) -> Result<Option<Vec<u8>>> {
         if record_name(&rec) == "PSP_GAME" {
             let sub = read_dir(&mut f, &rec)?;
             for entry in iter_records(&sub) {
-                if record_name(&entry) == "ICON0.PNG" {
+                if record_name(&entry).eq_ignore_ascii_case(file_name) {
                     let bytes = read_extent(&mut f, record_lba(&entry), record_size(&entry))?;
                     return Ok(Some(bytes));
                 }
@@ -91,6 +91,11 @@ pub fn read_icon0(path: &Path) -> Result<Option<Vec<u8>>> {
         }
     }
     Ok(None)
+}
+
+/// Read `PSP_GAME/ICON0.PNG` bytes (cover art) from a UMD image.
+pub fn read_icon0(path: &Path) -> Result<Option<Vec<u8>>> {
+    read_psp_file(path, "ICON0.PNG")
 }
 
 fn is_pvd(sector: &[u8]) -> bool {

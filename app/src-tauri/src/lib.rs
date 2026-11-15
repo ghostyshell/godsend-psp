@@ -995,7 +995,11 @@ fn cover(
 ) -> Option<String> {
     let paths = state.paths().ok()?.1;
     let config = state.config();
-    // 1. R2/catalog cover by serial (library covers), 2. stick ICON0 fallback.
+    // 1. art straight from the game (ICON0 next to EBOOT, PBP, or ISO).
+    if let Some(bytes) = library::asset_bytes(&paths, &id, "ICON0.PNG") {
+        return Some(format!("data:image/png;base64,{}", base64_encode(&bytes)));
+    }
+    // 2. R2/catalog cover by serial, 3. remote index cover, 4. stick ICON0.
     let serial_value = serial.clone().unwrap_or_default();
     if !serial_value.is_empty() {
         let fallback = godsend_core::catalog::lookup_serial(&serial_value)
@@ -1012,6 +1016,27 @@ fn cover(
     }
     let bytes = library::icon_bytes(&paths, &id)?;
     Some(format!("data:image/png;base64,{}", base64_encode(&bytes)))
+}
+
+/// The game's own animated icon, transcoded for the webview.
+#[tauri::command]
+fn animation(state: State<'_, AppState>, id: String) -> Result<Option<String>> {
+    let (_, paths) = state.paths()?;
+    let config = state.config();
+    let Some(pmf) = library::animation_pmf(&paths, &id) else {
+        return Ok(None);
+    };
+    let Some(ffmpeg) = media::find_ffmpeg(&config.ffmpeg_path) else {
+        return Ok(None);
+    };
+    let clip = media::transcode_pmf(
+        &ffmpeg,
+        &pmf,
+        &godsend_core::config::cache_dir().join("animations"),
+        &id,
+    )?;
+    let bytes = std::fs::read(clip)?;
+    Ok(Some(format!("data:video/mp4;base64,{}", base64_encode(&bytes))))
 }
 
 #[tauri::command]
@@ -1253,6 +1278,7 @@ pub fn run() {
             local_library,
             game_info,
             cover,
+            animation,
             mods_list,
             mods_install,
         ])

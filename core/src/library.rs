@@ -261,6 +261,38 @@ pub fn icon_bytes(paths: &PspPaths, id: &str) -> Option<Vec<u8>> {
     bytes
 }
 
+/// Read an asset that ships inside the game itself: a loose file next to the
+/// EBOOT, a PBP section, or a PSP_GAME entry in a UMD image.
+pub fn asset_bytes(paths: &PspPaths, id: &str, file_name: &str) -> Option<Vec<u8>> {
+    if let Some(folder) = id.strip_prefix("game/") {
+        let dir = paths.game().join(folder);
+        if let Ok(bytes) = fs::read(dir.join(file_name)) {
+            return Some(bytes);
+        }
+        let eboot = dir.join("EBOOT.PBP");
+        let section = match file_name.to_ascii_uppercase().as_str() {
+            "ICON0.PNG" => Section::Icon0,
+            "PIC1.PNG" => Section::Pic1,
+            "ICON1.PMF" => Section::Icon1,
+            _ => return None,
+        };
+        return Pbp::read_header(&eboot)
+            .ok()
+            .and_then(|p| p.read_section(&eboot, section).ok().flatten());
+    }
+    if let Some(file) = id.strip_prefix("iso/") {
+        return crate::iso::read_psp_file(&paths.iso().join(file), file_name)
+            .ok()
+            .flatten();
+    }
+    None
+}
+
+/// The game's own animated icon (`ICON1.PMF`), when it ships one.
+pub fn animation_pmf(paths: &PspPaths, id: &str) -> Option<Vec<u8>> {
+    asset_bytes(paths, id, "ICON1.PMF")
+}
+
 /// Remove a game folder (or disc image) from the stick.
 pub fn delete_entry(paths: &PspPaths, id: &str) -> Result<()> {
     let target = match id.strip_prefix("game/") {
