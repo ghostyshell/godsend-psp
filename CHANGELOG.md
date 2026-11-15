@@ -62,6 +62,12 @@ All notable changes to GODsend PSP. Newest first.
 
 ### Fixed
 
+- Installer DMG falls back to a plain `hdiutil create` when the Intel
+  runner cannot convert the read-write image, so the Applications link and
+  Read Me still ship.
+
+### Fixed
+
 - Publish polls the CI run and fetches each artifact archive individually
   with overwrite-tolerant extraction, so the blocking watch and the
   duplicate-entry Windows zip can no longer stall a release.

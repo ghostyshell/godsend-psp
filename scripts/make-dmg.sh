@@ -61,12 +61,20 @@ OSA
 fi
 sync
 hdiutil detach "$MNT" >/dev/null 2>&1 || hdiutil detach "$MNT" -force >/dev/null 2>&1 || true
+converted=0
 for attempt in 1 2 3; do
   if hdiutil convert "$TMP" -format UDZO -o "$OUT" >/dev/null 2>&1; then
+    converted=1
     break
   fi
-  [ "$attempt" = 3 ] && { echo "hdiutil convert failed" >&2; exit 1; }
   sleep 3
 done
+if [ "$converted" = 0 ]; then
+  # Some CI runners cannot convert a mounted read-write image; a plain
+  # create still yields a working installer with the app, link and Read Me.
+  echo "convert unavailable, using plain create" >&2
+  rm -f "$OUT"
+  hdiutil create -srcfolder "$STAGE" -volname "$VOL" -format UDZO -ov "$OUT" >/dev/null
+fi
 rm -rf "$STAGE" "$TMP"
 echo "built $OUT (app + Applications link + Read Me + background)"
