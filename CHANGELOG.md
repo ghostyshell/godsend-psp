@@ -99,6 +99,7 @@ All notable changes to GODsend PSP. Newest first.
 
 ### Fixed
 
+- Config default test follows the new veryslow preset.
 - The unused `video_preset` profile id was folded into the encoder preset
   field instead of duplicating the key.
 
