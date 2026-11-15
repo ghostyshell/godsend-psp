@@ -113,6 +113,8 @@ enum Command {
     },
     /// Environment check (ffmpeg, data dir, device).
     Doctor,
+    /// Serve the loopback MCP endpoint (127.0.0.1) until Ctrl-C.
+    Mcp,
 }
 
 #[derive(Subcommand)]
@@ -465,6 +467,16 @@ fn run(cli: Cli) -> godsend_core::Result<()> {
                 println!("[{}] {:<14} {}", if check.ok { "ok " } else { "!! " }, check.name, check.detail);
             }
             Ok(())
+        }
+        Command::Mcp => {
+            let config = Config::load();
+            let endpoint = godsend_core::mcp::ServerConfig::from_config(&config).url();
+            let _handle = godsend_core::mcp::serve(&config)?;
+            println!("MCP server listening on {}", endpoint);
+            println!("POST JSON-RPC 2.0 (MCP {}); press Ctrl-C to stop.", godsend_core::mcp::PROTOCOL_VERSION);
+            loop {
+                std::thread::sleep(std::time::Duration::from_secs(1));
+            }
         }
     }
 }

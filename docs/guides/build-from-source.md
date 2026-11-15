@@ -52,6 +52,20 @@ cargo build --release -p godsend-psp-cli
 The CLI is a single self-contained binary; it uses the system ffmpeg when
 conversion is needed.
 
+## MCP
+
+The desktop app serves a read-only Model Context Protocol endpoint on
+`http://127.0.0.1:8849` while it runs. The endpoint is toggled in Settings
+(`mcp_enabled`) and the port comes from `mcp_port` in the config file. For a
+headless endpoint without the app:
+
+```sh
+./target/release/godsend-psp mcp
+```
+
+Clients POST JSON-RPC 2.0 to the endpoint; `tools/list` names the available
+read-only tools.
+
 ## Tests
 
 ```sh

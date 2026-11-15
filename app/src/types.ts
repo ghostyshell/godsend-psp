@@ -23,6 +23,8 @@ export interface Config {
   gamesearch_base: string;
   covers_base: string;
   mods_base: string;
+  mcp_enabled: boolean;
+  mcp_port: number;
 }
 
 export interface Check {
