@@ -38,11 +38,11 @@ jobs:
         run: cargo build --release -p godsend-psp-cli --target ${{ matrix.target }}
       - name: Make DMG
         run: |
-          APP=$(find app/src-tauri/target/${{ matrix.target }}/release/bundle/macos -name "*.app" | head -1)
+          APP=$(find target/${{ matrix.target }}/release/bundle/macos -name "*.app" | head -1)
           hdiutil create -volname "GODsend PSP" -srcfolder "$APP" -ov -format UDZO \
             "godsend-psp-macos-${{ matrix.name }}.dmg"
           tar -czf "godsend-psp-cli-macos-${{ matrix.name }}.tar.gz" \
-            -C app/src-tauri/target/${{ matrix.target }}/release godsend-psp
+            -C target/${{ matrix.target }}/release godsend-psp
       - uses: actions/upload-artifact@v4
         with:
           name: macos-${{ matrix.name }}
@@ -79,8 +79,8 @@ jobs:
         with:
           name: linux-x64
           path: |
-            app/src-tauri/target/release/bundle/**/*.deb
-            app/src-tauri/target/release/bundle/**/*.AppImage
+            target/release/bundle/deb/*.deb
+            target/release/bundle/appimage/*.AppImage
             godsend-psp-cli-linux-x64.tar.gz
 
   windows:
@@ -109,7 +109,7 @@ jobs:
         with:
           name: windows-x64
           path: |
-            app/src-tauri/target/release/bundle/nsis/*.exe
+            target/release/bundle/nsis/*-setup.exe
             godsend-psp-cli-windows-x64.zip
 
   ui-check:
