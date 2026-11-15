@@ -832,7 +832,6 @@ fn store_download(app: AppHandle, state: State<'_, AppState>, source: String, id
                 },
             )
         }
-        "minerva" => Ok(serde_json::json!({ "kind": "minerva", "files": [] })),
         _ => {
             let hit = godsend_core::sources::gamesearch_detail(&config.gamesearch_base, &id)?;
             let label = hit.title.clone();
