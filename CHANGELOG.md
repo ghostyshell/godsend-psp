@@ -13,7 +13,8 @@ All notable changes to GODsend PSP. Newest first.
   header mark is a 2.5 KB 64px copy. The header gained a real mobile menu,
   cards and screenshots rise in on scroll (scroll-driven CSS, no JavaScript),
   focus rings are visible, and the screenshot viewer dims the page behind it,
-  locks scrolling and returns focus on close.
+  locks scrolling and returns focus on close. With JavaScript off the header
+  shows the links inline instead of a menu that cannot open.
 
 
 ## [0.2.15] - 2026-11-15
