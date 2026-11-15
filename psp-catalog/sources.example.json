@@ -1,0 +1,15 @@
+[
+  {
+    "_comment": "Themes gallery. selector limits collection to one container; omit it to scan the whole page.",
+    "kind": "themes",
+    "url": "https://example.com/psp/themes",
+    "selector": ".theme-list"
+  },
+  {
+    "_comment": "Optional mods source. serial groups the downloads into mods/<SERIAL>.json; entries without serial are skipped.",
+    "kind": "mods",
+    "url": "https://example.com/psp/mods/UCUS-98737",
+    "selector": "main",
+    "serial": "UCUS-98737"
+  }
+]

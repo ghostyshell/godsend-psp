@@ -5,6 +5,17 @@ All notable changes to GODsend PSP. Newest first.
 
 ## [0.2.25] - 2026-11-15
 
+### Added
+
+- Hosted PSP catalog pipeline: a validating sync script with `--dry-run`, a
+  Playwright scraper driven by `psp-catalog/sources.json`, and a daily launchd
+  job that scrapes and syncs at 04:12.
+
+### Changed
+
+- The saves and mods guide describes the hosted catalog layout, the sync and
+  scrape scripts, and how the app consumes remote mods and themes.
+
 
 ## [0.2.24] - 2026-11-15
 
