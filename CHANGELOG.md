@@ -19,6 +19,12 @@ All notable changes to GODsend PSP. Newest first.
 
 ### Fixed
 
+- Installer DMGs now carry an Applications drop target, a Read Me with
+  first-launch steps, and a background with arranged icons
+  (`scripts/make-dmg.sh`), instead of a bare app bundle.
+
+### Fixed
+
 - CI fetches the bundled ffmpeg pair before unit tests; the resource config
   previously made the Tauri build script fail during `cargo test` on all
   three platforms, which blocked the 0.2.7 publish.

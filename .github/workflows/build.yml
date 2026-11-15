@@ -43,11 +43,11 @@ jobs:
           APP=$(find target/${{ matrix.target }}/release/bundle/macos -name "*.app" | head -1)
           codesign --force --deep --sign - "$APP"
           codesign --verify --deep --strict "$APP"
-      - name: Make DMG
+      - name: Make installer DMG
         run: |
           APP=$(find target/${{ matrix.target }}/release/bundle/macos -name "*.app" | head -1)
-          hdiutil create -volname "GODsend PSP" -srcfolder "$APP" -ov -format UDZO \
-            "godsend-psp-macos-${{ matrix.name }}.dmg"
+          ./scripts/make-dmg.sh "$APP" "GODsend PSP" \
+            "godsend-psp-macos-${{ matrix.name }}.dmg" "app/src-tauri/dmg-background.png"
           tar -czf "godsend-psp-cli-macos-${{ matrix.name }}.tar.gz" \
             -C target/${{ matrix.target }}/release godsend-psp
       - uses: actions/upload-artifact@v4
