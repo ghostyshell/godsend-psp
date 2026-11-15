@@ -118,6 +118,11 @@ All notable changes to GODsend PSP. Newest first.
 
 ### Fixed
 
+- Store command routing: the Minerva detail arm no longer leaks into the
+  download handler, and the client type includes the Minerva source.
+
+### Fixed
+
 - Config default test follows the new veryslow preset.
 - The unused `video_preset` profile id was folded into the encoder preset
   field instead of duplicating the key.
