@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
-import { api } from "../api";
+import { api, pickers } from "../api";
 import type { DiscImage, GameEntry, GameInfo, LocalGame } from "../types";
 import type { PageProps } from "../App";
-import { Btn, Chip, Empty, GameHover, Seg, fmtBytes } from "../ui";
+import { Btn, Chip, Empty, GameHover, Seg, confirmDialog, fmtBytes } from "../ui";
 
 type Tab = "psp" | "local";
 type Category = "homebrew" | "games";
@@ -127,9 +127,26 @@ export default function Library({ snap, toast, refreshKey }: PageProps) {
         />
       ) : (
         <div className="rows">
+          {category === "games" ? (
+            <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+              <div className="section-caption">ISO / CSO</div>
+              <div style={{ flex: 1 }} />
+              <Btn
+                small
+                disabled={!connected}
+                onClick={async () => {
+                  const file = await pickers.pickFile("Pick a disc image", ["iso", "cso", "pbp"]);
+                  if (!file) return;
+                  await api.isoImport(file, file.toLowerCase().endsWith(".iso"));
+                  toast(`importing ${file.split("/").pop()}`);
+                }}
+              >
+                Import Image
+              </Btn>
+            </div>
+          ) : null}
           {category === "games" && images.length > 0 ? (
             <>
-              <div className="section-caption">ISO / CSO on the stick</div>
               {images.map((image) => (
                 <div className="row" key={image.id}>
                   <Chip tone={image.format === "iso" ? "laser" : "neutral"}>{image.format}</Chip>
@@ -141,6 +158,17 @@ export default function Library({ snap, toast, refreshKey }: PageProps) {
                     </div>
                   </div>
                   <span className="size">{fmtBytes(image.size_bytes)}</span>
+                  {(image.format === "iso" || image.format === "cso") ? (
+                    <Btn
+                      small
+                      onClick={async () => {
+                        await api.isoConvert(image.id);
+                        toast(`converting ${image.file}`);
+                      }}
+                    >
+                      Convert
+                    </Btn>
+                  ) : null}
                   <Btn
                     small
                     onClick={async () => {
@@ -149,6 +177,19 @@ export default function Library({ snap, toast, refreshKey }: PageProps) {
                     }}
                   >
                     To Local
+                  </Btn>
+                  <Btn
+                    small
+                    variant="danger"
+                    onClick={async () => {
+                      if (confirmDialog("Delete disc image?", `${image.file} will be removed from the stick.`)) {
+                        await api.imageDelete(image.id);
+                        toast(`deleted ${image.file}`);
+                        reload();
+                      }
+                    }}
+                  >
+                    Delete
                   </Btn>
                 </div>
               ))}
