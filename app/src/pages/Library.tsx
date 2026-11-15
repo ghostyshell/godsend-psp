@@ -7,7 +7,7 @@ import { Btn, Chip, Empty, GameHover, Seg, confirmDialog, fmtBytes } from "../ui
 type Tab = "psp" | "local";
 type Category = "homebrew" | "games";
 
-export default function Library({ snap, toast, refreshKey }: PageProps) {
+export default function Library({ snap, reload, toast, refreshKey }: PageProps) {
   const [tab, setTab] = useState<Tab>("psp");
   const [category, setCategory] = useState<Category>("games");
   const [games, setGames] = useState<GameEntry[]>([]);

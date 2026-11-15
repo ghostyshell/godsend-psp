@@ -190,6 +190,11 @@ All notable changes to GODsend PSP. Newest first.
 
 ### Fixed
 
+- Library image rows restore the reload callback used after deleting an
+  image.
+
+### Fixed
+
 - Store source default points at production: https://debrid.link/api.
 - Internet Archive sign-in takes a username and password (plus the optional
   S3 key pair), and all credentials are mirrored to secrets.json (0600) so
