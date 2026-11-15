@@ -555,7 +555,13 @@ fn push_video(
             let dest = video.join(format!("{}.mp4", name));
             let thm_dest = if thm { Some(video.join(format!("{}.THM", name))) } else { None };
             let probe = media::find_ffprobe(&config.ffprobe_path);
-            media::convert_video(ffmpeg, probe.as_deref(), file, &dest, thm_dest.as_deref(), &cancel, &mut |done, total| {
+            let quality = media::VideoQuality {
+                crf: config.video_crf,
+                fps: config.video_fps,
+                audio_kbps: config.video_audio_kbps,
+                resolution: config.video_resolution.clone(),
+            };
+            media::convert_video(ffmpeg, probe.as_deref(), file, &dest, thm_dest.as_deref(), &quality, &cancel, &mut |done, total| {
                 print!("{}: {}", file.display(), percent(done, total));
                 let _ = std::io::Write::flush(&mut std::io::stdout());
             })?;

@@ -148,21 +148,64 @@ pub fn convert_audio(
     run_progress(ffmpeg, src, dst, args, total_secs, cancel, progress)
 }
 
-/// Convert any video input to PSP AVC 480x272 MP4 (+ optional 160x120 .THM).
+/// Encoder settings for the PSP AVC preset.
+#[derive(Debug, Clone)]
+pub struct VideoQuality {
+    /// x264 CRF, lower is better.
+    pub crf: u32,
+    pub fps: u32,
+    pub audio_kbps: u32,
+    /// "480x272", "368x208" or "source".
+    pub resolution: String,
+}
+
+impl Default for VideoQuality {
+    fn default() -> Self {
+        Self {
+            crf: 18,
+            fps: 30,
+            audio_kbps: 192,
+            resolution: "480x272".into(),
+        }
+    }
+}
+
+/// Convert any video input to PSP AVC MP4 (+ optional 160x120 .THM).
 pub fn convert_video(
     ffmpeg: &Path,
     ffprobe: Option<&Path>,
     src: &Path,
     dst: &Path,
     thm: Option<&Path>,
+    quality: &VideoQuality,
     cancel: &AtomicBool,
     progress: &mut dyn FnMut(u64, u64),
 ) -> Result<()> {
-    let args = "-c:v libx264 -profile:v main -level:v 3.0 -preset medium \
-        -vf scale=480:272:force_original_aspect_ratio=decrease,pad=480:272:(ow-iw)/2:(oh-ih)/2 \
-        -pix_fmt yuv420p -c:a aac -b:a 128k -movflags +faststart"
-        .split_whitespace()
-        .collect::<Vec<_>>();
+    let mut vf = format!("fps={}", quality.fps.max(1));
+    if let Some((w, h)) = quality
+        .resolution
+        .split_once('x')
+        .and_then(|(w, h)| Some((w.parse::<u32>().ok()?, h.parse::<u32>().ok()?)))
+    {
+        vf.push_str(&format!(
+            ",scale={w}:{h}:force_original_aspect_ratio=decrease,pad={w}:{h}:(ow-iw)/2:(oh-ih)/2"
+        ));
+    }
+    let audio = format!("{}k", quality.audio_kbps.max(64));
+    let crf = quality.crf.clamp(10, 35).to_string();
+    let args: Vec<String> = vec![
+        "-c:v".into(), "libx264".into(),
+        "-profile:v".into(), "main".into(),
+        "-level:v".into(), "3.0".into(),
+        "-preset".into(), "medium".into(),
+        "-crf".into(), crf,
+        "-vf".into(), vf,
+        "-pix_fmt".into(), "yuv420p".into(),
+        "-c:a".into(), "aac".into(),
+        "-b:a".into(), audio,
+        "-movflags".into(), "+faststart".into(),
+    ];
+    let args: Vec<&str> = args.iter().map(|s| s.as_str()).collect();
     let total_secs = ffprobe.and_then(|probe| duration(probe, src).ok()).unwrap_or(0.0);
     run_progress(ffmpeg, src, dst, &args, total_secs, cancel, progress)?;
     if let Some(thm_path) = thm {

@@ -14,6 +14,7 @@ export function MediaPage({
   refreshKey,
 }: PageProps & { kind: "music" | "video" }) {
   const [files, setFiles] = useState<MediaFile[]>([]);
+  const [staged, setStaged] = useState<string[]>([]);
   const [query, setQuery] = useState("");
   const isVideo = kind === "video";
   const config = snap.config;
@@ -102,26 +103,73 @@ export function MediaPage({
             </>
           )}
           <div style={{ flex: 1 }} />
-          <Btn
-            variant="primary"
-            disabled={!connected}
-            onClick={async () => {
-              const picked = await pickers.pickFiles(
-                isVideo ? "Pick videos to push" : "Pick music to push",
-                isVideo ? ["mp4", "mkv", "avi", "mov", "wmv", "webm"] : MUSIC_EXTS
-              );
-              if (!picked.length) return;
-              if (isVideo) {
-                await api.videoPush(picked, config.convert_video && ffmpegOk, config.video_thumbnails);
-              } else {
+          {isVideo ? (
+            <>
+              <Btn
+                disabled={!connected}
+                onClick={async () => {
+                  const picked = await pickers.pickFiles("Browse videos to add", [
+                    "mp4", "mkv", "avi", "mov", "wmv", "webm",
+                  ]);
+                  if (!picked.length) return;
+                  setStaged((cur) => [...cur, ...picked.filter((p) => !cur.includes(p))]);
+                }}
+              >
+                Browse Videos...
+              </Btn>
+              <Btn
+                variant="primary"
+                disabled={!connected || staged.length === 0}
+                onClick={async () => {
+                  await api.videoPush(
+                    staged,
+                    config.convert_video && ffmpegOk,
+                    config.video_thumbnails
+                  );
+                  toast(`queued ${staged.length} video(s)`);
+                  setStaged([]);
+                }}
+              >
+                Push {staged.length || ""} Video{staged.length === 1 ? "" : "s"}
+              </Btn>
+            </>
+          ) : (
+            <Btn
+              variant="primary"
+              disabled={!connected}
+              onClick={async () => {
+                const picked = await pickers.pickFiles("Pick music to push", MUSIC_EXTS);
+                if (!picked.length) return;
                 await api.musicPush(picked, config.convert_music && ffmpegOk);
-              }
-              toast(`queued ${picked.length} file(s)`);
-            }}
-          >
-            {isVideo ? "Push Videos" : "Push Music"}
-          </Btn>
+                toast(`queued ${picked.length} file(s)`);
+              }}
+            >
+              Push Music
+            </Btn>
+          )}
         </div>
+
+        {isVideo && staged.length > 0 ? (
+          <div className="rows" style={{ marginTop: 10 }}>
+            {staged.map((path) => (
+              <div className="row" key={path}>
+                <Chip tone="laser">queued</Chip>
+                <div className="grow">
+                  <div className="title" title={path}>
+                    {path.split("/").pop()}
+                  </div>
+                  <div className="sub">{path}</div>
+                </div>
+                <Btn
+                  small
+                  onClick={() => setStaged((cur) => cur.filter((p) => p !== path))}
+                >
+                  Remove
+                </Btn>
+              </div>
+            ))}
+          </div>
+        ) : null}
 
         {!ffmpegOk && config.convert_music ? (
           <div className="note" style={{ marginTop: 10 }}>

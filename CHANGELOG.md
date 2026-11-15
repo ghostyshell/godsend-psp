@@ -3,6 +3,9 @@
 All notable changes to GODsend PSP. Newest first.
 
 
+## [0.2.18] - 2026-11-15
+
+
 ## [0.2.17] - 2026-11-15
 
 
@@ -37,6 +40,13 @@ All notable changes to GODsend PSP. Newest first.
 
 
 ## [0.2.15] - 2026-11-15
+
+### Added
+
+- Video transfer has a Browse Videos flow: pick files, review the staged
+  list, then push. Encoding is configurable in Settings with maximum-quality
+  defaults: CRF 18, 480x272, 30 fps, AAC 192 kbps (plus 368x208 and keep
+  source options).
 
 ### Added
 

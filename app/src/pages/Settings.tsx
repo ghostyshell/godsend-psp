@@ -217,6 +217,72 @@ export default function Settings({ snap, reload, toast, refreshKey }: PageProps)
           </div>
         </div>
         <div className="field">
+          <label>Video quality (CRF {config.video_crf}; lower is better)</label>
+          <div>
+            <Seg
+              ariaLabel="Video quality"
+              value={String(config.video_crf)}
+              onChange={(crf) => {
+                void api.configSet({ video_crf: Number(crf) } as never);
+                reload();
+              }}
+              options={[
+                { value: "18", label: "Maximum (18)" },
+                { value: "21", label: "High (21)" },
+                { value: "24", label: "Balanced (24)" },
+              ]}
+            />
+          </div>
+        </div>
+        <div className="field">
+          <label>Video resolution</label>
+          <div>
+            <Seg
+              ariaLabel="Video resolution"
+              value={config.video_resolution}
+              onChange={(resolution) => {
+                void api.configSet({ video_resolution: resolution } as never);
+                reload();
+              }}
+              options={[
+                { value: "480x272", label: "PSP native 480x272" },
+                { value: "368x208", label: "368x208" },
+                { value: "source", label: "Keep source" },
+              ]}
+            />
+          </div>
+        </div>
+        <div className="field">
+          <label>Frame rate cap and audio bitrate</label>
+          <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
+            <Seg
+              ariaLabel="Video fps"
+              value={String(config.video_fps)}
+              onChange={(fps) => {
+                void api.configSet({ video_fps: Number(fps) } as never);
+                reload();
+              }}
+              options={[
+                { value: "30", label: "30 fps" },
+                { value: "24", label: "24 fps" },
+              ]}
+            />
+            <Seg
+              ariaLabel="Audio bitrate"
+              value={String(config.video_audio_kbps)}
+              onChange={(kbps) => {
+                void api.configSet({ video_audio_kbps: Number(kbps) } as never);
+                reload();
+              }}
+              options={[
+                { value: "192", label: "192 kbps" },
+                { value: "128", label: "128 kbps" },
+                { value: "256", label: "256 kbps" },
+              ]}
+            />
+          </div>
+        </div>
+        <div className="field">
           <label>ISO to CSO compression level ({config.cso_level})</label>
           <div>
             <Seg
@@ -291,7 +357,7 @@ export default function Settings({ snap, reload, toast, refreshKey }: PageProps)
           <Btn onClick={() => void api.openDataDir()}>Open Data Folder</Btn>
         </div>
         <p style={{ margin: "12px 0 0", fontSize: 12.5, color: "var(--text-faint)" }}>
-          godsend-psp 0.2.17 - Rust engine + Tauri. USB mass storage, no drivers.
+          godsend-psp 0.2.18 - Rust engine + Tauri. USB mass storage, no drivers.
         </p>
       </section>
     </div>

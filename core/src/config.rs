@@ -19,6 +19,14 @@ pub struct Config {
     pub convert_music: bool,
     /// Convert video to the PSP format by default.
     pub convert_video: bool,
+    /// x264 CRF; lower is better. 18 is visually lossless for PSP sizes.
+    pub video_crf: u32,
+    /// Frame rate cap (PSP AVC level 3.0 tops out around 30).
+    pub video_fps: u32,
+    /// AAC audio bitrate in kbps.
+    pub video_audio_kbps: u32,
+    /// Target resolution, or "source" to keep the input size.
+    pub video_resolution: String,
     /// Optional explicit path to an ffmpeg binary. Empty means auto-detect.
     pub ffmpeg_path: String,
     /// Optional explicit path to an ffprobe binary. Empty means auto-detect.
@@ -52,6 +60,10 @@ impl Default for Config {
             video_thumbnails: true,
             convert_music: true,
             convert_video: true,
+            video_crf: 18,
+            video_fps: 30,
+            video_audio_kbps: 192,
+            video_resolution: "480x272".into(),
             ffmpeg_path: String::new(),
             ffprobe_path: String::new(),
             cso_level: 6,
