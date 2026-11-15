@@ -160,10 +160,14 @@ export function GameHover({ id }: { id: string }) {
     return undefined;
   }, [hover, id, url]);
 
-  if (!hover || !url) return null;
   return (
-    <div className="hover-anim" aria-hidden="true">
-      <video src={url} autoPlay muted loop playsInline />
+    <div
+      className="hover-anim"
+      aria-hidden="true"
+      onMouseEnter={() => setHover(true)}
+      onMouseLeave={() => setHover(false)}
+    >
+      {hover && url ? <video src={url} autoPlay muted loop playsInline /> : null}
     </div>
   );
 }

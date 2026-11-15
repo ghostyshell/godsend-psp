@@ -979,7 +979,6 @@ html[data-os="mac"] .topbar {
 .hover-anim {
   position: absolute;
   inset: 0;
-  pointer-events: none;
   z-index: 2;
 }
 

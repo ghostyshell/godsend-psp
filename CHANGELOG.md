@@ -57,7 +57,9 @@ All notable changes to GODsend PSP. Newest first.
 - Covers and animations come straight from the game files: ICON0.PNG is
   preferred from the EBOOT folder, PBP section or UMD image, and the
   game's own ICON1.PMF animated icon is transcoded to a looping MP4 that
-  plays over the cover on hover. Remote index covers remain the fallback.
+  plays over the cover on hover (the overlay owns the hover trigger, so
+keyboard users get the CSS zoom instead). Remote index covers remain the
+fallback.
 
 ### Added
 
