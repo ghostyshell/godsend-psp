@@ -25,6 +25,10 @@ export interface Config {
   rd_api_key: string;
   tb_api_key: string;
   gamesearch_base: string;
+  ia_access_key: string;
+  ia_secret_key: string;
+  ia_email: string;
+  ia_password: string;
   covers_base: string;
   mods_base: string;
   mcp_enabled: boolean;
@@ -202,9 +206,25 @@ export interface IaFile {
   url: string;
 }
 
+export interface RromsItem {
+  id: string;
+  title: string;
+  url: string;
+  kind: "ia_item" | "zip" | "7z" | "torrent";
+}
+
+export interface NpsEntry {
+  title_id: string;
+  title: string;
+  region: string;
+  url: string;
+  size_bytes: number;
+  zrif: string | null;
+}
+
 export interface StoreResult {
-  kind: "gamesearch" | "ia";
-  items?: GameHit[];
+  kind: "gamesearch" | "ia" | "minerva" | "rroms" | "nps";
+  items?: GameHit[] | IaItem[] | RromsItem[] | NpsEntry[] | { id: string; title: string; url: string }[];
   files?: IaFile[];
 }
 

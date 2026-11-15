@@ -7,6 +7,9 @@ All notable changes to GODsend PSP. Newest first.
 
 ### Added
 
+- Store sources for r-roms PSP links (archive.org sets plus direct archives,
+  with optional Internet Archive S3 keys) and NoPayStation PSP packages with
+  a zRIF sidecar for pkg2zip.
 - Hosted PSP catalog pipeline: a validating sync script with `--dry-run`, a
   Playwright scraper driven by `psp-catalog/sources.json`, and a daily launchd
   job that scrapes and syncs at 04:12.

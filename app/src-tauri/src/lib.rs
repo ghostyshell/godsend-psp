@@ -776,6 +776,14 @@ fn store_search(state: State<'_, AppState>, query: String, source: String, limit
             let sets = godsend_core::sources::minerva_sets()?;
             Ok(serde_json::json!({ "kind": "minerva", "items": sets }))
         }
+        "rroms" => {
+            let items = godsend_core::sources::rroms_items()?;
+            Ok(serde_json::json!({ "kind": "rroms", "items": items }))
+        }
+        "nps" => {
+            let entries = godsend_core::sources::nps_search(&query, limit.max(1).min(120))?;
+            Ok(serde_json::json!({ "kind": "nps", "items": entries }))
+        }
         _ => {
             let hits = godsend_core::sources::gamesearch(&config.gamesearch_base, &query, limit.max(1).min(60))?;
             // record into the catalog db (PPSSPP-style)
@@ -807,6 +815,10 @@ fn store_detail(state: State<'_, AppState>, source: String, id: String) -> Resul
             Ok(serde_json::json!({ "kind": "ia", "files": files }))
         }
         "minerva" => Ok(serde_json::json!({ "kind": "minerva", "files": [] })),
+        "rroms" => {
+            let files = godsend_core::sources::rroms_files(&id)?;
+            Ok(serde_json::json!({ "kind": "rroms", "files": files }))
+        }
         _ => {
             let hit = godsend_core::sources::gamesearch_detail(&config.gamesearch_base, &id)?;
             Ok(serde_json::json!({ "kind": "gamesearch", "hit": hit }))
@@ -846,7 +858,7 @@ fn store_download(app: AppHandle, state: State<'_, AppState>, source: String, id
                 .iter()
                 .find(|f| f.name == file)
                 .ok_or_else(|| Error::NotFound(file.to_string()))?;
-            let url = hit.url.clone();
+            let url = godsend_core::sources::ia_signed_url(&hit.url, &config);
             let label = file.to_string();
             let dest_dir = godsend_core::aria2::download_dir(&config);
             state.jobs.spawn(
@@ -857,7 +869,73 @@ fn store_download(app: AppHandle, state: State<'_, AppState>, source: String, id
                 },
                 move |ctx| {
                     ctx.check_cancel()?;
-                    let path = godsend_core::aria2::download(&url, &dest_dir, &label, &config, ctx)?;
+                    let path = godsend_core::aria2::download(&url, &dest_dir, &label, &config, ctx)
+                        .map_err(|err| Error::Other(config.redact(&err.to_string())))?;
+                    ctx.message(format!("downloaded {}", path.display()));
+                    Ok(())
+                },
+            )
+        }
+        "rroms" => {
+            // id is an r-roms item; archive.org items expand to their files.
+            let files = godsend_core::sources::rroms_files(&id)?;
+            let label = format!("r-roms {id}");
+            let count = files.len();
+            let dest_dir = godsend_core::aria2::download_dir(&config);
+            state.jobs.spawn(
+                "download",
+                &label,
+                move |job| {
+                    let _ = app2.emit("job://done", job);
+                },
+                move |ctx| {
+                    for (index, file) in files.iter().enumerate() {
+                        ctx.check_cancel()?;
+                        if count > 1 {
+                            ctx.message(format!("file {}/{}: {}", index + 1, count, file.name));
+                        }
+                        let name = file
+                            .name
+                            .rsplit('/')
+                            .next()
+                            .filter(|name| !name.is_empty())
+                            .unwrap_or(&id);
+                        let name = godsend_core::media::fat_safe_name(name);
+                        let url = godsend_core::sources::ia_signed_url(&file.url, &config);
+                        godsend_core::aria2::download(&url, &dest_dir, &name, &config, ctx)
+                            .map_err(|err| Error::Other(config.redact(&err.to_string())))?;
+                    }
+                    ctx.message(format!("downloaded {count} file(s) to {}", dest_dir.display()));
+                    Ok(())
+                },
+            )
+        }
+        "nps" => {
+            let entry = godsend_core::sources::nps_entry(&id)?;
+            let label = format!("{} [{}]", entry.title, entry.title_id);
+            let name = godsend_core::sources::nps_pkg_name(&entry);
+            let dest_dir = godsend_core::aria2::download_dir(&config);
+            state.jobs.spawn(
+                "download",
+                &label,
+                move |job| {
+                    let _ = app2.emit("job://done", job);
+                },
+                move |ctx| {
+                    ctx.check_cancel()?;
+                    let path =
+                        godsend_core::aria2::download(&entry.url, &dest_dir, &name, &config, ctx)?;
+                    // pkg2zip and NoPayStation want the key beside the package.
+                    let stem = path
+                        .file_stem()
+                        .map(|stem| stem.to_string_lossy().to_string())
+                        .unwrap_or_else(|| name.clone());
+                    let sidecar = path.with_file_name(format!("{stem}.zrif.txt"));
+                    let body = match entry.zrif.as_deref() {
+                        Some(key) if !key.is_empty() => format!("{key}\n"),
+                        _ => "# no zRIF in the NoPayStation index; pkg2zip needs a key\n".to_string(),
+                    };
+                    std::fs::write(&sidecar, body)?;
                     ctx.message(format!("downloaded {}", path.display()));
                     Ok(())
                 },

@@ -271,9 +271,17 @@ fn call_tool(config: &Config, name: &str, args: &Value) -> crate::Result<Value> 
                     let items = sources::ia_search(&query, 40)?;
                     json!({ "kind": "ia", "items": items })
                 }
+                "rroms" => {
+                    let items = sources::rroms_items()?;
+                    json!({ "kind": "rroms", "items": items })
+                }
+                "nps" => {
+                    let entries = sources::nps_search(query, 40)?;
+                    json!({ "kind": "nps", "items": entries })
+                }
                 other => {
                     return Err(crate::Error::Invalid(format!(
-                        "unknown source {}: use gamesearch or ia",
+                        "unknown source {}: use gamesearch, ia, rroms or nps",
                         other
                     )))
                 }
@@ -297,9 +305,16 @@ fn call_tool(config: &Config, name: &str, args: &Value) -> crate::Result<Value> 
                     let files = sources::ia_item_files(id)?;
                     json!({ "kind": "ia", "files": files })
                 }
+                "rroms" => {
+                    if id.is_empty() {
+                        return Err(crate::Error::Invalid("missing id".into()));
+                    }
+                    let files = sources::rroms_files(id)?;
+                    json!({ "kind": "rroms", "files": files })
+                }
                 other => {
                     return Err(crate::Error::Invalid(format!(
-                        "unknown source {}: use gamesearch or ia",
+                        "unknown source {}: use gamesearch, ia or rroms",
                         other
                     )))
                 }
@@ -361,31 +376,31 @@ pub fn tool_definitions() -> Vec<Value> {
         ),
         tool(
             "store_search",
-            "Search the game-search index or Internet Archive for PSP content.",
+            "Search the game-search index, Internet Archive, r-roms or NoPayStation for PSP content.",
             json!({
                 "type": "object",
                 "properties": {
                     "query": { "type": "string", "description": "Search text. Empty browses the source default." },
                     "source": {
                         "type": "string",
-                        "enum": ["gamesearch", "ia"],
-                        "description": "gamesearch (default) or ia",
+                        "enum": ["gamesearch", "ia", "rroms", "nps"],
+                        "description": "gamesearch (default), ia, rroms or nps",
                     },
                 },
             }),
         ),
         tool(
             "store_detail",
-            "Fetch one store hit: game links for game-search, files for an Internet Archive item.",
+            "Fetch one store hit: game links for game-search, files for an Internet Archive item or r-roms entry.",
             json!({
                 "type": "object",
                 "properties": {
                     "source": {
                         "type": "string",
-                        "enum": ["gamesearch", "ia"],
-                        "description": "gamesearch (default) or ia",
+                        "enum": ["gamesearch", "ia", "rroms"],
+                        "description": "gamesearch (default), ia or rroms",
                     },
-                    "id": { "type": "string", "description": "game-search slug or IA identifier" },
+                    "id": { "type": "string", "description": "game-search slug, IA identifier, or r-roms item id" },
                 },
                 "required": ["id"],
             }),

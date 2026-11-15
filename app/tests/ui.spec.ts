@@ -26,6 +26,15 @@ test("store page wires the debrid index", async ({ page }) => {
   await expect(page.getByText("Wipeout Pure")).toBeVisible();
 });
 
+test("store r-roms and NoPayStation tabs list fixtures", async ({ page }) => {
+  await page.getByRole("button", { name: "Store", exact: true }).click();
+  await page.getByRole("tab", { name: "r-roms" }).click();
+  await expect(page.getByText("PSP Redump .iso (Part 1)")).toBeVisible();
+  await page.getByRole("tab", { name: "NoPayStation" }).click();
+  await expect(page.getByText("LocoRoco 2").first()).toBeVisible();
+  await expect(page.getByText("UCUS98662")).toBeVisible();
+});
+
 test("downloads page lists local files", async ({ page }) => {
   await page.getByRole("button", { name: "Downloads" }).click();
   await expect(page.getByText("LocoRoco 2 (USA).iso")).toBeVisible();

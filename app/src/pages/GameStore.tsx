@@ -1,10 +1,10 @@
 import { useEffect, useState } from "react";
 import { api } from "../api";
-import type { GameHit, GameInfo, IaItem, IaFile } from "../types";
+import type { GameHit, GameInfo, IaItem, IaFile, NpsEntry, RromsItem } from "../types";
 import type { PageProps } from "../App";
 import { Btn, Chip, Empty, Seg, fmtBytes } from "../ui";
 
-type Source = "gamesearch" | "ia" | "minerva";
+type Source = "gamesearch" | "ia" | "minerva" | "rroms" | "nps";
 type View =
   | { kind: "none" }
   | { kind: "game"; hit: GameHit; info: GameInfo | null }
@@ -16,6 +16,8 @@ export default function Store({ snap, reload, toast, refreshKey }: PageProps) {
   const [items, setItems] = useState<GameHit[]>([]);
   const [iaItems, setIaItems] = useState<IaItem[]>([]);
   const [minervaItems, setMinervaItems] = useState<{ id: string; title: string; url: string }[]>([]);
+  const [rromsItems, setRromsItems] = useState<RromsItem[]>([]);
+  const [npsItems, setNpsItems] = useState<NpsEntry[]>([]);
   const [view, setView] = useState<View>({ kind: "none" });
   const [busy, setBusy] = useState(false);
   const [debrid, setDebrid] = useState({ realdebrid: false, torbox: false });
@@ -35,6 +37,14 @@ export default function Store({ snap, reload, toast, refreshKey }: PageProps) {
         setItems([]);
       } else if (src === "minerva") {
         setMinervaItems((result.items as unknown as { id: string; title: string; url: string }[]) ?? []);
+        setItems([]);
+      } else if (src === "rroms") {
+        const all = (result.items as unknown as RromsItem[]) ?? [];
+        const needle = q.trim().toLowerCase();
+        setRromsItems(needle ? all.filter((item) => item.title.toLowerCase().includes(needle)) : all);
+        setItems([]);
+      } else if (src === "nps") {
+        setNpsItems((result.items as unknown as NpsEntry[]) ?? []);
         setItems([]);
       } else {
         setItems((result.items as unknown as GameHit[]) ?? []);
@@ -74,7 +84,7 @@ export default function Store({ snap, reload, toast, refreshKey }: PageProps) {
     }
   }
 
-  async function download(source: "gamesearch" | "ia" | "minerva", id: string, label: string) {
+  async function download(source: Source, id: string, label: string) {
     if (!debrid.realdebrid && !debrid.torbox && source === "gamesearch") {
       toast("no debrid account: DDL links work, torrents need Settings > Debrid");
     }
@@ -112,6 +122,8 @@ export default function Store({ snap, reload, toast, refreshKey }: PageProps) {
               { value: "gamesearch", label: "Game Debrid" },
               { value: "ia", label: "Internet Archive" },
               { value: "minerva", label: "Minerva" },
+              { value: "rroms", label: "r-roms" },
+              { value: "nps", label: "NoPayStation" },
             ]}
           />
           <input
@@ -122,7 +134,11 @@ export default function Store({ snap, reload, toast, refreshKey }: PageProps) {
                 ? "PSP ISO (megathread set)"
                 : source === "minerva"
                   ? "Minerva PSP sets load automatically"
-                  : "search PSP games"
+                  : source === "rroms"
+                    ? "filter the r-roms links"
+                    : source === "nps"
+                      ? "filter NoPayStation by title"
+                      : "search PSP games"
             }
             value={query}
             onChange={(e) => setQuery(e.target.value)}
@@ -150,7 +166,11 @@ export default function Store({ snap, reload, toast, refreshKey }: PageProps) {
             ? "Debrid index wired to the game-search service. Links are resolved through Real-Debrid or TorBox when connected, then downloaded with aria2c."
             : source === "minerva"
               ? "Minerva Archive Myrient PSP torrents. Downloading saves the torrent, which aria2c can fetch."
-              : "Internet Archive sets in the r/Roms megathread style. Direct downloads, no account needed."}
+              : source === "rroms"
+                ? "The r-roms PSP page: Internet Archive sets and direct archives. An archive.org item downloads every game file in that set."
+                : source === "nps"
+                  ? "NoPayStation PSP packages. Installing a .pkg needs pkg2zip or NoPayStation to decrypt it; the .zrif sidecar is saved next to the download."
+                  : "Internet Archive sets in the r/Roms megathread style. Direct downloads, no account needed."}
         </p>
       </div>
 
@@ -321,6 +341,66 @@ export default function Store({ snap, reload, toast, refreshKey }: PageProps) {
                   small
                   variant="primary"
                   onClick={() => void download("minerva", set.id, set.title)}
+                >
+                  Download
+                </Btn>
+              </div>
+            ))}
+          </div>
+        )
+      ) : source === "rroms" ? (
+        rromsItems.length === 0 ? (
+          <Empty
+            title="No r-roms links"
+            hint="No links matched. Clear the filter to load the page, or check the connection."
+          />
+        ) : (
+          <div className="rows">
+            {rromsItems.map((item) => (
+              <div className="row" key={item.id}>
+                <Chip tone={item.kind === "ia_item" ? "laser" : "neutral"}>
+                  {item.kind === "ia_item" ? "IA" : item.kind}
+                </Chip>
+                <div className="grow">
+                  <div className="title">{item.title}</div>
+                  <div className="sub mono" style={{ fontSize: 11.5 }}>
+                    {item.id}
+                  </div>
+                </div>
+                <Btn
+                  small
+                  variant="primary"
+                  onClick={() => void download("rroms", item.id, item.title)}
+                >
+                  Download
+                </Btn>
+              </div>
+            ))}
+          </div>
+        )
+      ) : source === "nps" ? (
+        npsItems.length === 0 ? (
+          <Empty
+            title="No packages"
+            hint="Search NoPayStation by title or title id, e.g. LocoRoco."
+          />
+        ) : (
+          <div className="rows">
+            {npsItems.map((entry) => (
+              <div className="row" key={entry.title_id}>
+                <Chip tone="laser">{entry.region || "NPS"}</Chip>
+                <div className="grow">
+                  <div className="title">{entry.title}</div>
+                  <div className="sub mono" style={{ fontSize: 11.5 }}>
+                    {entry.title_id}
+                    {entry.zrif ? " - key in index" : ""}
+                  </div>
+                </div>
+                <span className="size">{fmtBytes(entry.size_bytes)}</span>
+                <Btn
+                  small
+                  variant="primary"
+                  onClick={() => void download("nps", entry.title_id, entry.title)}
                 >
                   Download
                 </Btn>

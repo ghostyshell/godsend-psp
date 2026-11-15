@@ -6,6 +6,8 @@ import { Btn, Chip, Seg, Toggle } from "../ui";
 export default function Settings({ snap, reload, toast, refreshKey }: PageProps) {
   const [rdKey, setRdKey] = useState("");
   const [tbKey, setTbKey] = useState("");
+  const [iaKey, setIaKey] = useState("");
+  const [iaSecret, setIaSecret] = useState("");
   const [downloadDir, setDownloadDir] = useState("");
   const [debrid, setDebrid] = useState({ realdebrid: false, torbox: false });
 
@@ -128,6 +130,55 @@ export default function Settings({ snap, reload, toast, refreshKey }: PageProps)
             }}
             style={inputStyle}
           />
+        </div>
+        <p style={{ margin: "0 0 12px", fontSize: 12.5, color: "var(--text-faint)" }}>
+          Internet Archive keys are optional. Set both to sign archive.org
+          downloads for items that need an account; the keys stay in the local
+          config and are kept out of job errors.
+        </p>
+        <div className="field">
+          <label>Internet Archive access key</label>
+          <div style={{ display: "flex", gap: 8 }}>
+            <input
+              type="password"
+              value={iaKey}
+              onChange={(e) => setIaKey(e.target.value)}
+              placeholder={config.ia_access_key ? "saved" : "paste access key"}
+              style={inputStyle}
+            />
+            <Btn
+              onClick={async () => {
+                await api.configSet({ ia_access_key: iaKey.trim() } as never);
+                toast("Internet Archive access key saved");
+                setIaKey("");
+                reload();
+              }}
+            >
+              Save
+            </Btn>
+          </div>
+        </div>
+        <div className="field">
+          <label>Internet Archive secret key</label>
+          <div style={{ display: "flex", gap: 8 }}>
+            <input
+              type="password"
+              value={iaSecret}
+              onChange={(e) => setIaSecret(e.target.value)}
+              placeholder={config.ia_secret_key ? "saved" : "paste secret key"}
+              style={inputStyle}
+            />
+            <Btn
+              onClick={async () => {
+                await api.configSet({ ia_secret_key: iaSecret.trim() } as never);
+                toast("Internet Archive secret key saved");
+                setIaSecret("");
+                reload();
+              }}
+            >
+              Save
+            </Btn>
+          </div>
         </div>
       </section>
 
