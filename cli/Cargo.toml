@@ -1,0 +1,20 @@
+[package]
+name = "godsend-psp-cli"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+authors.workspace = true
+repository.workspace = true
+description = "Headless CLI for GODsend PSP"
+
+[[bin]]
+name = "godsend-psp"
+path = "src/main.rs"
+
+[dependencies]
+godsend-core = { path = "../core" }
+clap = { version = "4", features = ["derive"] }
+serde.workspace = true
+serde_json.workspace = true
+tracing.workspace = true
+tracing-subscriber.workspace = true

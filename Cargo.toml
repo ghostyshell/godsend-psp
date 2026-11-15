@@ -1,0 +1,27 @@
+[workspace]
+resolver = "2"
+members = ["core", "cli", "app/src-tauri"]
+
+[workspace.package]
+version = "0.1.0"
+edition = "2021"
+license = "MIT"
+authors = ["GODsend PSP"]
+repository = "https://github.com/ghostyshell/godsend-psp"
+
+[workspace.dependencies]
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+thiserror = "2"
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+flate2 = "1"
+zip = { version = "2", default-features = false, features = ["deflate"] }
+ureq = { version = "2", features = ["json", "tls"] }
+directories = "5"
+fs4 = "0.13"
+
+[profile.release]
+lto = "thin"
+codegen-units = 1
+strip = true

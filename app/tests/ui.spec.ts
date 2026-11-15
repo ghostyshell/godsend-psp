@@ -1,0 +1,37 @@
+import { test, expect } from "@playwright/test";
+
+test.beforeEach(async ({ page }) => {
+  await page.goto("/?mock=1", { waitUntil: "load" });
+  await page.waitForTimeout(1500);
+});
+
+test("shell landmarks and nav", async ({ page }) => {
+  await expect(page.locator("header.topbar")).toBeVisible();
+  await expect(page.locator("nav.rail")).toBeVisible();
+  await expect(page.locator("footer.statusbar")).toBeVisible();
+  await expect(page.getByRole("link", { name: "Skip to content" })).toHaveCount(1);
+  const current = page.locator('.rail-item[aria-current="page"]');
+  await expect(current).toHaveText(/Console/);
+});
+
+test("games page lists the fixture library", async ({ page }) => {
+  await page.getByRole("button", { name: "Games" }).click();
+  await expect(page.locator(".tile")).toHaveCount(7);
+  await expect(page.locator(".tile .t").first()).toContainText(/God of War/i);
+});
+
+test("homebrew catalog renders with install buttons", async ({ page }) => {
+  await page.getByRole("button", { name: "Homebrew" }).click();
+  await expect(page.locator(".store-card")).toHaveCount(5);
+  await expect(page.locator(".store-card .name").filter({ hasText: "ARK-4" })).toBeVisible();
+});
+
+test("inspector queue shows the seeded jobs", async ({ page }) => {
+  await expect(page.locator(".queue-card .job-row")).toHaveCount(2);
+});
+
+test("settings exposes config controls", async ({ page }) => {
+  await page.getByRole("button", { name: "Settings" }).click();
+  await expect(page.getByText("Music conversion")).toBeVisible();
+  await expect(page.getByText("ISO to CSO compression level")).toBeVisible();
+});
