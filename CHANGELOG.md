@@ -3,6 +3,9 @@
 All notable changes to GODsend PSP. Newest first.
 
 
+## [0.2.29] - 2026-11-16
+
+
 ## [0.2.28] - 2026-11-16
 
 
@@ -34,7 +37,8 @@ All notable changes to GODsend PSP. Newest first.
 
 - Library merges the Images section into a Games/Homebrew split, each with
   PSP and Local sides. ISO/CSO entries appear under Games with their
-  convert/delete actions; the separate Images nav entry is gone.
+  import, convert and delete actions (the separate Images nav entry is
+  gone, those features moved here).
 
 ### Changed
 
