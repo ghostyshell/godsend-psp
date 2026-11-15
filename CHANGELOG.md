@@ -3,6 +3,9 @@
 All notable changes to GODsend PSP. Newest first.
 
 
+## [0.2.19] - 2026-11-15
+
+
 ## [0.2.18] - 2026-11-15
 
 
@@ -10,6 +13,12 @@ All notable changes to GODsend PSP. Newest first.
 
 
 ## [0.2.16] - 2026-11-15
+
+### Changed
+
+- Defaults are now maximum quality: x264 **veryslow**, CRF **16**, AAC
+  **256 kbps**, 480x272 at 30 fps. Preset, CRF and audio are selectable in
+  Settings; slow mediums trade speed for size.
 
 ### Changed
 

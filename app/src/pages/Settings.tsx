@@ -217,6 +217,25 @@ export default function Settings({ snap, reload, toast, refreshKey }: PageProps)
           </div>
         </div>
         <div className="field">
+          <label>Encoder preset (veryslow is the best quality per bit)</label>
+          <div>
+            <Seg
+              ariaLabel="Encoder preset"
+              value={config.video_preset}
+              onChange={(preset) => {
+                void api.configSet({ video_preset: preset } as never);
+                reload();
+              }}
+              options={[
+                { value: "veryslow", label: "veryslow" },
+                { value: "slow", label: "slow" },
+                { value: "medium", label: "medium" },
+                { value: "fast", label: "fast" },
+              ]}
+            />
+          </div>
+        </div>
+        <div className="field">
           <label>Video quality (CRF {config.video_crf}; lower is better)</label>
           <div>
             <Seg
@@ -227,6 +246,7 @@ export default function Settings({ snap, reload, toast, refreshKey }: PageProps)
                 reload();
               }}
               options={[
+                { value: "16", label: "Lossless-ish (16)" },
                 { value: "18", label: "Maximum (18)" },
                 { value: "21", label: "High (21)" },
                 { value: "24", label: "Balanced (24)" },
@@ -275,9 +295,9 @@ export default function Settings({ snap, reload, toast, refreshKey }: PageProps)
                 reload();
               }}
               options={[
+                { value: "256", label: "256 kbps" },
                 { value: "192", label: "192 kbps" },
                 { value: "128", label: "128 kbps" },
-                { value: "256", label: "256 kbps" },
               ]}
             />
           </div>
@@ -357,7 +377,7 @@ export default function Settings({ snap, reload, toast, refreshKey }: PageProps)
           <Btn onClick={() => void api.openDataDir()}>Open Data Folder</Btn>
         </div>
         <p style={{ margin: "12px 0 0", fontSize: 12.5, color: "var(--text-faint)" }}>
-          godsend-psp 0.2.18 - Rust engine + Tauri. USB mass storage, no drivers.
+          godsend-psp 0.2.19 - Rust engine + Tauri. USB mass storage, no drivers.
         </p>
       </section>
     </div>
