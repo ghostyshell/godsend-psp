@@ -11,8 +11,6 @@ use std::path::{Path, PathBuf};
 pub struct Config {
     /// Default audio conversion format for music pushes (`mp3` or `m4a`).
     pub music_format: String,
-    /// Default video preset id (`psp_avc_480`).
-    pub video_preset: String,
     /// Generate a 160x120 `.THM` thumbnail next to pushed videos.
     pub video_thumbnails: bool,
     /// Convert music to the PSP format by default.
@@ -20,6 +18,7 @@ pub struct Config {
     /// Convert video to the PSP format by default.
     pub convert_video: bool,
     /// x264 speed preset; veryslow gives the best compression at a given CRF.
+    /// (Replaces the old unused profile id.)
     pub video_preset: String,
     /// x264 CRF; lower is better. 16 is effectively lossless at PSP sizes.
     pub video_crf: u32,
@@ -58,11 +57,10 @@ impl Default for Config {
     fn default() -> Self {
         Self {
             music_format: "mp3".into(),
-            video_preset: "psp_avc_480".into(),
+            video_preset: "veryslow".into(),
             video_thumbnails: true,
             convert_music: true,
             convert_video: true,
-            video_preset: "veryslow".into(),
             video_crf: 16,
             video_fps: 30,
             video_audio_kbps: 256,

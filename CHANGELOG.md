@@ -99,6 +99,11 @@ All notable changes to GODsend PSP. Newest first.
 
 ### Fixed
 
+- The unused `video_preset` profile id was folded into the encoder preset
+  field instead of duplicating the key.
+
+### Fixed
+
 - Publish writes the release version into downloads.json from the build
   version (not from the first artifact name), and stale artifacts in dist/
   are no longer picked up.
