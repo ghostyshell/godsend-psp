@@ -5,18 +5,53 @@
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>GODsend PSP - game library, homebrew and mods for the PSP</title>
 <meta name="description" content="Desktop workshop for the PSP over USB: store with debrid and Internet Archive sources, homebrew, music, video, ISO/CSO, saves, mods and a library with covers." />
-<meta property="og:title" content="GODsend PSP" />
-<meta property="og:description" content="Manage the PSP memory stick from one window: store, homebrew, media, saves, mods." />
+<meta name="theme-color" content="#04060c" />
+<meta name="robots" content="index, follow, max-image-preview:large" />
+<link rel="canonical" href="https://ghostyshell.github.io/godsend-psp/" />
 <meta property="og:type" content="website" />
-<meta property="og:image" content="og.png" />
-<link rel="icon" type="image/png" href="icon.png" />
+<meta property="og:site_name" content="GODsend PSP" />
+<meta property="og:url" content="https://ghostyshell.github.io/godsend-psp/" />
+<meta property="og:title" content="GODsend PSP - game library, homebrew and mods for the PSP" />
+<meta property="og:description" content="Manage the PSP memory stick from one window: store, homebrew, media, saves, mods." />
+<meta property="og:image" content="https://ghostyshell.github.io/godsend-psp/og.png" />
+<meta property="og:image:alt" content="GODsend PSP - a desktop workshop for the PSP memory stick" />
+<meta property="og:image:width" content="1200" />
+<meta property="og:image:height" content="630" />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content="GODsend PSP - game library, homebrew and mods for the PSP" />
+<meta name="twitter:description" content="Manage the PSP memory stick from one window: store, homebrew, media, saves, mods." />
+<meta name="twitter:image" content="https://ghostyshell.github.io/godsend-psp/og.png" />
+<link rel="icon" href="mark.svg" type="image/svg+xml" />
+<link rel="apple-touch-icon" href="icon-180.png" />
+<link rel="preconnect" href="https://github.com" />
 <link rel="stylesheet" href="site.css" />
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "GODsend PSP",
+  "alternateName": "godsend-psp",
+  "applicationCategory": "UtilitiesApplication",
+  "operatingSystem": "macOS, Windows, Linux",
+  "url": "https://ghostyshell.github.io/godsend-psp/",
+  "downloadUrl": "https://ghostyshell.github.io/godsend-psp/#downloads",
+  "license": "https://github.com/ghostyshell/godsend-psp/blob/main/LICENSE",
+  "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+  "author": { "@type": "Person", "name": "ghosty99", "url": "https://github.com/ghostyshell" },
+  "description": "Desktop workshop for the PSP over USB mass storage: debrid and Internet Archive store, homebrew and custom firmware, media, ISO to CSO, saves and mods.",
+  "image": "https://ghostyshell.github.io/godsend-psp/og.png",
+  "screenshot": "https://ghostyshell.github.io/godsend-psp/site-library.png"
+}
+</script>
 </head>
 <body>
 <div class="glow"></div>
 <header>
-  <a class="brand" href="./"><img class="mark" src="icon.png" alt="" /><span>GODsend PSP</span></a>
-  <nav>
+  <a class="brand" href="./"><img class="mark" src="icon-64.png" alt="" width="26" height="26" /><span>GODsend PSP</span></a>
+  <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="primary-nav" aria-label="Menu">
+    <span aria-hidden="true"></span><span aria-hidden="true"></span><span aria-hidden="true"></span>
+  </button>
+  <nav id="primary-nav" aria-label="Primary">
     <a href="#features">Features</a>
     <a href="#screens">Screens</a>
     <a href="#downloads">Downloads</a>
@@ -51,24 +86,24 @@
 
   <section id="screens" class="screens">
     <a class="shot" href="site-console.png" aria-label="Open the console screenshot">
-      <img src="site-console.png" alt="Console page with device status, checks and activity" loading="lazy" />
+      <img src="site-console.png" alt="Console page with device status, checks and activity" width="1440" height="900" loading="lazy" decoding="async" />
     </a>
     <a class="shot" href="site-library.png" aria-label="Open the library screenshot">
-      <img src="site-library.png" alt="PSP library with landscape cover tiles" loading="lazy" />
+      <img src="site-library.png" alt="PSP library with landscape cover tiles" width="1440" height="900" loading="lazy" decoding="async" />
     </a>
     <a class="shot" href="site-store.png" aria-label="Open the store screenshot">
-      <img src="site-store.png" alt="Store with debrid and Internet Archive sources" loading="lazy" />
+      <img src="site-store.png" alt="Store with debrid and Internet Archive sources" width="1440" height="900" loading="lazy" decoding="async" />
     </a>
   </section>
 
-  <div id="lightbox" class="lightbox" hidden>
+  <div id="lightbox" class="lightbox" hidden role="dialog" aria-modal="true" aria-label="Screenshot viewer">
     <div class="lb-toolbar" role="toolbar" aria-label="Screenshot controls">
       <button class="lb-btn" data-zoom="out" aria-label="Zoom out">-</button>
       <span class="lb-scale" id="lb-scale">100%</span>
       <button class="lb-btn" data-zoom="in" aria-label="Zoom in">+</button>
       <button class="lb-btn lb-close" aria-label="Close the screenshot">Close</button>
     </div>
-    <img id="lightbox-img" alt="" />
+    <img id="lightbox-img" alt="" src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==" />
   </div>
 
   <section id="features">
@@ -148,7 +183,7 @@
 </main>
 
 <footer>
-  <a class="brand" href="./"><img class="mark" src="icon.png" alt="" /><span>GODsend PSP</span></a>
+  <a class="brand" href="./"><img class="mark" src="icon-64.png" alt="" width="26" height="26" /><span>GODsend PSP</span></a>
   <div class="links">
     <a href="https://ko-fi.com/ghosty99">Ko-fi</a>
     <a href="https://discord.gg/d3sFnrgpJn">Discord</a>
@@ -165,27 +200,33 @@
   const img = document.getElementById("lightbox-img");
   const scaleLabel = document.getElementById("lb-scale");
   let scale = 1;
+  let opener = null;
   const apply = () => {
     img.style.transform = `scale(${scale})`;
     scaleLabel.textContent = Math.round(scale * 100) + "%";
   };
   const close = () => {
     box.hidden = true;
-    img.src = "";
+    img.src = "data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==";
     scale = 1;
     apply();
+    document.body.style.overflow = "";
+    if (opener) opener.focus();
   };
-  const open = (href, alt) => {
+  const open = (href, alt, from) => {
+    opener = from || null;
     img.src = href;
     img.alt = alt;
     scale = 1;
     apply();
     box.hidden = false;
+    document.body.style.overflow = "hidden";
+    box.querySelector(".lb-close").focus();
   };
   document.querySelectorAll(".shot").forEach((a) => {
     a.addEventListener("click", (e) => {
       e.preventDefault();
-      open(a.getAttribute("href"), a.querySelector("img")?.alt ?? "");
+      open(a.getAttribute("href"), a.querySelector("img")?.alt ?? "", a);
     });
   });
   box.querySelector("[data-zoom='in']").addEventListener("click", (e) => {
@@ -211,6 +252,21 @@
     if (e.key === "+" || e.key === "=") { scale = Math.min(4, scale + 0.25); apply(); }
     if (e.key === "-") { scale = Math.max(0.5, scale - 0.25); apply(); }
   });
+})();
+
+// Mobile nav: a disclosure panel instead of hiding the links.
+(function () {
+  const btn = document.querySelector(".nav-toggle");
+  const nav = document.getElementById("primary-nav");
+  if (!btn || !nav) return;
+  const set = (open) => {
+    btn.setAttribute("aria-expanded", String(open));
+    nav.classList.toggle("open", open);
+  };
+  btn.addEventListener("click", () => set(btn.getAttribute("aria-expanded") !== "true"));
+  nav.addEventListener("click", (e) => { if (e.target.closest("a")) set(false); });
+  document.addEventListener("keydown", (e) => { if (e.key === "Escape") set(false); });
+  matchMedia("(min-width: 721px)").addEventListener("change", (e) => { if (e.matches) set(false); });
 })();
 
 fetch("downloads.json?v=" + Date.now(), { cache: "no-store" }).then(r => r.json()).then(data => {

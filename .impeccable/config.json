@@ -1,0 +1,26 @@
+{
+  "detector": {
+    "ignoreRules": [],
+    "ignoreFiles": [],
+    "ignoreValues": [
+      {
+        "rule": "dark-glow",
+        "value": "*",
+        "files": [
+          "docs/site.css"
+        ],
+        "createdAt": "2026-11-15T08:49:56.316Z",
+        "reason": "deliberate product identity: site.css mirrors the GODsend PSP desktop app's laser glow; not a default AI glow"
+      },
+      {
+        "rule": "dark-glow",
+        "value": "*",
+        "files": [
+          "docs/index.html"
+        ],
+        "createdAt": "2026-11-15T08:50:09.237Z",
+        "reason": "deliberate product identity: the page renders docs/site.css, which mirrors the GODsend PSP desktop app's laser glow"
+      }
+    ]
+  }
+}
