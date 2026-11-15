@@ -1,0 +1,51 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
+  <defs>
+    <linearGradient id="body" x1="140" y1="120" x2="900" y2="920" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#f2feff"/>
+      <stop offset=".16" stop-color="#9feaff"/>
+      <stop offset=".42" stop-color="#39b8ff"/>
+      <stop offset=".72" stop-color="#0f86ff"/>
+      <stop offset="1" stop-color="#0a4dff"/>
+    </linearGradient>
+    <linearGradient id="edge" x1="140" y1="120" x2="900" y2="920" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#8fe6ff"/>
+      <stop offset=".5" stop-color="#0a53d8"/>
+      <stop offset="1" stop-color="#031e7a"/>
+    </linearGradient>
+    <linearGradient id="rim" x1="200" y1="380" x2="820" y2="940" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#eafdff" stop-opacity=".95"/>
+      <stop offset=".55" stop-color="#7fdcff" stop-opacity=".35"/>
+      <stop offset="1" stop-color="#ffffff" stop-opacity="0"/>
+    </linearGradient>
+    <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="10" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="soft" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="26"/>
+    </filter>
+  </defs>
+
+  <!-- ambient glow -->
+  <ellipse cx="512" cy="640" rx="360" ry="250" fill="#25a8ff" opacity=".28" filter="url(#soft)"/>
+
+  <!-- ring swoosh, rotated, drawn in layers for depth -->
+  <g transform="rotate(-7 512 640)" filter="url(#glow)">
+    <ellipse cx="512" cy="660" rx="392" ry="286" fill="none" stroke="url(#edge)" stroke-width="118" stroke-linecap="round" stroke-dasharray="1740 300" stroke-dashoffset="118"/>
+    <ellipse cx="512" cy="660" rx="392" ry="286" fill="none" stroke="url(#body)" stroke-width="96" stroke-linecap="round" stroke-dasharray="1740 300" stroke-dashoffset="118"/>
+    <ellipse cx="512" cy="638" rx="392" ry="286" fill="none" stroke="url(#rim)" stroke-width="11" stroke-linecap="round" stroke-dasharray="900 1140" stroke-dashoffset="60"/>
+  </g>
+
+  <!-- download arrow over the ring -->
+  <g filter="url(#glow)">
+    <path d="M424 176
+             h170 a44 44 0 0 1 44 44
+             v212 h96 a30 30 0 0 1 22 50
+             L556 742 a56 56 0 0 1 -88 0
+             L268 482 a30 30 0 0 1 22 -50
+             h94 V220 a44 44 0 0 1 40 -44 z"
+          fill="url(#body)" stroke="#0a3ea8" stroke-width="9"/>
+    <path d="M446 200 h126 a18 18 0 0 1 18 18 v240 h74 L512 668 360 458 h68 V218 a18 18 0 0 1 18 -18 z"
+          fill="none" stroke="#eafdff" stroke-width="7" opacity=".55"/>
+  </g>
+</svg>
