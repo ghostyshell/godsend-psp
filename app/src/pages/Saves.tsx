@@ -95,13 +95,11 @@ export default function Saves({ snap, reload, toast, refreshKey }: PageProps) {
                 onChange={() => toggle(save.folder)}
                 aria-label={`Select ${save.title ?? save.folder}`}
               />
-              <SaveIcon folder={save.folder} title={save.title ?? save.folder} hasIcon={save.has_icon} />
+              <SaveIcon folder={save.folder} title={displayTitle(save)} hasIcon={save.has_icon} />
               <div className="grow">
-                <div className="title">{save.title ?? save.folder}</div>
+                <div className="title">{displayTitle(save)}</div>
                 <div className="sub">
-                  {save.subtitle ? `${save.subtitle} - ` : ""}
-                  {save.folder}
-                  {save.title_id ? ` - ${save.title_id}` : ""}
+                  {[save.subtitle, serialOf(save)].filter(Boolean).join(" - ")}
                 </div>
               </div>
               <span className="size">{fmtBytes(save.size_bytes)}</span>
@@ -136,6 +134,23 @@ export default function Saves({ snap, reload, toast, refreshKey }: PageProps) {
 }
 
 /** Save slot art: the save's own ICON0.PNG, landscape like the PSP. */
+/** PSP savedata folders are <SERIAL><suffix>; show a readable serial. */
+function serialOf(save: SaveEntry): string {
+  const raw = (save.title_id ?? save.folder).toUpperCase();
+  const m = raw.match(/^[A-Z]{4}\d{5}/);
+  if (!m) return "";
+  const serial = m[0];
+  return `${serial.slice(0, 4)}-${serial.slice(4)}`;
+}
+
+/** Prefer the SFO title; otherwise a formatted serial instead of triplicated ids. */
+function displayTitle(save: SaveEntry): string {
+  if (save.title && save.title.trim()) return save.title;
+  const serial = serialOf(save);
+  if (serial) return serial;
+  return save.subtitle ?? save.folder;
+}
+
 function SaveIcon({
   folder,
   title,

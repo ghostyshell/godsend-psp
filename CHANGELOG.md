@@ -3,6 +3,9 @@
 All notable changes to GODsend PSP. Newest first.
 
 
+## [0.2.24] - 2026-11-15
+
+
 ## [0.2.23] - 2026-11-15
 
 
@@ -135,6 +138,11 @@ All notable changes to GODsend PSP. Newest first.
 
 
 ## [0.2.4] - 2026-11-15
+
+### Fixed
+
+- Save Data titles: saves whose PARAM.SFO has no TITLE now show a formatted
+  serial (ULES-00309) once instead of repeating the folder id three times.
 
 ### Fixed
 
