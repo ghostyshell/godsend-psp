@@ -6,6 +6,7 @@ All notable changes to GODsend PSP. Newest first.
 
 ### Added
 
+- Video guides: `docs/video-guides.html` lists twelve short recordings, one per tab, with a walkthrough and steps each. Videos are on R2, the page is linked from the site and the README. Recorded from the renderer's `?mock=1` bridge with the demo-reels skill.
 - Store page with two sources: the game-search debrid index (platform=psp,
   ddl/magnet/torrent links with supportedBy) and Internet Archive sets in
   the r/Roms megathread style. Per-game link list, mods, and one-click
