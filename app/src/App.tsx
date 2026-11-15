@@ -3,6 +3,21 @@ import { api, listen } from "./api";
 import type { Job, Snapshot } from "./types";
 import { PAGE_TITLES } from "./types";
 import { Chip } from "./ui";
+import {
+  House,
+  Library as LibraryIcon,
+  Store as StoreIcon,
+  Download as DownloadIcon,
+  FolderOpen,
+  Package as PackageIcon,
+  Music as MusicIcon,
+  Film as FilmIcon,
+  Disc3,
+  Save as SaveIcon,
+  Wrench,
+  Settings as SettingsIcon,
+} from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 import logo from "./assets/logo.svg";
 import Home from "./pages/Home";
 import Library from "./pages/Library";
@@ -31,22 +46,22 @@ type Page =
   | "mods"
   | "settings";
 
-const NAV: { id: Page; label: string; glyph: string }[] = [
-  { id: "home", label: "Console", glyph: "PS" },
-  { id: "library", label: "Library", glyph: "LB" },
-  { id: "gamestore", label: "Store", glyph: "ST" },
-  { id: "downloads", label: "Downloads", glyph: "DL" },
-  { id: "files", label: "Files", glyph: "FM" },
-  { id: "store", label: "Homebrew", glyph: "HB" },
-  { id: "music", label: "Music", glyph: "MU" },
-  { id: "video", label: "Video", glyph: "VD" },
-  { id: "iso", label: "Images", glyph: "IS" },
-  { id: "saves", label: "Saves", glyph: "SV" },
-  { id: "mods", label: "Mods", glyph: "MD" },
-  { id: "settings", label: "Settings", glyph: "SE" },
+const NAV: { id: Page; label: string; icon: LucideIcon }[] = [
+  { id: "home", label: "Console", icon: House },
+  { id: "library", label: "Library", icon: LibraryIcon },
+  { id: "gamestore", label: "Store", icon: StoreIcon },
+  { id: "downloads", label: "Downloads", icon: DownloadIcon },
+  { id: "files", label: "Files", icon: FolderOpen },
+  { id: "store", label: "Homebrew", icon: PackageIcon },
+  { id: "music", label: "Music", icon: MusicIcon },
+  { id: "video", label: "Video", icon: FilmIcon },
+  { id: "iso", label: "Images", icon: Disc3 },
+  { id: "saves", label: "Saves", icon: SaveIcon },
+  { id: "mods", label: "Mods", icon: Wrench },
+  { id: "settings", label: "Settings", icon: SettingsIcon },
 ];
 
-const VERSION = "0.2.3";
+const VERSION = "0.2.4";
 
 export interface PageProps {
   snap: Snapshot;
@@ -191,9 +206,7 @@ export default function App() {
               }
             }}
           >
-            <span className="glyph" aria-hidden="true">
-              {item.glyph}
-            </span>
+            <item.icon className="glyph-icon" size={17} aria-hidden="true" />
             <span className="label">{item.label}</span>
           </button>
         ))}

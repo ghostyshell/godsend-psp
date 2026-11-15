@@ -16,3 +16,5 @@ playwright-report/
 .gofile-io-token
 .release-publish.lock
 .release-refresh.log
+
+app/src-tauri/resources/ffmpeg*
