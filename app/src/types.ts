@@ -14,6 +14,10 @@ export interface Config {
   video_thumbnails: boolean;
   convert_music: boolean;
   convert_video: boolean;
+  video_crf: number;
+  video_fps: number;
+  video_audio_kbps: number;
+  video_resolution: string;
   ffmpeg_path: string;
   ffprobe_path: string;
   cso_level: number;

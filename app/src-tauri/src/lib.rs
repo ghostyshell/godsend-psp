@@ -395,6 +395,12 @@ fn video_push(
     let ffmpeg = media::find_ffmpeg(&config.ffmpeg_path);
     let ffprobe = media::find_ffprobe(&config.ffprobe_path);
     let make_thm = thm && config.video_thumbnails;
+    let quality = media::VideoQuality {
+        crf: config.video_crf,
+        fps: config.video_fps,
+        audio_kbps: config.video_audio_kbps,
+        resolution: config.video_resolution.clone(),
+    };
     let dest_root = paths.video();
     std::fs::create_dir_all(&dest_root)?;
 
@@ -415,6 +421,7 @@ fn video_push(
         let ffprobe_clone = ffprobe.clone();
         let dest_root_clone = dest_root.clone();
         let volume_label = volume.label.clone();
+        let quality_clone = quality.clone();
         let app2 = app.clone();
         let job_id = state.jobs.spawn(
             "video",
@@ -441,6 +448,7 @@ fn video_push(
                         &src,
                         &dest,
                         thm_dest.as_deref(),
+                        &quality_clone,
                         &cancel_flag(ctx.job_id()),
                         &mut |done, total| ctx.progress(done, total),
                     )?;
