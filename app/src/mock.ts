@@ -195,8 +195,26 @@ async function invoke(cmd: string, args: Record<string, any> = {}): Promise<unkn
       return null;
     case "library_scan":
       return { games, images };
-    case "icon":
-      return iconDataUrl(args.id as string);
+    case "icon": {
+      const id = args.id as string;
+      const serial = SERIAL_FOR[id];
+      if (serial) {
+        try {
+          const res = await fetch(`demo-covers/${serial}.png`);
+          if (res.ok) {
+            const blob = await res.blob();
+            return await new Promise<string>((resolve) => {
+              const reader = new FileReader();
+              reader.onload = () => resolve(String(reader.result));
+              reader.readAsDataURL(blob);
+            });
+          }
+        } catch {
+          /* fall through to generated art */
+        }
+      }
+      return iconDataUrl(id);
+    }
     case "game_delete": {
       const i = games.findIndex((g) => g.id === args.id);
       if (i >= 0) games.splice(i, 1);
@@ -396,6 +414,16 @@ async function invoke(cmd: string, args: Record<string, any> = {}): Promise<unkn
       return null;
   }
 }
+
+// Real cover art, by serial, dropped into docs/demo-covers/.
+const SERIAL_FOR: Record<string, string> = {
+  "game/GodOfWarChainsOfOlympus": "UCUS-98737",
+  "game/LocoRoco2": "UCUS-98716",
+  "game/WipeoutPure": "UCUS-98712",
+  "iso/Metal Gear Solid - Peace Walker.iso": "ULUS-10509",
+  "iso/Persona 3 Portable.cso": "ULUS-10512",
+  "iso/Daxter.cso": "UCUS-98634",
+};
 
 function fileName(path: string): string {
   return path.split("/").pop() ?? path;

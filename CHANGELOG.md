@@ -3,6 +3,9 @@
 All notable changes to GODsend PSP. Newest first.
 
 
+## [0.2.11] - 2026-11-15
+
+
 ## [0.2.10] - 2026-11-15
 
 
@@ -45,6 +48,14 @@ All notable changes to GODsend PSP. Newest first.
 - Video tiles play a cached three second muted clip of the film on hover or
   keyboard focus, extracted with ffmpeg at 240px wide, the way PSP video
   icons animate.
+
+### Changed
+
+- Screenshot modal has a transparent backdrop, is centred, and carries zoom
+  in/out buttons with a percentage readout plus a close button; Escape and
+  clicks outside also close it.
+- Mock covers load real art from `docs/demo-covers/<SERIAL>.png` when the
+  files exist, so site captures can show actual game covers.
 
 ### Changed
 
