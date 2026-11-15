@@ -987,7 +987,12 @@ fn game_info(state: State<'_, AppState>, serial: String, title: String) -> Resul
 }
 
 #[tauri::command]
-fn cover(state: State<'_, AppState>, id: String, serial: Option<String>) -> Option<String> {
+fn cover(
+    state: State<'_, AppState>,
+    id: String,
+    serial: Option<String>,
+    title: Option<String>,
+) -> Option<String> {
     let paths = state.paths().ok()?.1;
     let config = state.config();
     // 1. R2/catalog cover by serial (library covers), 2. stick ICON0 fallback.
@@ -999,6 +1004,11 @@ fn cover(state: State<'_, AppState>, id: String, serial: Option<String>) -> Opti
         if let Some(bytes) = godsend_core::catalog::cover_bytes(&config, &serial_value, &fallback) {
             return Some(format!("data:image/png;base64,{}", base64_encode(&bytes)));
         }
+    }
+    // 3. remote cover from the store index (cached on disk), 4. stick ICON0.
+    let title_value = title.unwrap_or_default();
+    if let Some(bytes) = godsend_core::catalog::remote_cover(&config, &serial_value, &title_value) {
+        return Some(format!("data:image/png;base64,{}", base64_encode(&bytes)));
     }
     let bytes = library::icon_bytes(&paths, &id)?;
     Some(format!("data:image/png;base64,{}", base64_encode(&bytes)))

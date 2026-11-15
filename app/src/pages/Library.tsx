@@ -22,7 +22,7 @@ export default function Library({ snap, toast, refreshKey }: PageProps) {
         setGames(lib.games);
         setImages(lib.images);
         const entries = await Promise.all(
-          lib.games.map(async (g) => [g.id, await api.cover(g.id, g.title_id ?? undefined)] as const)
+          lib.games.map(async (g) => [g.id, await api.cover(g.id, g.title_id ?? undefined, g.title)] as const)
         );
         const map: Record<string, string> = {};
         for (const [id, url] of entries) if (url) map[id] = url;

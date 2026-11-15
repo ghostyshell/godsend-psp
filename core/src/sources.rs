@@ -43,6 +43,9 @@ pub struct GameHit {
     pub supported_by: Vec<String>,
     #[serde(default)]
     pub cover: Option<String>,
+    /// RAWG box art, as returned by the game-search detail rows.
+    #[serde(rename = "rawgCover", default)]
+    pub rawg_cover: Option<String>,
     #[serde(default)]
     pub size: Option<u64>,
     /// Filled by the detail fetch (game links live there).
