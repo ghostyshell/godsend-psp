@@ -1,0 +1,19 @@
+[package]
+name = "godsend-core"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+authors.workspace = true
+repository.workspace = true
+description = "PSP device engine: mount detection, PARAM.SFO/PBP parsing, ISO/CSO, transfers, homebrew, plugins"
+
+[dependencies]
+serde.workspace = true
+serde_json.workspace = true
+thiserror.workspace = true
+tracing.workspace = true
+flate2.workspace = true
+zip.workspace = true
+ureq.workspace = true
+directories.workspace = true
+fs4.workspace = true

@@ -1,0 +1,382 @@
+// Mock bridge: installs window.__TAURI_INTERNALS__ with fixture data so the
+// UI runs in a plain browser (?mock=1) with no PSP attached. Dropped from
+// release builds because nothing imports it statically.
+
+type Handler = (payload: unknown) => void;
+
+const listeners = new Map<number, { event: string; handler: Handler }>();
+let nextCallbackId = 1;
+
+function emit(event: string, payload: unknown) {
+  for (const { event: name, handler } of listeners.values()) {
+    if (name === event) {
+      handler({ event, id: nextCallbackId, payload });
+    }
+  }
+}
+
+// ---- fixtures ----
+
+const GB = 1024 * 1024 * 1024;
+const MB = 1024 * 1024;
+
+const pspVolume = {
+  mount: "/Volumes/MEMORY STICK",
+  label: "MEMORY STICK",
+  is_psp: true,
+  free_bytes: 3.2 * GB,
+  total_bytes: 16 * GB,
+};
+
+const laptopVolume = {
+  mount: "/",
+  label: "Macintosh HD",
+  is_psp: false,
+  free_bytes: 120 * GB,
+  total_bytes: 994 * GB,
+};
+
+const volumes = [laptopVolume, pspVolume];
+
+const config = {
+  music_format: "mp3",
+  video_preset: "psp_avc_480",
+  video_thumbnails: true,
+  convert_music: true,
+  convert_video: true,
+  ffmpeg_path: "",
+  ffprobe_path: "",
+  cso_level: 6,
+};
+
+const games = [
+  { id: "game/GodOfWarChainsOfOlympus", folder: "GodOfWarChainsOfOlympus", title: "God of War: Chains of Olympus", title_id: "UCUS-98737", category: "MG", kind: "digital", path: "/Volumes/MEMORY STICK/PSP/GAME/GodOfWarChainsOfOlympus", size_bytes: 1.1 * GB, has_icon: true, psp_system_ver: "3.80", version: "1.02" },
+  { id: "game/LocoRoco2", folder: "LocoRoco2", title: "LocoRoco 2", title_id: "UCUS-98716", category: "MG", kind: "digital", path: "/Volumes/MEMORY STICK/PSP/GAME/LocoRoco2", size_bytes: 640 * MB, has_icon: true, psp_system_ver: "3.80", version: "1.01" },
+  { id: "game/WipeoutPure", folder: "WipeoutPure", title: "Wipeout Pure", title_id: "UCUS-98712", category: "MG", kind: "digital", path: "/Volumes/MEMORY STICK/PSP/GAME/WipeoutPure", size_bytes: 420 * MB, has_icon: true, psp_system_ver: "1.50", version: "1.00" },
+  { id: "game/FrogGBA", folder: "FrogGBA", title: "FrogGBA", title_id: null, category: null, kind: "homebrew", path: "/Volumes/MEMORY STICK/PSP/GAME/FrogGBA", size_bytes: 4.2 * MB, has_icon: true, psp_system_ver: null, version: "0.4.0" },
+  { id: "game/TemperPCE", folder: "TemperPCE", title: "Temper (PC Engine)", title_id: null, category: null, kind: "homebrew", path: "/Volumes/MEMORY STICK/PSP/GAME/TemperPCE", size_bytes: 2.1 * MB, has_icon: false, psp_system_ver: null, version: "0.82" },
+  { id: "game/BookrMod", folder: "BookrMod", title: "Bookr Mod (PDF reader)", title_id: null, category: null, kind: "homebrew", path: "/Volumes/MEMORY STICK/PSP/GAME/BookrMod", size_bytes: 3.4 * MB, has_icon: false, psp_system_ver: null, version: null },
+  { id: "game/ARK_Loader", folder: "ARK_Loader", title: "ARK Loader", title_id: null, category: null, kind: "loader", path: "/Volumes/MEMORY STICK/PSP/GAME/ARK_Loader", size_bytes: 860 * 1024, has_icon: true, psp_system_ver: null, version: null },
+];
+
+const images = [
+  { id: "iso/Metal Gear Solid - Peace Walker.iso", file: "Metal Gear Solid - Peace Walker.iso", format: "iso", title: "Metal Gear Solid Peace Walker", title_id: "ULUS-10509", is_umd: true, path: "/Volumes/MEMORY STICK/ISO/Metal Gear Solid - Peace Walker.iso", size_bytes: 1.48 * GB },
+  { id: "iso/Persona 3 Portable.cso", file: "Persona 3 Portable.cso", format: "cso", title: null, title_id: null, is_umd: true, path: "/Volumes/MEMORY STICK/ISO/Persona 3 Portable.cso", size_bytes: 780 * MB },
+  { id: "iso/Daxter.cso", file: "Daxter.cso", format: "cso", title: null, title_id: null, is_umd: true, path: "/Volumes/MEMORY STICK/ISO/Daxter.cso", size_bytes: 690 * MB },
+];
+
+const music = [
+  { rel: "Massive Attack/Mezzanine/01 Angel.mp3", name: "01 Angel.mp3", size_bytes: 7.8 * MB },
+  { rel: "Massive Attack/Mezzanine/02 Risingson.mp3", name: "02 Risingson.mp3", size_bytes: 6.9 * MB },
+  { rel: "Nujabes/Metaphorical Music/01 Blessing It.mp3", name: "01 Blessing It.mp3", size_bytes: 8.2 * MB },
+  { rel: "Radiohead/In Rainbows/01 15 Step.mp3", name: "01 15 Step.mp3", size_bytes: 5.9 * MB },
+];
+
+const videos = [
+  { rel: "Blade Runner 2049 (PSP).mp4", name: "Blade Runner 2049 (PSP).mp4", size_bytes: 640 * MB },
+  { rel: "Akira (480x272).mp4", name: "Akira (480x272).mp4", size_bytes: 512 * MB },
+];
+
+const saves = [
+  { folder: "UCUS98737GODOFWAR", title: "God of War: Chains of Olympus", subtitle: "Chapter 3: The Sun Shield", title_id: "UCUS-98737", size_bytes: 512 * 1024, has_icon: true },
+  { folder: "UCUS98712WIPEOUT", title: "Wipeout Pure", subtitle: "Classic Grid", title_id: "UCUS-98712", size_bytes: 128 * 1024, has_icon: true },
+  { folder: "ULUS10509PEACEWALKER", title: "Metal Gear Solid Peace Walker", subtitle: "Outer Base", title_id: "ULUS-10509", size_bytes: 2.2 * MB, has_icon: true },
+];
+
+const plugins = {
+  game: [
+    { path: "ms0:/seplugins/cwcheat/cwcheat.prx", enabled: true, exists: true, section: "game" },
+    { path: "ms0:/seplugins/gamesharing.prx", enabled: false, exists: true, section: "game" },
+  ],
+  vsh: [
+    { path: "ms0:/seplugins/cxmb/cxmb.prx", enabled: true, exists: true, section: "vsh" },
+    { path: "ms0:/seplugins/categorieslite.prx", enabled: false, exists: false, section: "vsh" },
+  ],
+  pops: [
+    { path: "ms0:/seplugins/cdda_enabler.prx", enabled: true, exists: true, section: "pops" },
+  ],
+};
+
+const themes = [
+  { name: "Metal Gear.ctf", format: "ctf", size_bytes: 2.4 * MB },
+  { name: "Classic Waves.ptf", format: "ptf", size_bytes: 900 * 1024 },
+];
+
+const catalog = [
+  { id: "ark-4", name: "ARK-4", description: "Next generation custom firmware for PSP (and Vita ePSP). Live CFW with custom launcher, plugins, Inferno ISO driver.", category: "cfw", repo: "PSP-Archive/ARK-4", layout: "ark", note: "Copies ARK_01234 to PSP/SAVEDATA and loaders to PSP/GAME.", latest_tag: "v4.20.69 r206", zip_url: "https://example.invalid/ark4.zip", published_at: "2026-05-15T00:23:00Z" },
+  { id: "ark-5", name: "ARK-5", description: "Successor to ARK-4. Fresh rewrite of the ARK custom firmware line.", category: "cfw", repo: "PSP-Arkfive/ARK-5", layout: "ark", note: "New CFW line; check the project wiki for model support.", latest_tag: "r3", zip_url: "https://example.invalid/ark5.zip", published_at: "2026-09-02T10:00:00Z" },
+  { id: "froggba", name: "FrogGBA", description: "GBA emulator for PSP, based on TempGBA4PSP with gpSP Kai optimizations.", category: "emu", repo: "tzubertowski/FrogGBA", layout: "psp_root", note: "Needs gba_bios.bin dropped into the game folder after install.", latest_tag: "v0.4.0-rc.1", zip_url: "https://example.invalid/froggba.zip", published_at: "2026-08-17T19:30:00Z" },
+  { id: "tempgba", name: "TempGBA4PSP-mod", description: "Long-maintained GBA emulator with 2026 fixes, 16:9 full screen and a single-game mode.", category: "emu", repo: "andymcca/TempGBA4PSP-mod", layout: "auto", note: "Needs gba_bios.bin in the emulator folder.", latest_tag: "20260807", zip_url: "https://example.invalid/tempgba.zip", published_at: "2026-08-07T17:40:00Z" },
+  { id: "daedalusx64", name: "DaedalusX64", description: "N64 emulator for PSP using the Media Engine for asynchronous audio.", category: "emu", repo: "DaedalusX64/daedalus", layout: "auto", note: null, latest_tag: "1.1.8", zip_url: "https://example.invalid/daedalus.zip", published_at: "2026-10-23T01:19:00Z" },
+];
+
+const installed = [
+  { id: "ark-4", installed: true },
+  { id: "ark-5", installed: false },
+  { id: "froggba", installed: true },
+  { id: "tempgba", installed: false },
+  { id: "daedalusx64", installed: false },
+];
+
+let jobs: any[] = [];
+let nextJobId = 100;
+
+const doctor = [
+  { name: "data dir", ok: true, detail: "/Users/demo/Library/Application Support/godsend-psp" },
+  { name: "ffmpeg", ok: true, detail: "ffmpeg version 7.1 (built with psp presets)" },
+  { name: "ffprobe", ok: true, detail: "found" },
+  { name: "device", ok: true, detail: "/Volumes/MEMORY STICK" },
+  { name: "catalog cache", ok: true, detail: "cached (2h ago)" },
+];
+
+function snapshot() {
+  return { volumes, active: pspVolume.mount, config, doctor, jobs };
+}
+
+// ---- fake jobs ----
+
+function startJob(kind: string, label: string): number {
+  const id = ++nextJobId;
+  const job = {
+    id,
+    kind,
+    label,
+    state: "running",
+    done_bytes: 0,
+    total_bytes: 100,
+    message: "working",
+    started_at: Math.floor(Date.now() / 1000),
+    finished_at: null as number | null,
+  };
+  jobs = [job, ...jobs].slice(0, 25);
+  let done = 0;
+  const timer = setInterval(() => {
+    done += 4 + Math.random() * 14;
+    const current = jobs.find((j) => j.id === id);
+    if (!current) {
+      clearInterval(timer);
+      return;
+    }
+    if (done >= 100) {
+      done = 100;
+      current.done_bytes = 100;
+      current.state = "done";
+      current.finished_at = Math.floor(Date.now() / 1000);
+      current.message = "installed on MEMORY STICK";
+      emit("job://progress", { id, done: 100, total: 100 });
+      emit("job://done", { ...current });
+      clearInterval(timer);
+      refreshCounts();
+    } else {
+      current.done_bytes = Math.floor(done);
+      emit("job://progress", { id, done: Math.floor(done), total: 100 });
+    }
+  }, 240);
+  return id;
+}
+
+function refreshCounts() {
+  // In mock mode an install flips installed flags after a CFW job.
+}
+
+// ---- invoke routing ----
+
+async function invoke(cmd: string, args: Record<string, any> = {}): Promise<unknown> {
+  switch (cmd) {
+    case "snapshot":
+      return snapshot();
+    case "rescan":
+      return volumes;
+    case "homebrew_refresh":
+      return catalog;
+    case "set_active_device":
+      return null;
+    case "eject_device":
+      return null;
+    case "library_scan":
+      return { games, images };
+    case "icon":
+      return iconDataUrl(args.id as string);
+    case "game_delete": {
+      const i = games.findIndex((g) => g.id === args.id);
+      if (i >= 0) games.splice(i, 1);
+      return null;
+    }
+    case "homebrew_catalog":
+      return catalog;
+    case "homebrew_installed":
+      return installed;
+    case "homebrew_install": {
+      const entry = installed.find((e) => e.id === args.id);
+      startJob("install", `${catalog.find((c) => c.id === args.id)?.name ?? args.id}`);
+      setTimeout(() => {
+        if (entry) entry.installed = true;
+        emit("device://changed", volumes);
+      }, 2600);
+      return nextJobId;
+    }
+    case "homebrew_import":
+      return startJob("install", "import homebrew.zip");
+    case "music_list":
+      return music;
+    case "video_list":
+      return videos;
+    case "media_delete": {
+      const list = args.kind === "video" ? videos : music;
+      const i = list.findIndex((f) => f.rel === args.rel);
+      if (i >= 0) list.splice(i, 1);
+      return null;
+    }
+    case "music_push":
+      return args.files.map((f: string, i: number) => startJob("music", fileName(f) + (i >= 0 ? "" : "")));
+    case "video_push":
+      return args.files.map((f: string) => startJob("video", fileName(f)));
+    case "iso_import":
+      return startJob("iso", fileName(args.file));
+    case "iso_convert":
+      return startJob("convert", args.image_id);
+    case "image_delete": {
+      const i = images.findIndex((img) => img.id === args.image_id);
+      if (i >= 0) images.splice(i, 1);
+      return null;
+    }
+    case "savedata_list":
+      return saves;
+    case "savedata_backup":
+      return startJob("backup", "saves -> saves-backup.zip");
+    case "savedata_restore":
+      return startJob("restore", fileName(args.zip));
+    case "savedata_delete": {
+      const i = saves.findIndex((s) => s.folder === args.folder);
+      if (i >= 0) saves.splice(i, 1);
+      return null;
+    }
+    case "savedata_reveal":
+      return `/Volumes/MEMORY STICK/PSP/SAVEDATA/${args.folder}`;
+    case "plugins_list":
+      return plugins;
+    case "plugin_toggle": {
+      const list = (plugins as any)[args.section as string] as any[];
+      const entry = list.find((p) => p.path === args.path);
+      if (entry) entry.enabled = args.enable;
+      return null;
+    }
+    case "plugin_add": {
+      const list = (plugins as any)[args.section as string] as any[];
+      list.push({ path: `ms0:/seplugins/${fileName(args.prx)}`, enabled: true, exists: true, section: args.section });
+      return list[list.length - 1];
+    }
+    case "plugin_remove": {
+      const list = (plugins as any)[args.section as string] as any[];
+      const i = list.findIndex((p) => p.path === args.path);
+      if (i >= 0) list.splice(i, 1);
+      return null;
+    }
+    case "themes_list":
+      return themes;
+    case "theme_install":
+      themes.push({ name: fileName(args.file), format: "ctf", size_bytes: 2 * MB });
+      return themes[themes.length - 1];
+    case "theme_delete": {
+      const i = themes.findIndex((t) => t.name === args.name);
+      if (i >= 0) themes.splice(i, 1);
+      return null;
+    }
+    case "doctor_run":
+      return doctor;
+    case "config_get":
+      return config;
+    case "config_set":
+      Object.assign(config, args.patch);
+      return config;
+    case "jobs":
+      return jobs;
+    case "job_cancel":
+      return true;
+    case "jobs_clear":
+      jobs = jobs.filter((j) => j.state === "running");
+      return null;
+    case "reveal":
+    case "open_data_dir":
+      return null;
+    case "plugin:dialog|open": {
+      const options = (args.options ?? {}) as { filters?: { extensions: string[] }[] };
+      const ext = options.filters?.[0]?.extensions?.[0] ?? "zip";
+      return [`/Users/demo/Downloads/${ext === "prx" ? "cwcheat.prx" : ext === "iso" ? "Persona 2.iso" : "homebrew-pack.zip"}`];
+    }
+    case "plugin:dialog|save":
+      return "/Users/demo/Downloads/saves-backup-mock.zip";
+    case "plugin:event|listen": {
+      const id = nextCallbackId++;
+      listeners.set(id, { event: args.event, handler: args.handler });
+      return id;
+    }
+    case "plugin:event|unlisten":
+      listeners.delete(args.eventId);
+      return null;
+    default:
+      console.warn("[mock] unhandled invoke:", cmd, args);
+      return null;
+  }
+}
+
+function fileName(path: string): string {
+  return path.split("/").pop() ?? path;
+}
+
+function iconDataUrl(id: string): string {
+  // Draw a deterministic 96x96 tile with a monogram; reads as a real cover at grid size.
+  const canvas = document.createElement("canvas");
+  canvas.width = 96;
+  canvas.height = 96;
+  const ctx = canvas.getContext("2d")!;
+  let hash = 0;
+  for (const ch of id) hash = (hash * 31 + ch.charCodeAt(0)) | 0;
+  const hue = Math.abs(hash) % 360;
+  const grad = ctx.createLinearGradient(0, 0, 96, 96);
+  grad.addColorStop(0, `hsl(${hue} 55% 30%)`);
+  grad.addColorStop(1, `hsl(${(hue + 40) % 360} 60% 18%)`);
+  ctx.fillStyle = grad;
+  ctx.fillRect(0, 0, 96, 96);
+  ctx.fillStyle = "rgba(255,255,255,0.92)";
+  ctx.font = "700 34px 'Chakra Petch', sans-serif";
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+  const words = id.replace(/^game\//, "").replace(/^iso\//, "");
+  ctx.fillText(words.slice(0, 2).toUpperCase(), 48, 44);
+  ctx.fillStyle = "rgba(255,255,255,0.55)";
+  ctx.font = "500 9px 'JetBrains Mono', monospace";
+  ctx.fillText(words.slice(0, 12), 48, 78);
+  return canvas.toDataURL("image/png");
+}
+
+// install the shim
+(window as unknown as Record<string, any>).__TAURI_INTERNALS__ = {
+  invoke,
+  transformCallback(cb: Handler) {
+    const id = nextCallbackId++;
+    listeners.set(id, { event: "__callback__", handler: cb });
+    // plugin:event|listen replaces this entry with the real event name.
+    return id;
+  },
+  metadata: { currentWindow: { label: "main" }, currentWebview: { windowLabel: "main" } },
+  plugins: {},
+};
+
+console.info("[mock] GODsend PSP fixture bridge installed");
+
+export {}; // make this file a module so dynamic import type-checks
+
+// Seed a couple of finished jobs so the inspector is alive.
+jobs = [
+  {
+    id: 2, kind: "music", label: "01 15 Step.mp3", state: "done",
+    done_bytes: 100, total_bytes: 100, message: "on MEMORY STICK as 01 15 Step.mp3",
+    started_at: Math.floor(Date.now() / 1000) - 600, finished_at: Math.floor(Date.now() / 1000) - 590,
+  },
+  {
+    id: 1, kind: "install", label: "FrogGBA v0.4.0-rc.1", state: "done",
+    done_bytes: 100, total_bytes: 100, message: "installed 2 item(s) onto MEMORY STICK",
+    started_at: Math.floor(Date.now() / 1000) - 3600, finished_at: Math.floor(Date.now() / 1000) - 3590,
+  },
+];
