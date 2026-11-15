@@ -16,10 +16,8 @@ suffix=""
 
 for tool in ffmpeg ffprobe; do
   out="$RES/${tool}${suffix}"
-  if [ -f "$out" ] && [ -s "$out" ]; then
-    echo "[skip] $out exists"
-    continue
-  fi
+  # Always fetch: a stale binary from another architecture must never ship.
+  rm -f "$out"
   echo "[fetch] ${tool}-${PLAT}"
   curl -fsSL --retry 3 --max-time 600 "$BASE/${tool}-${PLAT}.gz" -o "$RES/${tool}.gz"
   gunzip -f "$RES/${tool}.gz"
