@@ -69,45 +69,30 @@ else
   DIST="$RUN/artifacts"
   rm -rf "$DIST"
   mkdir -p "$DIST"
-  command -v gh >/dev/null 2>&1 || die "gh not found (needed to run the CI build)"
-  SLUG=ghostyshell/godsend-psp
-  log "dispatching the all-platform CI build"
-  gh workflow run build.yml --repo "$SLUG" || die "could not dispatch the build"
-  RUN_ID=""
-  for _ in $(seq 1 60); do
-    RUN_ID=$(gh run list --repo "$SLUG" --workflow build --limit 3 \
-      --json databaseId,status,event \
-      --jq '[.[] | select(.event=="workflow_dispatch" and (.status=="queued" or .status=="in_progress" or .status=="requested"))][0].databaseId' 2>/dev/null || true)
-    [ -n "$RUN_ID" ] && break
-    sleep 5
-  done
-  [ -n "$RUN_ID" ] || die "the dispatched build never appeared"
-  log "waiting for CI run $RUN_ID"
-  STATUS=""
-  for _ in $(seq 1 160); do
-    STATUS=$(gh run view "$RUN_ID" --repo "$SLUG" --json status,conclusion --jq '.status+"/"+(.conclusion//"-")')
-    case "$STATUS" in
-      completed/success) break ;;
-      completed/*) die "CI run $RUN_ID: $STATUS" ;;
-    esac
-    sleep 15
-  done
-  [ "$STATUS" = "completed/success" ] || die "CI run $RUN_ID timed out"
-  rm -rf "$DIST"
-  mkdir -p "$DIST/raw"
-  gh api "repos/$SLUG/actions/runs/$RUN_ID/artifacts" --jq '.artifacts[] | .name + " " + (.id|tostring)' > "$DIST/arts.txt"
-  while read -r name id; do
-    gh api "repos/$SLUG/actions/artifacts/$id/zip" > "$DIST/$name.zip" 2>/dev/null \
-      && unzip -oq "$DIST/$name.zip" -d "$DIST/raw" \
-      || die "artifact $name failed"
-  done < "$DIST/arts.txt"
-  find "$DIST/raw" -type f \( -name "*.dmg" -o -name "*.exe" -o -name "*.AppImage" \
-    -o -name "*.deb" -o -name "*.tar.gz" -o -name "godsend-psp-cli-*.zip" \) \
-    -exec mv {} "$DIST/" \;
-  rm -rf "$DIST/raw" "$DIST"/*.zip "$DIST/arts.txt"
-  # Flatten the per-OS subdirectories.
-  find "$DIST" -mindepth 2 -type f -exec mv {} "$DIST/" \; 2>/dev/null || true
-  find "$DIST" -mindepth 1 -type d -empty -delete 2>/dev/null || true
+  ARCH=$(uname -m)
+  case "$ARCH" in
+    arm64) PLATARCH=arm64 ;;
+    x86_64) PLATARCH=x64 ;;
+    *) die "unsupported macOS arch: $ARCH" ;;
+  esac
+  log "building locally for macOS $PLATARCH (no CI)"
+  ./scripts/fetch-ffmpeg.sh "darwin-$PLATARCH" >/dev/null
+  ( cd app && npm run build >/dev/null 2>&1 && npx tauri build --bundles app >/dev/null 2>&1 ) \
+    || die "tauri build failed"
+  APP=$(find target/release/bundle/macos -name "*.app" | head -1)
+  [ -n "$APP" ] || die "no app bundle produced"
+  codesign --force --deep --sign - "$APP" >/dev/null 2>&1 || true
+  ./scripts/make-dmg.sh "$APP" "GODsend PSP" "$DIST/godsend-psp-macos-$PLATARCH.dmg" \
+    "app/src-tauri/dmg-background.png" >/dev/null || die "installer DMG failed"
+  cargo build --release -p godsend-psp-cli >/dev/null 2>&1 || die "cli build failed"
+  tar -czf "$DIST/godsend-psp-cli-macos-$PLATARCH.tar.gz" -C target/release godsend-psp
+  # Cross-platform artifacts are built on demand (or copied from a previous
+  # run kept in dist/); the session publishes whatever exists.
+  if [ -d dist ]; then
+    for f in dist/*.AppImage dist/*.deb dist/*setup.exe dist/*linux*.tar.gz dist/*windows*.zip; do
+      [ -f "$f" ] && cp "$f" "$DIST/"
+    done
+  fi
 fi
 
 FILES=()

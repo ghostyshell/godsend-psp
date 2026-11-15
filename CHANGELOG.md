@@ -7,6 +7,14 @@ All notable changes to GODsend PSP. Newest first.
 
 ### Changed
 
+- Releases are built and uploaded by the working session, not GitHub
+  Actions. `publish-release.sh` builds the macOS app, installer DMG and CLI
+  locally, includes any cross-platform artifacts staged in `dist/`, and
+  uploads to GoFile + file.kiwi. The workflow remains for optional manual
+  cross-platform builds only.
+
+### Changed
+
 - The site page carries a canonical URL, Open Graph and Twitter cards, and
   SoftwareApplication structured data, plus a sitemap. Its
   favicon is now a 3.5 KB SVG mark instead of the 548 KB app icon, and the
