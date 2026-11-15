@@ -563,6 +563,13 @@ fn savedata_list(state: State<'_, AppState>) -> Result<Vec<SaveEntry>> {
 }
 
 #[tauri::command]
+fn savedata_icon(state: State<'_, AppState>, folder: String) -> Option<String> {
+    let paths = state.paths().ok()?.1;
+    let bytes = savedata::icon_bytes(&paths, &folder)?;
+    Some(format!("data:image/png;base64,{}", base64_encode(&bytes)))
+}
+
+#[tauri::command]
 fn savedata_backup(app: AppHandle, state: State<'_, AppState>, folders: Vec<String>) -> Result<u64> {
     let (volume, paths) = state.paths()?;
     let stamp = chrono_stamp();
@@ -1283,6 +1290,7 @@ pub fn run() {
             iso_convert,
             image_delete,
             savedata_list,
+            savedata_icon,
             savedata_backup,
             savedata_restore,
             savedata_delete,

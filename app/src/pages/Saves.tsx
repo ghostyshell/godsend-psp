@@ -95,9 +95,7 @@ export default function Saves({ snap, reload, toast, refreshKey }: PageProps) {
                 onChange={() => toggle(save.folder)}
                 aria-label={`Select ${save.title ?? save.folder}`}
               />
-              {save.has_icon ? (
-                <SaveIcon folder={save.folder} />
-              ) : null}
+              <SaveIcon folder={save.folder} title={save.title ?? save.folder} hasIcon={save.has_icon} />
               <div className="grow">
                 <div className="title">{save.title ?? save.folder}</div>
                 <div className="sub">
@@ -137,19 +135,30 @@ export default function Saves({ snap, reload, toast, refreshKey }: PageProps) {
   );
 }
 
-function SaveIcon({ folder }: { folder: string }) {
+/** Save slot art: the save's own ICON0.PNG, landscape like the PSP. */
+function SaveIcon({
+  folder,
+  title,
+  hasIcon,
+}: {
+  folder: string;
+  title: string;
+  hasIcon: boolean;
+}) {
   const [url, setUrl] = useState<string | null>(null);
   useEffect(() => {
-    void api.icon(`game/${folder}`).then(setUrl);
-  }, [folder]);
-  if (!url) return null;
+    if (hasIcon) void api.savedataIcon(folder).then(setUrl);
+  }, [folder, hasIcon]);
   return (
-    <img
-      src={url}
-      alt=""
-      width={36}
-      height={36}
-      style={{ borderRadius: 8, objectFit: "cover", flexShrink: 0 }}
-    />
+    <div className="save-icon">
+      {url ? (
+        <img src={url} alt="" />
+      ) : (
+        <div className="cover-fallback">
+          <span className="cf-title">{title}</span>
+          <span className="cf-serial">{folder}</span>
+        </div>
+      )}
+    </div>
   );
 }
