@@ -97,6 +97,23 @@ for f in "$DIST"/*.dmg "$DIST"/*.tar.gz "$DIST"/*.zip "$DIST"/*.AppImage "$DIST"
   [ -f "$f" ] && FILES+=("$(basename "$f")")
 done
 [ ${#FILES[@]} -gt 0 ] || die "no release files in $DIST"
+# Normalize CI names to godsend-psp-<version>-<platform>.<ext>.
+normalize() {
+  local f=$1 base
+  base=$(basename "$f")
+  case "$base" in
+    godsend-psp-macos-*)     mv "$f" "$DIST/godsend-psp-${V}-${base#godsend-psp-macos-}" ;;
+    godsend-psp-cli-*)       case "$base" in *"${V}"*) : ;; *) mv "$f" "$DIST/godsend-psp-cli-${V}-${base#godsend-psp-cli-}" ;; esac ;;
+    "GODsend PSP_"*amd64.AppImage) mv "$f" "$DIST/godsend-psp-${V}-linux-x64.AppImage" ;;
+    "GODsend PSP_"*amd64.deb)      mv "$f" "$DIST/godsend-psp-${V}-linux-x64.deb" ;;
+    "GODsend PSP_"*x64-setup.exe)  mv "$f" "$DIST/godsend-psp-${V}-x64-setup.exe" ;;
+  esac
+}
+for f in "${FILES[@]}"; do normalize "$DIST/$f"; done
+FILES=()
+for f in "$DIST"/*.dmg "$DIST"/*.tar.gz "$DIST"/*.zip "$DIST"/*.AppImage "$DIST"/*.deb "$DIST"/*setup.exe; do
+  [ -f "$f" ] && FILES+=("$(basename "$f")")
+done
 log "artifacts: ${FILES[*]}"
 
 # --- 2. Upload ------------------------------------------------------------------

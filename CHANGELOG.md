@@ -20,6 +20,9 @@ All notable changes to GODsend PSP. Newest first.
 
 ### Fixed
 
+- Publish script normalizes CI artifact names to `godsend-psp-<version>-...`
+  before upload, so the README and site table carry consistent versioned
+  filenames for every platform.
 - GitHub Releases and tags removed; CI builds only on manual dispatch and
   the publish script dispatches its own build, so nothing recreates a
   release.
