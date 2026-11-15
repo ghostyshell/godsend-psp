@@ -61,7 +61,7 @@ const NAV: { id: Page; label: string; icon: LucideIcon }[] = [
   { id: "settings", label: "Settings", icon: SettingsIcon },
 ];
 
-const VERSION = "0.2.25";
+const VERSION = "0.2.26";
 
 export interface PageProps {
   snap: Snapshot;
@@ -352,12 +352,29 @@ export default function App() {
   );
 }
 
+function progressText(job: Job): string {
+  if (!job.total_bytes) return "";
+  const pct = Math.min(100, Math.round((job.done_bytes / job.total_bytes) * 100));
+  let eta = "";
+  const elapsed = Math.max(1, Math.floor(Date.now() / 1000) - job.started_at);
+  if (job.done_bytes > 0 && job.done_bytes < job.total_bytes) {
+    const rate = job.done_bytes / elapsed;
+    if (rate > 0) {
+      const remain = Math.round((job.total_bytes - job.done_bytes) / rate);
+      const m = Math.floor(remain / 60);
+      const secs = remain % 60;
+      eta = ` - ${m}:${String(secs).padStart(2, "0")} left`;
+    }
+  }
+  return `${pct}%${eta}`;
+}
+
 function JobRow({ job, onCancel }: { job: Job; onCancel: () => void }) {
   const running = job.state === "running";
   return (
     <div className="job-row">
       <div className="head">
-        <span className="label" title={job.label}>
+        <span className="label two" title={job.label}>
           {job.label}
         </span>
         {running ? (
@@ -382,6 +399,7 @@ function JobRow({ job, onCancel }: { job: Job; onCancel: () => void }) {
               }}
             />
           </div>
+          <div className="msg">{progressText(job) || job.message}</div>
         </div>
       ) : (
         <div className="msg">{job.message}</div>

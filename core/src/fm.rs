@@ -27,7 +27,15 @@ pub fn list_dir(path: &Path) -> Result<Vec<FmEntry>> {
     for entry in fs::read_dir(path)?.flatten() {
         let p = entry.path();
         let name = entry.file_name().to_string_lossy().to_string();
-        if name.starts_with('.') || name.starts_with("._") {
+        let lower = name.to_lowercase();
+        if name.starts_with('.')
+            || name.starts_with("._")
+            || lower.ends_with(".aria2")
+            || lower.ends_with(".part")
+            || lower.ends_with(".partial")
+            || lower.ends_with(".tmp")
+            || lower.ends_with(".crdownload")
+        {
             continue;
         }
         let is_dir = p.is_dir();
