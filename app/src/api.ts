@@ -61,6 +61,7 @@ export const api = {
   musicList: () => invoke<MediaFile[]>("music_list"),
   videoList: () => invoke<MediaFile[]>("video_list"),
   mediaDelete: (kind: string, rel: string) => invoke<void>("media_delete", { kind, rel }),
+  videoPreview: (rel: string) => invoke<string | null>("video_preview", { rel }),
   musicPush: (files: string[], convert: boolean) =>
     invoke<number[]>("music_push", { files, convert }),
   videoPush: (files: string[], convert: boolean, thm: boolean) =>

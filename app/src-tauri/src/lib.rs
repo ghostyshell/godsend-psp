@@ -274,6 +274,29 @@ fn video_list(state: State<'_, AppState>) -> Result<Vec<MediaFile>> {
     list_media(&paths.video())
 }
 
+/// Short muted preview clip for a video on the stick (PSP-style hover).
+#[tauri::command]
+fn video_preview(state: State<'_, AppState>, rel: String) -> Result<Option<String>> {
+    let (_, paths) = state.paths()?;
+    let config = state.config();
+    let root = paths.video();
+    let src = root.join(&rel);
+    if !src.starts_with(&root) || !src.is_file() {
+        return Err(Error::NotFound(rel));
+    }
+    let Some(ffmpeg) = media::find_ffmpeg(&config.ffmpeg_path) else {
+        return Ok(None);
+    };
+    let clip = media::preview_clip(
+        &ffmpeg,
+        &src,
+        &godsend_core::config::cache_dir().join("previews"),
+        3.0,
+    )?;
+    let bytes = std::fs::read(clip)?;
+    Ok(Some(format!("data:video/mp4;base64,{}", base64_encode(&bytes))))
+}
+
 #[tauri::command]
 fn media_delete(state: State<'_, AppState>, kind: String, rel: String) -> Result<()> {
     let (_, paths) = state.paths()?;
@@ -1177,6 +1200,7 @@ pub fn run() {
             music_list,
             video_list,
             media_delete,
+            video_preview,
             music_push,
             video_push,
             iso_import,

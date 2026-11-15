@@ -165,7 +165,7 @@ export function MediaPage({
         <div className="rows">
           {shown.map((file) => (
             <div className="row" key={file.rel}>
-              <Chip tone={isVideo ? "laser" : "neutral"}>{isVideo ? "video" : "audio"}</Chip>
+              {isVideo ? <VideoPreview rel={file.rel} /> : <Chip tone="neutral">audio</Chip>}
               <div className="grow">
                 <div className="title" title={file.rel}>
                   {file.name}
@@ -197,4 +197,47 @@ export function MediaPage({
 
 export default function Music(props: PageProps) {
   return <MediaPage kind="music" {...props} />;
+}
+
+/* PSP-style hover preview: a cached three second clip of the movie. */
+function VideoPreview({ rel }: { rel: string }) {
+  const [src, setSrc] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [hover, setHover] = useState(false);
+
+  async function ensure() {
+    if (src || loading) return;
+    setLoading(true);
+    try {
+      setSrc(await api.videoPreview(rel));
+    } catch {
+      setSrc(null);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  return (
+    <div
+      className={`preview-frame ${hover ? "on" : ""} ${loading ? "loading" : ""}`}
+      onMouseEnter={() => {
+        setHover(true);
+        void ensure();
+      }}
+      onMouseLeave={() => setHover(false)}
+      onFocus={() => {
+        setHover(true);
+        void ensure();
+      }}
+      onBlur={() => setHover(false)}
+      tabIndex={0}
+      aria-label={`Preview ${rel}`}
+    >
+      {hover && src ? (
+        <video src={src} autoPlay muted loop playsInline />
+      ) : (
+        <span className="preview-idle" aria-hidden="true" />
+      )}
+    </div>
+  );
 }

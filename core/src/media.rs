@@ -260,6 +260,62 @@ pub fn is_psp_video(path: &Path) -> bool {
     ext == "mp4"
 }
 
+/// Build (or reuse from cache) a short muted preview clip for a video, the
+/// PSP-style hover animation of the movie itself.
+pub fn preview_clip(ffmpeg: &Path, src: &Path, cache_dir: &Path, seconds: f64) -> Result<PathBuf> {
+    use std::time::UNIX_EPOCH;
+    std::fs::create_dir_all(cache_dir)?;
+    let meta = std::fs::metadata(src)?;
+    let mtime = meta
+        .modified()
+        .ok()
+        .and_then(|t| t.duration_since(UNIX_EPOCH).ok())
+        .map(|d| d.as_secs())
+        .unwrap_or(0);
+    let mut hash: u64 = 0xcbf2_9ce4_8422_2325;
+    for byte in format!("{}:{}:{}", src.display(), meta.len(), mtime).as_bytes() {
+        hash ^= *byte as u64;
+        hash = hash.wrapping_mul(0x0000_0100_0000_01b3);
+    }
+    let dest = cache_dir.join(format!("{hash:016x}.mp4"));
+    if dest.is_file() && dest.metadata().map(|m| m.len() > 1024).unwrap_or(false) {
+        return Ok(dest);
+    }
+    // Start a little into the film so the clip is not a black fade-in.
+    let status = Command::new(ffmpeg)
+        .args(["-y", "-nostdin", "-hide_banner", "-loglevel", "error", "-ss", "6"])
+        .arg(src)
+        .args([
+            "-t", &format!("{seconds}"),
+            "-vf", "scale=240:-2",
+            "-an",
+            "-c:v", "libx264",
+            "-preset", "veryfast",
+            "-crf", "30",
+            "-movflags", "+faststart",
+        ])
+        .arg(&dest)
+        .status()
+        .map_err(|e| Error::Ffmpeg(format!("preview failed: {e}")))?;
+    if !status.success() || !dest.is_file() {
+        let _ = std::fs::remove_file(&dest);
+        // Very short sources may not have a 6s mark; retry from the start.
+        let retry = Command::new(ffmpeg)
+            .args(["-y", "-nostdin", "-hide_banner", "-loglevel", "error"])
+            .arg(src)
+            .args(["-t", "3", "-vf", "scale=240:-2", "-an", "-c:v", "libx264",
+                   "-preset", "veryfast", "-crf", "30", "-movflags", "+faststart"])
+            .arg(&dest)
+            .status()
+            .map_err(|e| Error::Ffmpeg(format!("preview failed: {e}")))?;
+        if !retry.success() || !dest.is_file() {
+            let _ = std::fs::remove_file(&dest);
+            return Err(Error::Ffmpeg("could not make a preview clip".into()));
+        }
+    }
+    Ok(dest)
+}
+
 /// Sanitize a file name for FAT32 (the Memory Stick filesystem).
 pub fn fat_safe_name(name: &str) -> String {
     let mut out = String::with_capacity(name.len());

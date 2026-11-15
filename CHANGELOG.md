@@ -3,6 +3,9 @@
 All notable changes to GODsend PSP. Newest first.
 
 
+## [0.2.9] - 2026-11-15
+
+
 ## [0.2.8] - 2026-11-15
 
 
@@ -28,6 +31,12 @@ All notable changes to GODsend PSP. Newest first.
 - CI fetches the bundled ffmpeg pair before unit tests; the resource config
   previously made the Tauri build script fail during `cargo test` on all
   three platforms, which blocked the 0.2.7 publish.
+
+### Added
+
+- Video tiles play a cached three second muted clip of the film on hover or
+  keyboard focus, extracted with ffmpeg at 240px wide, the way PSP video
+  icons animate.
 
 ### Changed
 
