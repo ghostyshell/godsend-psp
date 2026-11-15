@@ -22,11 +22,11 @@ GODsend 360 and Keepsake Atelier, built on the Keepsake Atelier code stack
 <!-- downloads:start -->
 | Build | GoFile (primary) | file.kiwi (backup) | Size |
 | --- | --- | --- | --- |
-| `godsend-psp-cli-0.2.19-macos-arm64.tar.gz` | [Download](https://gofile.io/d/xenAgCg8) | [Mirror](https://file.kiwi/cd981662#FXfZuuw3tE5ECnRkUhm5Tw) | 1.9 MiB |
-| `godsend-psp-cli-0.2.19-macos-x64.tar.gz` | [Download](https://gofile.io/d/XqoP4R0O) | [Mirror](https://file.kiwi/cde25e85#Y8mGTW4PAPnciynFgf_Zvw) | 2.0 MiB |
-| `godsend-psp-cli-0.2.19-windows-x64.zip` | [Download](https://gofile.io/d/0aMAYgzE) | [Mirror](https://file.kiwi/a5f7b604#_6ngCFQx-AxgG-lA4T9b4A) | 2.0 MiB |
-| `godsend-psp-0.2.19-arm64.dmg` | [Download](https://gofile.io/d/ICWqMSkH) | [Mirror](https://file.kiwi/de108afe#mLSjAvItq-NSSh4h9ebyuw) | 44.1 MiB |
-| `godsend-psp-0.2.19-x64.dmg` | [Download](https://gofile.io/d/UAUJhHuN) | [Mirror](https://file.kiwi/77d428e0#A51vdp8a3LhASAK9QonbSw) | 59.0 MiB |
+| `godsend-psp-cli-0.2.23-macos-arm64.tar.gz` | [Download](https://gofile.io/d/1ueRWMPF) | [Mirror](https://file.kiwi/8a3eca6c#lEZTLpEEazgDiqrYjwdplA) | 1.9 MiB |
+| `godsend-psp-cli-0.2.23-macos-x64.tar.gz` | [Download](https://gofile.io/d/t7nUgFiC) | [Mirror](https://file.kiwi/5cca17f1#nboLGahzS-HcBixIT4koRQ) | 2.0 MiB |
+| `godsend-psp-cli-0.2.23-windows-x64.zip` | [Download](https://gofile.io/d/D6qbaavp) | [Mirror](https://file.kiwi/7faa084a#xDad8AuupSdVLWpdWiG2qg) | 2.0 MiB |
+| `godsend-psp-0.2.23-arm64.dmg` | [Download](https://gofile.io/d/FlkHWE5o) | [Mirror](https://file.kiwi/8543232d#yNtT-M_xnVeBmZmYlRfuPA) | 44.1 MiB |
+| `godsend-psp-0.2.23-x64.dmg` | [Download](https://gofile.io/d/NoYBlOc6) | [Mirror](https://file.kiwi/90ef9d83#TqLlm6CPV8RlaE0cdNBuIA) | 59.0 MiB |
 <!-- downloads:end -->
 
 Mirrors follow the sibling projects: **GoFile** is the primary host and
