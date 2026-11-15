@@ -57,8 +57,13 @@ app/src-tauri/icons/icon.png` (only when the mark changes).
 ## Conventions
 
 - Public-facing copy: no em dashes, no en dashes, ASCII hyphen only.
-- Every product change updates CHANGELOG.md (newest first, Keep a
-  Changelog-ish sections Added/Changed/Fixed).
+- **Version bump + changelog, every change.** Any edit to product code,
+  config or user-visible copy bumps the version and adds a CHANGELOG entry
+  in the same commit. No `[Unreleased]` section: newest `## [x.y.z] -
+  YYYY-MM-DD` header at the top. Use `scripts/bump-version.sh x.y.z "Fixed:
+  ..."` and read `docs/agents/skills/changelog.md`. The pre-commit hook
+  (`scripts/install-hooks.sh`) fails on product changes without a changelog
+  diff or on version mismatches.
 - Frontend keeps types in `app/src/types.ts` in sync with core serializers;
   the mock bridge fixtures must mirror real shapes.
 - Errors: core returns `godsend_core::Result<T>`; the Tauri error type
