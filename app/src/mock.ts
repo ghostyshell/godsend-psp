@@ -284,6 +284,81 @@ async function invoke(cmd: string, args: Record<string, any> = {}): Promise<unkn
     }
     case "doctor_run":
       return doctor;
+    case "debrid_status":
+      return { realdebrid: true, torbox: false };
+    case "store_search":
+      return {
+        kind: args.source === "ia" ? "ia" : "gamesearch",
+        items:
+          args.source === "ia"
+            ? [
+                { id: "psp-iso-collection", title: "PSP ISO Collection", files_count: 240, size_bytes: 180 * GB },
+                { id: "psp-rom-set", title: "PSP ROM Set (megathread)", files_count: 620, size_bytes: 420 * GB },
+              ]
+            : [
+                { id: "1", slug: "locoroco-2", title: "LocoRoco 2", platform: "psp", source: "minerva",
+                  host: "minerva-archive.org", url: "https://example.invalid/locoroco2.zip", linkType: "ddl",
+                  supportedBy: ["torbox", "realdebrid"], cover: null, size: 640 * MB,
+                  links: [{ host: "minerva-archive.org", url: "https://example.invalid/locoroco2.zip", linkType: "ddl", supportedBy: ["torbox", "realdebrid"] }] },
+                { id: "2", slug: "wipeout-pure", title: "Wipeout Pure", platform: "psp", source: "rroms",
+                  host: "rroms.org", url: "magnet:?xt=urn:btih:demo", linkType: "magnet",
+                  supportedBy: ["torbox", "realdebrid"], cover: null, size: 420 * MB,
+                  links: [{ host: "rroms.org", url: "magnet:?xt=urn:btih:demo", linkType: "magnet", supportedBy: ["torbox", "realdebrid"] }] },
+              ],
+      };
+    case "store_detail":
+      return args.source === "ia"
+        ? { kind: "ia", files: [{ name: "LocoRoco 2 (USA).iso", size_bytes: 640 * MB, url: "https://example.invalid/x.iso" }] }
+        : { kind: "gamesearch", hit: null };
+    case "store_download":
+      return startJob("download", String(args.id));
+    case "downloads_list":
+      return {
+        dir: "/Users/demo/Downloads/godsend-psp",
+        files: [
+          { name: "LocoRoco 2 (USA).iso", path: "/Users/demo/Downloads/godsend-psp/LocoRoco 2 (USA).iso", is_dir: false, size_bytes: 640 * MB, kind: "iso" },
+          { name: "FrogGBA.zip", path: "/Users/demo/Downloads/godsend-psp/FrogGBA.zip", is_dir: false, size_bytes: 4 * MB, kind: "other" },
+          { name: "mods", path: "/Users/demo/Downloads/godsend-psp/mods", is_dir: true, size_bytes: 0, kind: "other" },
+        ],
+      };
+    case "download_dir_set":
+    case "download_open":
+      return args.name ?? null;
+    case "download_delete":
+      return null;
+    case "download_push":
+      return startJob("copy", `\${args.name} -> PSP`);
+    case "fm_list":
+      return [
+        { name: "PSP", path: `\${args.path}/PSP`, is_dir: true, size_bytes: 0, kind: "other" },
+        { name: "ISO", path: `\${args.path}/ISO`, is_dir: true, size_bytes: 0, kind: "other" },
+        { name: "seplugins", path: `\${args.path}/seplugins`, is_dir: true, size_bytes: 0, kind: "other" },
+      ];
+    case "fm_mkdir":
+      return `\${args.path}/\${args.name}`;
+    case "fm_delete":
+      return null;
+    case "fm_to_psp":
+    case "fm_from_psp":
+      return startJob("copy", "transfer");
+    case "local_library":
+      return [
+        { id: "local/Peace Walker.iso", name: "Peace Walker.iso", kind: "iso", path: "/Users/demo/Downloads/godsend-psp/Peace Walker.iso", size_bytes: 1.5 * GB, serial: "ULUS-10509", title: "Metal Gear Solid Peace Walker" },
+      ];
+    case "game_info":
+      return {
+        known: { serial: args.serial || "UCUS-98737", title: "God of War: Chains of Olympus", cover: "", animation: "" },
+        animation: args.serial ? `https://covers.example.com/psp/\${args.serial}.webm` : null,
+        mods: [
+          { name: "60 FPS patch", author: "community", version: "1.2", url: "https://example.invalid/60fps.zip", size_bytes: 120 * 1024, notes: "smoother gameplay", kind: "iso_patch" },
+        ],
+      };
+    case "cover":
+      return iconDataUrl(String(args.serial || args.id));
+    case "mods_list":
+      return [];
+    case "mods_install":
+      return startJob("download", String(args.name));
     case "config_get":
       return config;
     case "config_set":

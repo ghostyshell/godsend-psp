@@ -96,6 +96,31 @@ export const api = {
 
   reveal: (path: string) => invoke<void>("reveal", { path }),
   openDataDir: () => invoke<string>("open_data_dir"),
+
+  // store / debrid / downloads / files / catalog
+  debridStatus: () => invoke<import("./types").DebridStatus>("debrid_status"),
+  storeSearch: (query: string, source: "gamesearch" | "ia") =>
+    invoke<import("./types").StoreResult>("store_search", { query, source, limit: 40 }),
+  storeDetail: (source: string, id: string) =>
+    invoke<import("./types").StoreResult>("store_detail", { source, id }),
+  storeDownload: (source: string, id: string) => invoke<number>("store_download", { source, id }),
+  downloadsList: () => invoke<{ dir: string; files: import("./types").FmEntry[] }>("downloads_list"),
+  downloadDirSet: (path: string) => invoke<void>("download_dir_set", { path }),
+  downloadOpen: (name: string) => invoke<string>("download_open", { name }),
+  downloadDelete: (name: string) => invoke<void>("download_delete", { name }),
+  downloadPush: (name: string) => invoke<number>("download_push", { name }),
+  fmList: (path: string) => invoke<import("./types").FmEntry[]>("fm_list", { path }),
+  fmMkdir: (path: string, name: string) => invoke<string>("fm_mkdir", { path, name }),
+  fmDelete: (path: string) => invoke<void>("fm_delete", { path }),
+  fmToPsp: (path: string, destKind: string) => invoke<number>("fm_to_psp", { path, destKind }),
+  fmFromPsp: (pspId: string) => invoke<number>("fm_from_psp", { pspId }),
+  localLibrary: () => invoke<import("./types").LocalGame[]>("local_library"),
+  gameInfo: (serial: string, title: string) =>
+    invoke<import("./types").GameInfo>("game_info", { serial, title }),
+  cover: (id: string, serial?: string) => invoke<string | null>("cover", { id, serial: serial ?? null }),
+  modsList: (serial: string) => invoke<import("./types").ModEntry[]>("mods_list", { serial }),
+  modsInstall: (serial: string, url: string, name: string) =>
+    invoke<number>("mods_install", { serial, url, name }),
 };
 
 // ---- native file pickers (dialog plugin) ----
@@ -120,6 +145,13 @@ export const pickers = {
   async pickFile(title: string, extensions: string[]): Promise<string | null> {
     const files = await pickers.pickFiles(title, extensions);
     return files.length ? files[0] : null;
+  },
+  async pickDirectory(title: string): Promise<string | null> {
+    const api = (window as unknown as Record<string, any>).__TAURI_INTERNALS__ as DialogInternals;
+    const result = (await api.invoke("plugin:dialog|open", {
+      options: { title, directory: true, multiple: false },
+    })) as string | null;
+    return result ?? null;
   },
   async pickSavePath(title: string, defaultName: string, extensions: string[]): Promise<string | null> {
     const api = (window as unknown as Record<string, any>).__TAURI_INTERNALS__ as DialogInternals;

@@ -16,11 +16,11 @@ Latest release (all platforms, built by CI): **[github.com/ghostyshell/godsend-p
 
 | Build | File | Platform |
 | --- | --- | --- |
-| Desktop app (Apple Silicon) | `godsend-psp-0.1.0-arm64.dmg` | macOS 12+ |
-| Desktop app (Intel) | `godsend-psp-0.1.0-x64.dmg` | macOS 12+ |
-| Desktop app | `godsend-psp-0.1.0-x64-setup.exe` | Windows 10/11 |
-| Desktop app | `godsend-psp-0.1.0-linux-x64.AppImage` | Linux |
-| Desktop app | `godsend-psp-0.1.0-linux-x64.deb` | Debian/Ubuntu |
+| Desktop app (Apple Silicon) | `godsend-psp-0.2.0-arm64.dmg` | macOS 12+ |
+| Desktop app (Intel) | `godsend-psp-0.2.0-x64.dmg` | macOS 12+ |
+| Desktop app | `godsend-psp-0.2.0-x64-setup.exe` | Windows 10/11 |
+| Desktop app | `godsend-psp-0.2.0-linux-x64.AppImage` | Linux |
+| Desktop app | `godsend-psp-0.2.0-linux-x64.deb` | Debian/Ubuntu |
 | Headless CLI | `godsend-psp-cli-<platform>.tar.gz` / `.zip` | all of the above |
 
 The CLI is a single self-contained binary covering the entire feature set;

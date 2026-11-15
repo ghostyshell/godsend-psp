@@ -4,7 +4,10 @@ import type { Job, Snapshot } from "./types";
 import { PAGE_TITLES } from "./types";
 import { Chip } from "./ui";
 import Home from "./pages/Home";
-import Games from "./pages/Games";
+import Library from "./pages/Library";
+import GameStore from "./pages/GameStore";
+import Downloads from "./pages/Downloads";
+import Files from "./pages/Files";
 import Store from "./pages/Store";
 import Music from "./pages/Music";
 import Video from "./pages/Video";
@@ -15,7 +18,10 @@ import Settings from "./pages/Settings";
 
 type Page =
   | "home"
-  | "games"
+  | "library"
+  | "gamestore"
+  | "downloads"
+  | "files"
   | "store"
   | "music"
   | "video"
@@ -26,7 +32,10 @@ type Page =
 
 const NAV: { id: Page; label: string; glyph: string }[] = [
   { id: "home", label: "Console", glyph: "PS" },
-  { id: "games", label: "Games", glyph: "GB" },
+  { id: "library", label: "Library", glyph: "LB" },
+  { id: "gamestore", label: "Store", glyph: "ST" },
+  { id: "downloads", label: "Downloads", glyph: "DL" },
+  { id: "files", label: "Files", glyph: "FM" },
   { id: "store", label: "Homebrew", glyph: "HB" },
   { id: "music", label: "Music", glyph: "MU" },
   { id: "video", label: "Video", glyph: "VD" },
@@ -36,7 +45,7 @@ const NAV: { id: Page; label: string; glyph: string }[] = [
   { id: "settings", label: "Settings", glyph: "SE" },
 ];
 
-const VERSION = "0.1.0";
+const VERSION = "0.2.0";
 
 export interface PageProps {
   snap: Snapshot;
@@ -191,7 +200,10 @@ export default function App() {
 
       <main className="workspace with-inspector" id="workspace" tabIndex={-1}>
         {page === "home" && <Home {...pageProps} />}
-        {page === "games" && <Games {...pageProps} />}
+        {page === "library" && <Library {...pageProps} />}
+        {page === "gamestore" && <GameStore {...pageProps} />}
+        {page === "downloads" && <Downloads {...pageProps} />}
+        {page === "files" && <Files {...pageProps} />}
         {page === "store" && <Store {...pageProps} />}
         {page === "music" && <Music {...pageProps} />}
         {page === "video" && <Video {...pageProps} />}

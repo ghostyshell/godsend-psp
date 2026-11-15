@@ -17,6 +17,12 @@ export interface Config {
   ffmpeg_path: string;
   ffprobe_path: string;
   cso_level: number;
+  download_dir: string;
+  rd_api_key: string;
+  tb_api_key: string;
+  gamesearch_base: string;
+  covers_base: string;
+  mods_base: string;
 }
 
 export interface Check {
@@ -135,7 +141,10 @@ export interface ThemeEntry {
 
 export const PAGE_TITLES: Record<string, string> = {
   home: "Console",
-  games: "Game Library",
+  library: "Library",
+  gamestore: "Store",
+  downloads: "Downloads",
+  files: "File Manager",
   store: "Homebrew",
   music: "Music",
   video: "Video",
@@ -144,3 +153,85 @@ export const PAGE_TITLES: Record<string, string> = {
   mods: "Mods",
   settings: "Settings",
 };
+
+// ---- store / debrid / downloads / files ----
+
+export interface DebridStatus {
+  realdebrid: boolean;
+  torbox: boolean;
+}
+
+export interface GameLink {
+  host: string;
+  url: string;
+  linkType: string;
+  supportedBy: string[];
+}
+
+export interface GameHit {
+  id: string;
+  slug: string;
+  title: string;
+  platform: string;
+  source: string;
+  host: string;
+  url: string;
+  linkType: string;
+  supportedBy: string[];
+  cover: string | null;
+  size: number | null;
+  links: GameLink[];
+}
+
+export interface IaItem {
+  id: string;
+  title: string;
+  files_count: number;
+  size_bytes: number;
+}
+
+export interface IaFile {
+  name: string;
+  size_bytes: number;
+  url: string;
+}
+
+export interface StoreResult {
+  kind: "gamesearch" | "ia";
+  items?: GameHit[];
+  files?: IaFile[];
+}
+
+export interface FmEntry {
+  name: string;
+  path: string;
+  is_dir: boolean;
+  size_bytes: number;
+  kind: string;
+}
+
+export interface LocalGame {
+  id: string;
+  name: string;
+  kind: string;
+  path: string;
+  size_bytes: number;
+  serial: string | null;
+  title: string | null;
+}
+
+export interface ModEntry {
+  name: string;
+  author: string;
+  version: string;
+  url: string;
+  size_bytes: number;
+  notes: string;
+  kind: string;
+}
+
+export interface GameInfo {
+  known: { serial: string; title: string; cover: string; animation: string } | null;
+  animation: string | null;
+  mods: ModEntry[];
+}

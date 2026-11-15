@@ -3,18 +3,25 @@
 //! Everything in `godsend-core` works on plain filesystem paths so it can back
 //! a CLI, a Tauri desktop app, or a headless service.
 
+pub mod catalog;
 pub mod config;
+pub mod debrid;
 pub mod device;
 pub mod doctor;
 pub mod error;
+pub mod fm;
 pub mod homebrew;
 pub mod iso;
 pub mod cso;
 pub mod library;
 pub mod media;
+pub mod mods;
+pub mod aria2;
 pub mod pbp;
 pub mod plugins;
 pub mod sfo;
+pub mod sources;
+pub mod store;
 pub mod savedata;
 pub mod themes;
 pub mod transfer;
