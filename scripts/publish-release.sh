@@ -84,8 +84,9 @@ else
   [ -n "$RUN_ID" ] || die "the dispatched build never appeared"
   log "waiting for CI run $RUN_ID"
   gh run watch "$RUN_ID" --repo "$SLUG" --exit-status >/dev/null 2>&1 \
-    || gh run download "$RUN_ID" --repo "$SLUG" --dir "$DIST" >/dev/null 2>&1 \
-    || true
+    || die "CI run $RUN_ID did not succeed"
+  rm -rf "$DIST"
+  mkdir -p "$DIST"
   gh run download "$RUN_ID" --repo "$SLUG" --dir "$DIST" \
     || die "artifact download failed"
   # Flatten the per-OS subdirectories.
