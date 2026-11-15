@@ -161,6 +161,22 @@ pub fn scan_images(paths: &PspPaths) -> Result<Vec<DiscImage>> {
             .collect();
         files.sort();
         for file in files {
+            let name = file
+                .file_name()
+                .map(|n| n.to_string_lossy().to_string())
+                .unwrap_or_default()
+                .to_lowercase();
+            // Skip in-flight downloads: aria2 control files, partials, temps.
+            if name.ends_with(".aria2")
+                || name.ends_with(".part")
+                || name.ends_with(".partial")
+                || name.ends_with(".tmp")
+                || name.ends_with(".crdownload")
+                || file.with_extension("").exists()
+                    && std::path::Path::new(&format!("{}.aria2", file.display())).exists()
+            {
+                continue;
+            }
             let ext = file
                 .extension()
                 .map(|e| e.to_string_lossy().to_lowercase())

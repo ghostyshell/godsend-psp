@@ -3,6 +3,9 @@
 All notable changes to GODsend PSP. Newest first.
 
 
+## [0.2.26] - 2026-11-15
+
+
 ## [0.2.25] - 2026-11-15
 
 ### Added
@@ -161,6 +164,14 @@ All notable changes to GODsend PSP. Newest first.
 
 
 ## [0.2.4] - 2026-11-15
+
+### Fixed
+
+- In-flight transfers no longer appear as library or file-manager entries:
+  `.aria2`, `.part`, `.partial`, `.tmp` and `.crdownload` files (and any
+  file with a live aria2 control file beside it) are filtered out.
+- Queue rows show the percentage and an ETA, with the file name wrapped to
+  two lines instead of being truncated to one.
 
 ### Fixed
 
