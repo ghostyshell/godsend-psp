@@ -2,6 +2,13 @@
 
 All notable changes to GODsend PSP. Newest first.
 
+
+## [0.2.3] - 2026-11-15
+
+### Changed
+
+- refreshed the README and site screenshots and re-recorded all twelve video guides with the new logo
+
 ## [0.2.2] - 2026-11-15
 
 ### Fixed
