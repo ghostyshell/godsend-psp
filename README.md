@@ -22,11 +22,14 @@ GODsend 360 and Keepsake Atelier, built on the Keepsake Atelier code stack
 <!-- downloads:start -->
 | Build | GoFile (primary) | file.kiwi (backup) | Size |
 | --- | --- | --- | --- |
-| `godsend-psp-cli-0.2.23-macos-arm64.tar.gz` | [Download](https://gofile.io/d/1ueRWMPF) | [Mirror](https://file.kiwi/8a3eca6c#lEZTLpEEazgDiqrYjwdplA) | 1.9 MiB |
-| `godsend-psp-cli-0.2.23-macos-x64.tar.gz` | [Download](https://gofile.io/d/t7nUgFiC) | [Mirror](https://file.kiwi/5cca17f1#nboLGahzS-HcBixIT4koRQ) | 2.0 MiB |
-| `godsend-psp-cli-0.2.23-windows-x64.zip` | [Download](https://gofile.io/d/D6qbaavp) | [Mirror](https://file.kiwi/7faa084a#xDad8AuupSdVLWpdWiG2qg) | 2.0 MiB |
-| `godsend-psp-0.2.23-arm64.dmg` | [Download](https://gofile.io/d/FlkHWE5o) | [Mirror](https://file.kiwi/8543232d#yNtT-M_xnVeBmZmYlRfuPA) | 44.1 MiB |
-| `godsend-psp-0.2.23-x64.dmg` | [Download](https://gofile.io/d/NoYBlOc6) | [Mirror](https://file.kiwi/90ef9d83#TqLlm6CPV8RlaE0cdNBuIA) | 59.0 MiB |
+| `godsend-psp-0.2.25-linux-x64.AppImage` | [Download](https://gofile.io/d/V7RgiRL2) | [Mirror](https://file.kiwi/ef2252a3#AgJqLxszLsy6qgx2l_SxRA) | 131.9 MiB |
+| `godsend-psp-cli-0.2.25-linux-x64.tar.gz` | [Download](https://gofile.io/d/oM90d0hU) | [Mirror](https://file.kiwi/6ada2a41#qCjrZ_hZ-t4uyAszN8JXwg) | 2.1 MiB |
+| `godsend-psp-cli-0.2.25-macos-arm64.tar.gz` | [Download](https://gofile.io/d/TmwdbqN5) | [Mirror](https://file.kiwi/9d51b6b9#MkZdpsnveS3lmYkSTkBEEg) | 1.9 MiB |
+| `godsend-psp-cli-0.2.25-macos-x64.tar.gz` | [Download](https://gofile.io/d/BaMhm4lo) | [Mirror](https://file.kiwi/a13ad6ec#Qik34d-q6NyVIAgBi2kzPQ) | 2.0 MiB |
+| `godsend-psp-0.2.25-linux-x64.deb` | [Download](https://gofile.io/d/Do8SdzxT) | [Mirror](https://file.kiwi/a7bed707#_rt3DKs0WkOj89cnV7PoQQ) | 62.7 MiB |
+| `godsend-psp-0.2.25-arm64.dmg` | [Download](https://gofile.io/d/u1XmdbQD) | [Mirror](https://file.kiwi/8000a452#U1-jKzBd4O_e3swblf8Dag) | 44.3 MiB |
+| `godsend-psp-0.2.25-x64.dmg` | [Download](https://gofile.io/d/BjPwD9Zk) | [Mirror](https://file.kiwi/ab7847a1#PKbXEmJB5apflVBBBGt_gA) | 59.1 MiB |
+| `godsend-psp-0.2.25-x64-setup.exe` | [Download](https://gofile.io/d/MvtKPWV6) | [Mirror](https://file.kiwi/a865f35f#m18tExR16HDDMDH_KjieHw) | 45.0 MiB |
 <!-- downloads:end -->
 
 Mirrors follow the sibling projects: **GoFile** is the primary host and
