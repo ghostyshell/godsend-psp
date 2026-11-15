@@ -18,3 +18,5 @@ playwright-report/
 .release-refresh.log
 
 app/src-tauri/resources/ffmpeg*
+app/src-tauri/resources/ffmpeg*
+app/src-tauri/resources/ffprobe*

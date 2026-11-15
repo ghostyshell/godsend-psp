@@ -37,6 +37,13 @@ All notable changes to GODsend PSP. Newest first.
 
 ### Fixed
 
+- CI no longer reuses stale ffmpeg binaries: the fetched arm64 pair had been
+  committed (gitignore only covered `ffmpeg*`), which broke the x64 macOS
+  and Linux jobs with "Bad CPU type". The binaries are untracked and the
+  fetch script always replaces them.
+
+### Fixed
+
 - Publish downloads CI artifacts exactly once (a second extraction was
   colliding with the first and failing with "file exists").
 
