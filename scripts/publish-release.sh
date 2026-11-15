@@ -187,7 +187,7 @@ for f in "${FILES[@]}"; do
 done
 
 # --- 3. Rewrite the README table -------------------------------------------------
-python3 -I scripts/patch-release-links.py "$LINKS" || die "could not patch README"
+python3 -I scripts/patch-release-links.py "$LINKS" "$V" || die "could not patch README"
 
 # --- 4. Commit and push ----------------------------------------------------------
 if git diff --quiet -- README.md docs/downloads.json; then

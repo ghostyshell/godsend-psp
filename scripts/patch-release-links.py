@@ -44,6 +44,7 @@ def cell(url, text):
 
 def main():
     manifest = Path(sys.argv[1])
+    version_arg = sys.argv[2] if len(sys.argv) > 2 else ""
     rows = []
     for line in manifest.read_text().splitlines():
         parts = [p.strip() for p in line.split("|")]
@@ -82,10 +83,11 @@ def main():
         }
         for name, gofile, kiwi, size, sha, *_ in [row[:5] for row in rows]
     ]
-    version = ""
-    m = re.search(r"\d+\.\d+\.\d+", artifacts[0]["name"]) if artifacts else None
-    if m:
-        version = m.group(0)
+    version = version_arg
+    if not version and artifacts:
+        m = re.search(r"\d+\.\d+\.\d+", artifacts[0]["name"])
+        if m:
+            version = m.group(0)
     (ROOT / "docs" / "downloads.json").write_text(
         json.dumps(
             {

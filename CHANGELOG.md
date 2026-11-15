@@ -70,6 +70,12 @@ All notable changes to GODsend PSP. Newest first.
 
 ### Fixed
 
+- Publish writes the release version into downloads.json from the build
+  version (not from the first artifact name), and stale artifacts in dist/
+  are no longer picked up.
+
+### Fixed
+
 - Installer DMG falls back to a plain `hdiutil create` when the Intel
   runner cannot convert the read-write image, so the Applications link and
   Read Me still ship.
