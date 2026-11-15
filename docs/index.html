@@ -62,7 +62,12 @@
   </section>
 
   <div id="lightbox" class="lightbox" hidden>
-    <button class="lightbox-close" aria-label="Close the screenshot">Close</button>
+    <div class="lb-toolbar" role="toolbar" aria-label="Screenshot controls">
+      <button class="lb-btn" data-zoom="out" aria-label="Zoom out">-</button>
+      <span class="lb-scale" id="lb-scale">100%</span>
+      <button class="lb-btn" data-zoom="in" aria-label="Zoom in">+</button>
+      <button class="lb-btn lb-close" aria-label="Close the screenshot">Close</button>
+    </div>
     <img id="lightbox-img" alt="" />
   </div>
 
@@ -154,21 +159,58 @@
 </footer>
 
 <script>
-// Screenshot lightbox: click to zoom, Escape or click to close.
+// Screenshot modal: transparent backdrop, centred, zoom in/out, close.
 (function () {
   const box = document.getElementById("lightbox");
   const img = document.getElementById("lightbox-img");
-  const close = () => { box.hidden = true; img.src = ""; };
+  const scaleLabel = document.getElementById("lb-scale");
+  let scale = 1;
+  const apply = () => {
+    img.style.transform = `scale(${scale})`;
+    scaleLabel.textContent = Math.round(scale * 100) + "%";
+  };
+  const close = () => {
+    box.hidden = true;
+    img.src = "";
+    scale = 1;
+    apply();
+  };
+  const open = (href, alt) => {
+    img.src = href;
+    img.alt = alt;
+    scale = 1;
+    apply();
+    box.hidden = false;
+  };
   document.querySelectorAll(".shot").forEach((a) => {
     a.addEventListener("click", (e) => {
       e.preventDefault();
-      img.src = a.getAttribute("href");
-      img.alt = a.querySelector("img")?.alt ?? "";
-      box.hidden = false;
+      open(a.getAttribute("href"), a.querySelector("img")?.alt ?? "");
     });
   });
+  box.querySelector("[data-zoom='in']").addEventListener("click", (e) => {
+    e.stopPropagation();
+    scale = Math.min(4, scale + 0.25);
+    apply();
+  });
+  box.querySelector("[data-zoom='out']").addEventListener("click", (e) => {
+    e.stopPropagation();
+    scale = Math.max(0.5, scale - 0.25);
+    apply();
+  });
+  box.querySelector(".lb-close").addEventListener("click", (e) => {
+    e.stopPropagation();
+    close();
+  });
+  img.addEventListener("click", (e) => e.stopPropagation());
+  // Clicking the transparent area outside the image closes it.
   box.addEventListener("click", close);
-  document.addEventListener("keydown", (e) => { if (e.key === "Escape") close(); });
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape") close();
+    if (box.hidden) return;
+    if (e.key === "+" || e.key === "=") { scale = Math.min(4, scale + 0.25); apply(); }
+    if (e.key === "-") { scale = Math.max(0.5, scale - 0.25); apply(); }
+  });
 })();
 
 fetch("downloads.json?v=" + Date.now(), { cache: "no-store" }).then(r => r.json()).then(data => {
