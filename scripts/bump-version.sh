@@ -46,7 +46,11 @@ if header not in s:
                    "removed": "Removed", "security": "Security"}.get(kind, "Changed")
         bullet = text.strip() if text.strip() else note
         entry += f"### {section}\n\n- {bullet}\n\n"
-    s = re.sub(r'(# Changelog\n\n)', r'\g<1>' + entry, s, count=1)
+    m = re.search(r'(# Changelog\n\n(?:[^#\n][^\n]*\n\n)?)', s)
+    if m:
+        s = s[:m.end()] + entry + s[m.end():]
+    else:
+        s = entry + s
 open("CHANGELOG.md", "w").write(s)
 PY
 echo "bumped to $V"
