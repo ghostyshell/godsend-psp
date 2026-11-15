@@ -316,6 +316,44 @@ pub fn preview_clip(ffmpeg: &Path, src: &Path, cache_dir: &Path, seconds: f64) -
     Ok(dest)
 }
 
+/// Convert a PSP `ICON1.PMF` animated icon into a small looping MP4.
+pub fn transcode_pmf(ffmpeg: &Path, pmf: &[u8], cache_dir: &Path, key: &str) -> Result<PathBuf> {
+    std::fs::create_dir_all(cache_dir)?;
+    let mut hash: u64 = 0xcbf2_9ce4_8422_2325;
+    for byte in format!("{key}:{}", pmf.len()).as_bytes() {
+        hash ^= *byte as u64;
+        hash = hash.wrapping_mul(0x0000_0100_0000_01b3);
+    }
+    let dest = cache_dir.join(format!("{hash:016x}.mp4"));
+    if dest.is_file() && dest.metadata().map(|m| m.len() > 512).unwrap_or(false) {
+        return Ok(dest);
+    }
+    let tmp = cache_dir.join(format!("{hash:016x}.pmf"));
+    std::fs::write(&tmp, pmf)?;
+    let status = Command::new(ffmpeg)
+        .args(["-y", "-nostdin", "-hide_banner", "-loglevel", "error", "-i"])
+        .arg(&tmp)
+        .args([
+            "-t", "8",
+            "-an",
+            "-vf", "scale=256:-2",
+            "-c:v", "libx264",
+            "-preset", "veryfast",
+            "-crf", "28",
+            "-pix_fmt", "yuv420p",
+            "-movflags", "+faststart",
+        ])
+        .arg(&dest)
+        .status()
+        .map_err(|e| Error::Ffmpeg(format!("pmf transcode: {e}")))?;
+    let _ = std::fs::remove_file(&tmp);
+    if !status.success() || !dest.is_file() {
+        let _ = std::fs::remove_file(&dest);
+        return Err(Error::Ffmpeg("could not decode ICON1.PMF".into()));
+    }
+    Ok(dest)
+}
+
 /// Sanitize a file name for FAT32 (the Memory Stick filesystem).
 pub fn fat_safe_name(name: &str) -> String {
     let mut out = String::with_capacity(name.len());

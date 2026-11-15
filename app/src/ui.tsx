@@ -1,6 +1,7 @@
 // Shared UI primitives for the GODsend PSP shell.
 
-import { ReactNode } from "react";
+import { ReactNode, useEffect, useState } from "react";
+import { api } from "./api";
 
 export function fmtBytes(bytes: number): string {
   if (!bytes) return "0 B";
@@ -135,6 +136,35 @@ export function Toggle({
       <span className="knob" aria-hidden="true" />
       <span className="switch-label">{label}</span>
     </button>
+  );
+}
+
+/** Plays the game's own ICON1.PMF animation over the cover on hover. */
+export function GameHover({ id }: { id: string }) {
+  const [url, setUrl] = useState<string | null>(null);
+  const [hover, setHover] = useState(false);
+
+  useEffect(() => {
+    if (hover && url === null) {
+      let alive = true;
+      void api
+        .animation(id)
+        .then((value) => {
+          if (alive) setUrl(value);
+        })
+        .catch(() => setUrl(""));
+      return () => {
+        alive = false;
+      };
+    }
+    return undefined;
+  }, [hover, id, url]);
+
+  if (!hover || !url) return null;
+  return (
+    <div className="hover-anim" aria-hidden="true">
+      <video src={url} autoPlay muted loop playsInline />
+    </div>
   );
 }
 

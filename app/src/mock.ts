@@ -239,6 +239,8 @@ async function invoke(cmd: string, args: Record<string, any> = {}): Promise<unkn
       return music;
     case "video_list":
       return videos;
+    case "animation":
+      return null;
     case "video_preview":
       return null;
     case "media_delete": {

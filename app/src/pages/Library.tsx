@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { api } from "../api";
 import type { DiscImage, GameEntry, GameInfo, LocalGame } from "../types";
 import type { PageProps } from "../App";
-import { Btn, Chip, Empty, Seg, fmtBytes } from "../ui";
+import { Btn, Chip, Empty, GameHover, Seg, fmtBytes } from "../ui";
 
 type Tab = "psp" | "local";
 
@@ -71,6 +71,7 @@ export default function Library({ snap, toast, refreshKey }: PageProps) {
                       <span className="cf-serial">{game.title_id ?? game.kind}</span>
                     </div>
                   )}
+                  <GameHover id={game.id} />
                 </div>
                 <div className="body">
                   <div className="t" title={game.title}>
