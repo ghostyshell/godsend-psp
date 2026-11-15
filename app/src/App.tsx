@@ -18,7 +18,7 @@ import {
   Settings as SettingsIcon,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
-import logo from "./assets/logo.svg";
+import logo from "./assets/logo.png";
 import Home from "./pages/Home";
 import Library from "./pages/Library";
 import GameStore from "./pages/GameStore";
@@ -61,7 +61,7 @@ const NAV: { id: Page; label: string; icon: LucideIcon }[] = [
   { id: "settings", label: "Settings", icon: SettingsIcon },
 ];
 
-const VERSION = "0.2.5";
+const VERSION = "0.2.6";
 
 export interface PageProps {
   snap: Snapshot;
