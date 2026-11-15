@@ -79,7 +79,7 @@ impl Default for Config {
             download_dir: String::new(),
             rd_api_key: String::new(),
             tb_api_key: String::new(),
-            gamesearch_base: "https://debrid.link/api".into(),
+            gamesearch_base: "https://game-debrid.link/api".into(),
             ia_access_key: String::new(),
             ia_secret_key: String::new(),
             ia_email: String::new(),

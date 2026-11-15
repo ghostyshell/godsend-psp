@@ -217,7 +217,8 @@ pub fn remote_cover(config: &Config, serial: &str, title: &str) -> Option<Vec<u8
             candidates.push(format!("{base}/games/{slug}.{ext}"));
         }
     }
-    // Ask the index by title when no base is configured (or it missed).
+    // Ask the production index by title. RAWG art is authoritative; the R2
+    // games/<slug>.<ext> mirror is tried with the index slug (not a guess).
     if !config.gamesearch_base.is_empty() && !title.is_empty() {
         if let Ok(hits) = crate::sources::gamesearch(&config.gamesearch_base, title, 5) {
             let needle = title.to_lowercase();
@@ -228,8 +229,21 @@ pub fn remote_cover(config: &Config, serial: &str, title: &str) -> Option<Vec<u8
                 if let Some(detail) =
                     crate::sources::gamesearch_detail(&config.gamesearch_base, &hit.slug).ok()
                 {
-                    if let Some(url) = detail.rawg_cover.or(detail.cover) {
+                    if let Some(url) = detail.rawg_cover.clone().or(detail.cover.clone()) {
                         candidates.push(url);
+                    }
+                    let base = config.covers_base.trim_end_matches('/');
+                    if !base.is_empty() {
+                        for slug in [detail.slug.as_str(), hit.slug.as_str()] {
+                            if slug.is_empty() {
+                                continue;
+                            }
+                            for ext in ["jpg", "png", "webp"] {
+                                candidates.push(format!("{base}/games/{slug}.{ext}"));
+                            }
+                        }
+                    }
+                    if !candidates.is_empty() {
                         break;
                     }
                 }
