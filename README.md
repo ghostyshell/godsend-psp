@@ -22,15 +22,15 @@ GODsend 360 and Keepsake Atelier, built on the Keepsake Atelier code stack
 <!-- downloads:start -->
 | Build | GoFile (primary) | file.kiwi (backup) | Size |
 | --- | --- | --- | --- |
-| `GODsend PSP_0.2.1_amd64.AppImage` | [Download](https://gofile.io/d/7OSJd5kl) | [Mirror](https://file.kiwi/af483a49#w--Ditza7a3bALv2rgoIPw) | 79.9 MiB |
-| `godsend-psp-cli-linux-x64.tar.gz` | [Download](https://gofile.io/d/eBbBTLSr) | [Mirror](https://file.kiwi/5112dc31#r1pc1jLa9krsdPBY8Hcs9Q) | 1.9 MiB |
-| `godsend-psp-cli-macos-arm64.tar.gz` | [Download](https://gofile.io/d/rTlSGg4Z) | [Mirror](https://file.kiwi/0db55065#tr6G43SnxZgufHnWNd9BiA) | 1.8 MiB |
-| `godsend-psp-cli-macos-x64.tar.gz` | [Download](https://gofile.io/d/wnIj7juu) | [Mirror](https://file.kiwi/c61c9b73#sFpwI68FHXde2CbgFLxA9Q) | 1.9 MiB |
-| `godsend-psp-cli-windows-x64.zip` | [Download](https://gofile.io/d/sJuRyHSh) | [Mirror](https://file.kiwi/740ddce1#0ajsgD2SpjlMhTqmAt0xRQ) | 2.0 MiB |
-| `GODsend PSP_0.2.1_amd64.deb` | [Download](https://gofile.io/d/X20MysHf) | [Mirror](https://file.kiwi/55b42132#uz1Bx98FBo3fkYQCtzee7w) | 5.0 MiB |
-| `godsend-psp-macos-arm64.dmg` | [Download](https://gofile.io/d/Hee4AqZr) | [Mirror](https://file.kiwi/cc60c87d#b0hyfi98R2DrRJOz610eIw) | 5.1 MiB |
-| `godsend-psp-macos-x64.dmg` | [Download](https://gofile.io/d/1ZziWxuZ) | [Mirror](https://file.kiwi/0bed954b#7vsehFyjjM6bUVTVX9iYew) | 5.5 MiB |
-| `GODsend PSP_0.2.1_x64-setup.exe` | [Download](https://gofile.io/d/9ulV7TdN) | [Mirror](https://file.kiwi/111534e2#4vzNOhLEGrWXOWaS1jNFhw) | 3.4 MiB |
+| `godsend-psp-0.2.1-linux-x64.AppImage` | [Download](https://gofile.io/d/1VBrUUY2) | [Mirror](https://file.kiwi/92c1c939#iZYgha8JLLh4MVOZIzwfJQ) | 79.9 MiB |
+| `godsend-psp-cli-0.2.1-linux-x64.tar.gz` | [Download](https://gofile.io/d/MYVGvByQ) | [Mirror](https://file.kiwi/db74fd1a#28a1Csm9sb7S9w-6BULjPA) | 1.9 MiB |
+| `godsend-psp-cli-0.2.1-macos-arm64.tar.gz` | [Download](https://gofile.io/d/MR0eSeE2) | [Mirror](https://file.kiwi/0e20ffe9#YsXRSk10VDn_KsAe3BfSsA) | 1.8 MiB |
+| `godsend-psp-cli-0.2.1-macos-x64.tar.gz` | [Download](https://gofile.io/d/NBLOw3Y8) | [Mirror](https://file.kiwi/cd98f582#BeklT16pHwwptSloTIBjgA) | 1.9 MiB |
+| `godsend-psp-cli-0.2.1-windows-x64.zip` | [Download](https://gofile.io/d/aVq6i8Yn) | [Mirror](https://file.kiwi/1c26db36#ZnYOvJLzw_htaPGyqUpIcg) | 2.0 MiB |
+| `godsend-psp-0.2.1-linux-x64.deb` | [Download](https://gofile.io/d/Q5cPzPTK) | [Mirror](https://file.kiwi/45f74332#m6MssNnYMNoeRNKtIob2Ng) | 5.0 MiB |
+| `godsend-psp-0.2.1-arm64.dmg` | [Download](https://gofile.io/d/3Oel28ZZ) | [Mirror](https://file.kiwi/fe311b2a#_NE_7oScpDZExG7J1b2pOg) | 5.1 MiB |
+| `godsend-psp-0.2.1-x64.dmg` | [Download](https://gofile.io/d/CqwC6GIH) | [Mirror](https://file.kiwi/02c1861c#-Vn92Co20_5XVYzSkCiIfQ) | 5.5 MiB |
+| `godsend-psp-0.2.1-x64-setup.exe` | [Download](https://gofile.io/d/iqnA9fI6) | [Mirror](https://file.kiwi/46a71198#f7V36N9xVjwChlvdetLsLg) | 3.4 MiB |
 <!-- downloads:end -->
 
 Mirrors follow the sibling projects: **GoFile** is the primary host and
