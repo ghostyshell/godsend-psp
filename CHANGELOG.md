@@ -33,6 +33,19 @@ All notable changes to GODsend PSP. Newest first.
 
 ### Changed
 
+- New app and site icon: the cyan download-arrow mark (assets/logo.svg),
+  regenerated across the Tauri icon set and the Pages site.
+- scripts/render-logo.mjs renders the vector mark to icon.png via Playwright.
+
+### Fixed
+
+- macOS DMGs are ad-hoc signed as a bundle before packaging. Previously the
+  app carried only a linker-level signature, so Gatekeeper reported "damaged"
+  on Apple Silicon. CI now signs the bundle and verifies it before the DMG
+  is created; both published DMGs were re-signed and re-uploaded.
+
+### Changed
+
 - Releases now publish to GoFile (primary) and file.kiwi (backup) like the
   sibling projects; the README table is rewritten from the upload manifest.
   GitHub Releases are no longer created (tags still trigger CI builds).

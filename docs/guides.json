@@ -1,0 +1,178 @@
+{
+  "addon": "godsendpsp",
+  "title": "GODsend PSP video guides",
+  "intro": "Short screen recordings of every tab of the GODsend PSP desktop app, from plugging in the console to managing plugins. The demo data shown is fixture data, no real console is involved.",
+  "version": "2026-11-15",
+  "sections": [
+    {
+      "id": "getting-started",
+      "title": "Getting started",
+      "summary": "See your PSP and what is on it.",
+      "videos": [
+        {
+          "id": "01-console",
+          "title": "The Console",
+          "description": "Plug the PSP in over USB and the Console tab shows the memory stick: free space, games and homebrew, disc images, save folders and library size, plus rescan, open, eject and environment checks.",
+          "steps": [
+            "Connect the PSP in USB mode",
+            "Read the stick summary",
+            "Use Rescan, Open Stick, Eject Safely or Run Checks",
+            "Watch the queue on the right"
+          ],
+          "video": "https://covers.debrid.in/guides/godsendpsp/01-console.b74f3035.mp4",
+          "poster": "https://covers.debrid.in/guides/godsendpsp/01-console.b74f3035.jpg"
+        },
+        {
+          "id": "02-library",
+          "title": "Library",
+          "description": "Everything installed on the stick next to what you keep on your computer. Copy a game back to your computer, or open its info.",
+          "steps": [
+            "Open Library",
+            "Compare PSP and Local lists",
+            "Press To Local to copy a game to your computer"
+          ],
+          "video": "https://covers.debrid.in/guides/godsendpsp/02-library.c9704c9f.mp4",
+          "poster": "https://covers.debrid.in/guides/godsendpsp/02-library.c9704c9f.jpg"
+        }
+      ]
+    },
+    {
+      "id": "getting-games",
+      "title": "Getting games",
+      "summary": "Find, download and move games.",
+      "videos": [
+        {
+          "id": "03-store",
+          "title": "Store",
+          "description": "Search PSP games through the Game Debrid index or Internet Archive. Links are resolved through Real-Debrid or TorBox, then downloaded with aria2c.",
+          "steps": [
+            "Pick Game Debrid or Internet Archive",
+            "Search by title",
+            "Open Links, or press Download"
+          ],
+          "video": "https://covers.debrid.in/guides/godsendpsp/03-store.1f567167.mp4",
+          "poster": "https://covers.debrid.in/guides/godsendpsp/03-store.1f567167.jpg"
+        },
+        {
+          "id": "04-downloads",
+          "title": "Downloads",
+          "description": "Finished downloads wait here. Change the download folder or send a file to the memory stick with To PSP.",
+          "steps": [
+            "Open Downloads",
+            "Change the folder if you like",
+            "Press To PSP"
+          ],
+          "video": "https://covers.debrid.in/guides/godsendpsp/04-downloads.df6ad233.mp4",
+          "poster": "https://covers.debrid.in/guides/godsendpsp/04-downloads.df6ad233.jpg"
+        },
+        {
+          "id": "05-files",
+          "title": "Files",
+          "description": "A two-pane file manager: your computer on one side and the memory stick on the other, with folders, up and delete.",
+          "steps": [
+            "Open Files",
+            "Browse both sides",
+            "Make folders or delete"
+          ],
+          "video": "https://covers.debrid.in/guides/godsendpsp/05-files.65db6843.mp4",
+          "poster": "https://covers.debrid.in/guides/godsendpsp/05-files.65db6843.jpg"
+        }
+      ]
+    },
+    {
+      "id": "homebrew-and-media",
+      "title": "Homebrew and media",
+      "summary": "Put software, music, video and disc images on the stick.",
+      "videos": [
+        {
+          "id": "06-homebrew",
+          "title": "Homebrew",
+          "description": "Browse emulators and custom firmware and install in one click, or import your own zip.",
+          "steps": [
+            "Filter All, Emulators or CFW",
+            "Press Install",
+            "Or Import Zip"
+          ],
+          "video": "https://covers.debrid.in/guides/godsendpsp/06-homebrew.ef8f353a.mp4",
+          "poster": "https://covers.debrid.in/guides/godsendpsp/06-homebrew.ef8f353a.jpg"
+        },
+        {
+          "id": "07-music",
+          "title": "Music",
+          "description": "Convert tracks to MP3 or M4A, or copy as-is, and push them to the stick.",
+          "steps": [
+            "Choose a format",
+            "Press Push Music"
+          ],
+          "video": "https://covers.debrid.in/guides/godsendpsp/07-music.16b12cb6.mp4",
+          "poster": "https://covers.debrid.in/guides/godsendpsp/07-music.16b12cb6.jpg"
+        },
+        {
+          "id": "08-video",
+          "title": "Video",
+          "description": "Convert movies to the PSP AVC profile, generate .THM thumbnails and push them to the stick.",
+          "steps": [
+            "Choose Convert to PSP AVC or Copy as-is",
+            "Generate thumbnails",
+            "Press Push Videos"
+          ],
+          "video": "https://covers.debrid.in/guides/godsendpsp/08-video.e2259472.mp4",
+          "poster": "https://covers.debrid.in/guides/godsendpsp/08-video.e2259472.jpg"
+        },
+        {
+          "id": "09-images",
+          "title": "Disc images",
+          "description": "Import ISO or CSO images and convert between them, optionally compressing to CSO on import.",
+          "steps": [
+            "Press Import Image",
+            "Use To CSO or To ISO"
+          ],
+          "video": "https://covers.debrid.in/guides/godsendpsp/09-images.9435e0e6.mp4",
+          "poster": "https://covers.debrid.in/guides/godsendpsp/09-images.9435e0e6.jpg"
+        }
+      ]
+    },
+    {
+      "id": "saves-mods-settings",
+      "title": "Saves, mods and settings",
+      "summary": "Back up, customize and configure.",
+      "videos": [
+        {
+          "id": "10-saves",
+          "title": "Save data",
+          "description": "Back up every save folder or only the ones you pick, and restore from a backup zip.",
+          "steps": [
+            "Press Backup All or select some",
+            "Restore Zip to bring them back"
+          ],
+          "video": "https://covers.debrid.in/guides/godsendpsp/10-saves.b792fd19.mp4",
+          "poster": "https://covers.debrid.in/guides/godsendpsp/10-saves.b792fd19.jpg"
+        },
+        {
+          "id": "11-mods",
+          "title": "Mods",
+          "description": "Manage plugins, themes and custom firmware. seplugins are grouped by environment (Game, VSH, Pops); add a .prx, switch it on or off, or remove it.",
+          "steps": [
+            "Open Mods",
+            "Pick Game, VSH or Pops",
+            "Add .prx, toggle or Remove"
+          ],
+          "video": "https://covers.debrid.in/guides/godsendpsp/11-mods.5fa5bb39.mp4",
+          "poster": "https://covers.debrid.in/guides/godsendpsp/11-mods.5fa5bb39.jpg"
+        },
+        {
+          "id": "12-settings",
+          "title": "Settings",
+          "description": "Add Real-Debrid or TorBox keys for the Store, choose store sources, set the downloads folder and the default music and video conversion.",
+          "steps": [
+            "Add debrid accounts",
+            "Choose store sources",
+            "Set transfer defaults"
+          ],
+          "video": "https://covers.debrid.in/guides/godsendpsp/12-settings.e8c440eb.mp4",
+          "poster": "https://covers.debrid.in/guides/godsendpsp/12-settings.e8c440eb.jpg"
+        }
+      ]
+    }
+  ]
+}

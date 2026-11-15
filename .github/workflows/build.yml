@@ -36,6 +36,13 @@ jobs:
         run: npx tauri build --bundles app --target ${{ matrix.target }}
       - name: Build CLI
         run: cargo build --release -p godsend-psp-cli --target ${{ matrix.target }}
+      - name: Ad-hoc sign the app bundle
+        run: |
+          # Apple Silicon refuses bundles without a valid bundle signature
+          # (Gatekeeper reports "damaged"); sign after bundling, before the DMG.
+          APP=$(find target/${{ matrix.target }}/release/bundle/macos -name "*.app" | head -1)
+          codesign --force --deep --sign - "$APP"
+          codesign --verify --deep --strict "$APP"
       - name: Make DMG
         run: |
           APP=$(find target/${{ matrix.target }}/release/bundle/macos -name "*.app" | head -1)

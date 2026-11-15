@@ -3,6 +3,7 @@ import { api, listen } from "./api";
 import type { Job, Snapshot } from "./types";
 import { PAGE_TITLES } from "./types";
 import { Chip } from "./ui";
+import logo from "./assets/logo.svg";
 import Home from "./pages/Home";
 import Library from "./pages/Library";
 import GameStore from "./pages/GameStore";
@@ -157,7 +158,7 @@ export default function App() {
 
       <header className="topbar">
         <div className="brand">
-          <div className="mark" aria-hidden="true" />
+          <img className="mark" src={logo} alt="" aria-hidden="true" />
           <div>
             <div className="eyebrow">GODSEND PSP</div>
             <div className="page-title" aria-live="polite">

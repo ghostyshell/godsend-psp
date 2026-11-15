@@ -37,8 +37,8 @@ header {
   z-index: 5;
 }
 .brand { display: flex; align-items: center; gap: 10px; color: var(--text); font-weight: 700; }
-.mark { width: 22px; height: 22px; border-radius: 7px; background: var(--grad); position: relative; box-shadow: 0 8px 24px -10px rgba(109,139,255,.6); }
-.mark::after { content: ""; position: absolute; inset: 6px; border-radius: 3px; background: var(--ink); }
+.mark { width: 26px; height: 26px; object-fit: contain; filter: drop-shadow(0 4px 12px rgba(86,232,245,.35)); }
+
 nav { display: flex; gap: 22px; font-size: 14px; }
 nav a { color: var(--dim); }
 nav a:hover { color: var(--text); text-decoration: none; }

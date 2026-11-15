@@ -207,21 +207,11 @@ html[data-os="mac"] .topbar {
 }
 
 .brand .mark {
-  width: 26px;
-  height: 26px;
-  border-radius: 8px;
-  background: var(--grad-laser);
-  box-shadow: var(--glow-laser);
+  width: 28px;
+  height: 28px;
   align-self: center;
-  position: relative;
-}
-
-.brand .mark::after {
-  content: "";
-  position: absolute;
-  inset: 7px;
-  border-radius: 4px;
-  background: var(--ink-0);
+  object-fit: contain;
+  filter: drop-shadow(0 4px 12px rgba(86, 232, 245, 0.35));
 }
 
 .brand .name {
