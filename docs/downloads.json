@@ -1,22 +1,46 @@
 {
-  "version": "0.2.16",
+  "version": "0.2.19",
   "updated": "2026-11-15",
   "artifacts": [
     {
-      "name": "godsend-psp-cli-0.2.16-macos-arm64.tar.gz",
+      "name": "godsend-psp-cli-0.2.19-macos-arm64.tar.gz",
       "label": "macOS (Apple Silicon, CLI)",
-      "gofile": "https://gofile.io/d/8sPNq1KR",
-      "kiwi": "https://file.kiwi/c3f11081#BMwR4fWF93uvLBHD6e_f8g",
+      "gofile": "https://gofile.io/d/xenAgCg8",
+      "kiwi": "https://file.kiwi/cd981662#FXfZuuw3tE5ECnRkUhm5Tw",
       "size": "1.9 MiB",
-      "sha256": "55bb030e16d5717e4573559191a47e424884e8e5bdffa96cdebf9e1ef042903d"
+      "sha256": "06d9550aae9322d4cb464a94db536874921cd5b091eebe80a0f98d308c77b3b7"
     },
     {
-      "name": "godsend-psp-0.2.16-arm64.dmg",
+      "name": "godsend-psp-cli-0.2.19-macos-x64.tar.gz",
+      "label": "macOS (Intel, CLI)",
+      "gofile": "https://gofile.io/d/XqoP4R0O",
+      "kiwi": "https://file.kiwi/cde25e85#Y8mGTW4PAPnciynFgf_Zvw",
+      "size": "2.0 MiB",
+      "sha256": "0c1053f1ecbf2ee199cbbb8ff7de72c5ce0b446afc5214e8e16b1878a9936e2a"
+    },
+    {
+      "name": "godsend-psp-cli-0.2.19-windows-x64.zip",
+      "label": "Windows (x86_64, CLI)",
+      "gofile": "https://gofile.io/d/0aMAYgzE",
+      "kiwi": "https://file.kiwi/a5f7b604#_6ngCFQx-AxgG-lA4T9b4A",
+      "size": "2.0 MiB",
+      "sha256": "18f9e0628d87469b63ef086aba85de3042b04b1e743ad6b00259ee80f36dd230"
+    },
+    {
+      "name": "godsend-psp-0.2.19-arm64.dmg",
       "label": "macOS (Apple Silicon)",
-      "gofile": "https://gofile.io/d/e0tmrSL1",
-      "kiwi": "https://file.kiwi/1c8346d9#ixOa0zrOWZs9uS3fGr64kA",
+      "gofile": "https://gofile.io/d/ICWqMSkH",
+      "kiwi": "https://file.kiwi/de108afe#mLSjAvItq-NSSh4h9ebyuw",
       "size": "44.1 MiB",
-      "sha256": "2216a3ad8fa62eb81420f66b10c61000c193636a209c8466e0b591439ef7e739"
+      "sha256": "908929c0f3120fbb22307a3b6a5b9be4bed537147ee6576a98321cf44ff918e7"
+    },
+    {
+      "name": "godsend-psp-0.2.19-x64.dmg",
+      "label": "macOS (Intel)",
+      "gofile": "https://gofile.io/d/UAUJhHuN",
+      "kiwi": "https://file.kiwi/77d428e0#A51vdp8a3LhASAK9QonbSw",
+      "size": "59.0 MiB",
+      "sha256": "83845133c0e7db51c00cecdc9329b09852d4c8b7069b3d2b1ae90811767a857d"
     }
   ]
 }

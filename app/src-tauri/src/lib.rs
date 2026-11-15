@@ -741,6 +741,10 @@ fn store_search(state: State<'_, AppState>, query: String, source: String, limit
             let items = godsend_core::sources::ia_search(&q, 40)?;
             Ok(serde_json::json!({ "kind": "ia", "items": items }))
         }
+        "minerva" => {
+            let sets = godsend_core::sources::minerva_sets()?;
+            Ok(serde_json::json!({ "kind": "minerva", "items": sets }))
+        }
         _ => {
             let hits = godsend_core::sources::gamesearch(&config.gamesearch_base, &query, limit.max(1).min(60))?;
             // record into the catalog db (PPSSPP-style)
@@ -771,6 +775,7 @@ fn store_detail(state: State<'_, AppState>, source: String, id: String) -> Resul
             let files = godsend_core::sources::ia_item_files(&id)?;
             Ok(serde_json::json!({ "kind": "ia", "files": files }))
         }
+        "minerva" => Ok(serde_json::json!({ "kind": "minerva", "files": [] })),
         _ => {
             let hit = godsend_core::sources::gamesearch_detail(&config.gamesearch_base, &id)?;
             Ok(serde_json::json!({ "kind": "gamesearch", "hit": hit }))
@@ -783,6 +788,25 @@ fn store_download(app: AppHandle, state: State<'_, AppState>, source: String, id
     let config = state.config();
     let app2 = app.clone();
     let job_id = match source.as_str() {
+        "minerva" => {
+            let url = godsend_core::sources::minerva_download(&id)
+                .ok_or_else(|| Error::Invalid("bad minerva id".into()))?;
+            let label = id.clone();
+            let dest_dir = godsend_core::aria2::download_dir(&config);
+            state.jobs.spawn(
+                "download",
+                &format!("torrent {label}"),
+                move |job| {
+                    let _ = app2.emit("job://done", job);
+                },
+                move |ctx| {
+                    ctx.check_cancel()?;
+                    let path = godsend_core::aria2::download(&url, &dest_dir, &label, &config, ctx)?;
+                    ctx.message(format!("torrent saved to {}", path.display()));
+                    Ok(())
+                },
+            )
+        }
         "ia" => {
             // id = "<item>/<file name>"; resolve to a direct IA url
             let (item, file) = id.split_once('/').ok_or_else(|| Error::Invalid("bad ia id".into()))?;
@@ -808,6 +832,7 @@ fn store_download(app: AppHandle, state: State<'_, AppState>, source: String, id
                 },
             )
         }
+        "minerva" => Ok(serde_json::json!({ "kind": "minerva", "files": [] })),
         _ => {
             let hit = godsend_core::sources::gamesearch_detail(&config.gamesearch_base, &id)?;
             let label = hit.title.clone();
