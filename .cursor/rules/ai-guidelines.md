@@ -30,7 +30,11 @@ and raw hex in components is banned.
 6. Design: follow DESIGN.md tokens and motion rules; respect the
    reduced-motion kill switch; keep state chips dot+word so nothing is
    color-only.
-7. Tests: `cargo test --workspace` covers the binary format parsers and the
+7. Releases: after `scripts/publish-release.sh`, verify the live site feed
+   (`downloads.json?v=<timestamp>`) reports the new version. Local files or
+   a pushed commit are not proof; GitHub Pages caches for ten minutes and
+   the site must fetch the feed cache-busted.
+8. Tests: `cargo test --workspace` covers the binary format parsers and the
    job manager; `npx playwright test` covers the UI via the mock bridge.
    Both must pass before any commit that touches product code.
 

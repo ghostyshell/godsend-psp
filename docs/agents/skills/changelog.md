@@ -37,3 +37,9 @@
 
 `scripts/publish-release.sh` reads the version from `tauri.conf.json` and
 uploads that build to GoFile and file.kiwi. Bump first, publish second.
+
+The script also rewrites the README table and `docs/downloads.json`, then
+verifies the live site feed with a cache-busted request
+(`downloads.json?v=<timestamp>`). A release is only complete when that
+check reports the new version; Pages caches the feed for 600 seconds and
+the site page must fetch it with cache busting.

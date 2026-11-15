@@ -2,6 +2,12 @@
 
 All notable changes to GODsend PSP. Newest first.
 
+## [0.2.2] - 2026-11-15
+
+### Fixed
+
+- Site download table served stale links: the page now cache-busts downloads.json, the publish script verifies the live feed, and the release rule requires that check.
+
 ## [0.2.1] - 2026-11-15
 
 ### Added

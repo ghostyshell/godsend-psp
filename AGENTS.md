@@ -39,6 +39,13 @@ offers GODsend 360 style features for the PSP.
 - Savedata operations must skip `ARK_01234` (CFW payload, not a save).
 - Installs prune `__MACOSX`, `._*` and `.DS_Store` from the stick (ARK-4
   ships the same fix on-console; do it at the source).
+- **Releases are not done until the live feed proves it.** After running
+  `scripts/publish-release.sh`, confirm
+  `https://ghostyshell.github.io/godsend-psp/downloads.json` (cache-busted)
+  reports the new version. The script performs this check itself; never
+  declare a release complete from the local files alone. Site pages must
+  fetch the feed with a cache-busting query, because Pages serves it with a
+  600s cache.
 - Destructive operations (game/image/save/theme delete, CFW install) need
   an explicit user confirmation in the UI.
 

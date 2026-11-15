@@ -143,7 +143,7 @@
 </footer>
 
 <script>
-fetch("downloads.json").then(r => r.json()).then(data => {
+fetch("downloads.json?v=" + Date.now(), { cache: "no-store" }).then(r => r.json()).then(data => {
   const el = document.getElementById("downloads-table");
   if (!data.artifacts || !data.artifacts.length) return;
   let html = '<table><thead><tr><th>Build</th><th>GoFile</th><th>file.kiwi</th><th>Size</th></tr></thead><tbody>';

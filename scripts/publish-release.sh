@@ -201,6 +201,21 @@ README table is repointed at the fresh mirrors." || die "git commit failed"
   else
     git push -q origin main || die "git push failed"
     log "pushed refreshed ${V} links"
+    # Prove the live site actually serves the new feed. Pages caches for ten
+    # minutes, so a cache-busted request is the only reliable check.
+    log "verifying the live site feed"
+    sleep 20
+    LIVE=$(curl -fsS "https://ghostyshell.github.io/godsend-psp/downloads.json?v=$(date +%s)" 2>/dev/null \
+      | python3 -c 'import json,sys
+try:
+    print(json.load(sys.stdin).get("version",""))
+except Exception:
+    print("")' 2>/dev/null || true)
+    if [ "$LIVE" = "$V" ]; then
+      log "live site feed serves $V"
+    else
+      log "WARNING: live site feed shows '${LIVE:-unknown}' - Pages may need a minute; re-run to confirm"
+    fi
   fi
 fi
 
