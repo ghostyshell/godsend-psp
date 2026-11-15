@@ -1518,7 +1518,7 @@ dependencies = [
 
 [[package]]
 name = "godsend-core"
-version = "0.2.26"
+version = "0.2.27"
 dependencies = [
  "directories",
  "flate2",
@@ -1533,7 +1533,7 @@ dependencies = [
 
 [[package]]
 name = "godsend-psp-app"
-version = "0.2.26"
+version = "0.2.27"
 dependencies = [
  "base64 0.22.1",
  "godsend-core",
@@ -1550,7 +1550,7 @@ dependencies = [
 
 [[package]]
 name = "godsend-psp-cli"
-version = "0.2.26"
+version = "0.2.27"
 dependencies = [
  "clap",
  "godsend-core",

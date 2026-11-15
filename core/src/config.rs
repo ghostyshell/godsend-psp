@@ -79,7 +79,7 @@ impl Default for Config {
             download_dir: String::new(),
             rd_api_key: String::new(),
             tb_api_key: String::new(),
-            gamesearch_base: "http://localhost:3011".into(),
+            gamesearch_base: "https://debrid.link/api".into(),
             ia_access_key: String::new(),
             ia_secret_key: String::new(),
             ia_email: String::new(),
@@ -116,6 +116,10 @@ pub fn config_path() -> PathBuf {
     data_dir().join("config.json")
 }
 
+pub fn secrets_path() -> PathBuf {
+    data_dir().join("secrets.json")
+}
+
 pub fn jobs_path() -> PathBuf {
     data_dir().join("jobs.json")
 }
@@ -127,13 +131,35 @@ pub fn catalog_cache_path() -> PathBuf {
 impl Config {
     pub fn load() -> Config {
         let path = config_path();
-        match fs::read(&path) {
+        let mut cfg = match fs::read(&path) {
             Ok(bytes) => serde_json::from_slice(&bytes).unwrap_or_else(|e| {
                 tracing::warn!("config at {} is corrupt ({}), using defaults", path.display(), e);
                 Config::default()
             }),
             Err(_) => Config::default(),
+        };
+        // Credentials also live in secrets.json, so an updated config (or a
+        // reset one) never loses connected accounts.
+        let secrets = read_secrets();
+        if cfg.rd_api_key.is_empty() {
+            cfg.rd_api_key = secrets.rd_api_key;
         }
+        if cfg.tb_api_key.is_empty() {
+            cfg.tb_api_key = secrets.tb_api_key;
+        }
+        if cfg.ia_access_key.is_empty() {
+            cfg.ia_access_key = secrets.ia_access_key;
+        }
+        if cfg.ia_secret_key.is_empty() {
+            cfg.ia_secret_key = secrets.ia_secret_key;
+        }
+        if cfg.ia_email.is_empty() {
+            cfg.ia_email = secrets.ia_email;
+        }
+        if cfg.ia_password.is_empty() {
+            cfg.ia_password = secrets.ia_password;
+        }
+        cfg
     }
 
     pub fn save(&self) -> Result<()> {
@@ -143,7 +169,7 @@ impl Config {
         }
         let bytes = serde_json::to_vec_pretty(self)?;
         fs::write(path, bytes)?;
-        Ok(())
+        write_secrets(self)
     }
 
     /// Overwrite only the fields present in `patch` (a partial JSON object).
@@ -199,6 +225,51 @@ pub fn ensure_dirs() -> Result<()> {
     for dir in [data_dir(), cache_dir(), icons_cache_dir()] {
         fs::create_dir_all(&dir)?;
         probe_writable(&dir)?;
+    }
+    Ok(())
+}
+
+#[derive(Default, serde::Serialize, serde::Deserialize)]
+struct Secrets {
+    #[serde(default)]
+    rd_api_key: String,
+    #[serde(default)]
+    tb_api_key: String,
+    #[serde(default)]
+    ia_access_key: String,
+    #[serde(default)]
+    ia_secret_key: String,
+    #[serde(default)]
+    ia_email: String,
+    #[serde(default)]
+    ia_password: String,
+}
+
+fn read_secrets() -> Secrets {
+    fs::read(secrets_path())
+        .ok()
+        .and_then(|b| serde_json::from_slice(&b).ok())
+        .unwrap_or_default()
+}
+
+fn write_secrets(cfg: &Config) -> Result<()> {
+    let path = secrets_path();
+    if let Some(parent) = path.parent() {
+        fs::create_dir_all(parent)?;
+    }
+    let secrets = Secrets {
+        rd_api_key: cfg.rd_api_key.clone(),
+        tb_api_key: cfg.tb_api_key.clone(),
+        ia_access_key: cfg.ia_access_key.clone(),
+        ia_secret_key: cfg.ia_secret_key.clone(),
+        ia_email: cfg.ia_email.clone(),
+        ia_password: cfg.ia_password.clone(),
+    };
+    fs::write(&path, serde_json::to_vec_pretty(&secrets)?)?;
+    #[cfg(unix)]
+    {
+        use std::os::unix::fs::PermissionsExt;
+        let _ = fs::set_permissions(&path, fs::Permissions::from_mode(0o600));
     }
     Ok(())
 }

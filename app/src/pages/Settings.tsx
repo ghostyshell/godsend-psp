@@ -137,6 +137,38 @@ export default function Settings({ snap, reload, toast, refreshKey }: PageProps)
           config and are kept out of job errors.
         </p>
         <div className="field">
+          <label>Internet Archive username</label>
+          <input
+            type="text"
+            defaultValue={config.ia_email}
+            placeholder="archive.org account email"
+            onBlur={async (e) => {
+              if (e.target.value !== config.ia_email) {
+                await api.configSet({ ia_email: e.target.value.trim() } as never);
+                toast("Internet Archive username saved");
+              }
+            }}
+            style={inputStyle}
+          />
+        </div>
+        <div className="field">
+          <label>Internet Archive password</label>
+          <div style={{ display: "flex", gap: 8 }}>
+            <input
+              type="password"
+              defaultValue=""
+              placeholder={config.ia_password ? "saved" : "archive.org password"}
+              onBlur={async (e) => {
+                if (e.target.value) {
+                  await api.configSet({ ia_password: e.target.value } as never);
+                  toast("Internet Archive password saved");
+                }
+              }}
+              style={inputStyle}
+            />
+          </div>
+        </div>
+        <div className="field">
           <label>Internet Archive access key</label>
           <div style={{ display: "flex", gap: 8 }}>
             <input
@@ -428,7 +460,7 @@ export default function Settings({ snap, reload, toast, refreshKey }: PageProps)
           <Btn onClick={() => void api.openDataDir()}>Open Data Folder</Btn>
         </div>
         <p style={{ margin: "12px 0 0", fontSize: 12.5, color: "var(--text-faint)" }}>
-          godsend-psp 0.2.26 - Rust engine + Tauri. USB mass storage, no drivers.
+          godsend-psp 0.2.27 - Rust engine + Tauri. USB mass storage, no drivers.
         </p>
       </section>
     </div>

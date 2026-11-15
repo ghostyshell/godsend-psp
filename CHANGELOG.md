@@ -3,6 +3,9 @@
 All notable changes to GODsend PSP. Newest first.
 
 
+## [0.2.27] - 2026-11-16
+
+
 ## [0.2.26] - 2026-11-15
 
 
@@ -171,6 +174,13 @@ All notable changes to GODsend PSP. Newest first.
 
 
 ## [0.2.4] - 2026-11-15
+
+### Fixed
+
+- Store source default points at production: https://debrid.link/api.
+- Internet Archive sign-in takes a username and password (plus the optional
+  S3 key pair), and all credentials are mirrored to secrets.json (0600) so
+  installing a new build no longer loses Real-Debrid, TorBox or IA accounts.
 
 ### Fixed
 
