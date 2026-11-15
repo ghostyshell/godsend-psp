@@ -47,6 +47,18 @@ const config = {
   ffmpeg_path: "",
   ffprobe_path: "",
   cso_level: 6,
+  download_dir: "",
+  rd_api_key: "",
+  tb_api_key: "",
+  gamesearch_base: "http://localhost:3011",
+  ia_access_key: "",
+  ia_secret_key: "",
+  ia_email: "",
+  ia_password: "",
+  covers_base: "",
+  mods_base: "",
+  mcp_enabled: true,
+  mcp_port: 8849,
 };
 
 const games = [
@@ -315,29 +327,61 @@ async function invoke(cmd: string, args: Record<string, any> = {}): Promise<unkn
     case "debrid_status":
       return { realdebrid: true, torbox: false };
     case "store_search":
+      if (args.source === "ia") {
+        return {
+          kind: "ia",
+          items: [
+            { id: "psp-iso-collection", title: "PSP ISO Collection", files_count: 240, size_bytes: 180 * GB },
+            { id: "psp-rom-set", title: "PSP ROM Set (megathread)", files_count: 620, size_bytes: 420 * GB },
+          ],
+        };
+      }
+      if (args.source === "rroms") {
+        return {
+          kind: "rroms",
+          items: [
+            { id: "sony_playstation_portable_part1", title: "PSP Redump .iso (Part 1)", url: "https://archive.org/download/sony_playstation_portable_part1", kind: "ia_item" },
+            { id: "PSP-DLC/PSP DLC", title: "PSP DLC", url: "https://archive.org/download/PSP-DLC/PSP%20DLC/", kind: "ia_item" },
+            { id: "psp-homebrew-pack.zip", title: "PSP homebrew pack", url: "https://example.invalid/psp-homebrew-pack.zip", kind: "zip" },
+          ],
+        };
+      }
+      if (args.source === "nps") {
+        return {
+          kind: "nps",
+          items: [
+            { title_id: "UCUS98662", title: "LocoRoco", region: "US", url: "https://example.invalid/UCUS98662.pkg", size_bytes: 340 * MB, zrif: "6A1B2C3D4E5F60718293A4B5C6D7E8F9" },
+            { title_id: "UCUS98731", title: "LocoRoco 2", region: "US", url: "https://example.invalid/UCUS98731.pkg", size_bytes: 640 * MB, zrif: null },
+          ],
+        };
+      }
       return {
-        kind: args.source === "ia" ? "ia" : "gamesearch",
-        items:
-          args.source === "ia"
-            ? [
-                { id: "psp-iso-collection", title: "PSP ISO Collection", files_count: 240, size_bytes: 180 * GB },
-                { id: "psp-rom-set", title: "PSP ROM Set (megathread)", files_count: 620, size_bytes: 420 * GB },
-              ]
-            : [
-                { id: "1", slug: "locoroco-2", title: "LocoRoco 2", platform: "psp", source: "minerva",
-                  host: "minerva-archive.org", url: "https://example.invalid/locoroco2.zip", linkType: "ddl",
-                  supportedBy: ["torbox", "realdebrid"], cover: null, size: 640 * MB,
-                  links: [{ host: "minerva-archive.org", url: "https://example.invalid/locoroco2.zip", linkType: "ddl", supportedBy: ["torbox", "realdebrid"] }] },
-                { id: "2", slug: "wipeout-pure", title: "Wipeout Pure", platform: "psp", source: "rroms",
-                  host: "rroms.org", url: "magnet:?xt=urn:btih:demo", linkType: "magnet",
-                  supportedBy: ["torbox", "realdebrid"], cover: null, size: 420 * MB,
-                  links: [{ host: "rroms.org", url: "magnet:?xt=urn:btih:demo", linkType: "magnet", supportedBy: ["torbox", "realdebrid"] }] },
-              ],
+        kind: "gamesearch",
+        items: [
+          { id: "1", slug: "locoroco-2", title: "LocoRoco 2", platform: "psp", source: "minerva",
+            host: "minerva-archive.org", url: "https://example.invalid/locoroco2.zip", linkType: "ddl",
+            supportedBy: ["torbox", "realdebrid"], cover: null, size: 640 * MB,
+            links: [{ host: "minerva-archive.org", url: "https://example.invalid/locoroco2.zip", linkType: "ddl", supportedBy: ["torbox", "realdebrid"] }] },
+          { id: "2", slug: "wipeout-pure", title: "Wipeout Pure", platform: "psp", source: "rroms",
+            host: "rroms.org", url: "magnet:?xt=urn:btih:demo", linkType: "magnet",
+            supportedBy: ["torbox", "realdebrid"], cover: null, size: 420 * MB,
+            links: [{ host: "rroms.org", url: "magnet:?xt=urn:btih:demo", linkType: "magnet", supportedBy: ["torbox", "realdebrid"] }] },
+        ],
       };
     case "store_detail":
-      return args.source === "ia"
-        ? { kind: "ia", files: [{ name: "LocoRoco 2 (USA).iso", size_bytes: 640 * MB, url: "https://example.invalid/x.iso" }] }
-        : { kind: "gamesearch", hit: null };
+      if (args.source === "ia") {
+        return { kind: "ia", files: [{ name: "LocoRoco 2 (USA).iso", size_bytes: 640 * MB, url: "https://example.invalid/x.iso" }] };
+      }
+      if (args.source === "rroms") {
+        return {
+          kind: "rroms",
+          files: [
+            { name: "LocoRoco 2 (USA).zip", size_bytes: 640 * MB, url: "https://example.invalid/locoroco2.zip" },
+            { name: "Wipeout Pure (USA).zip", size_bytes: 420 * MB, url: "https://example.invalid/wipeout.zip" },
+          ],
+        };
+      }
+      return { kind: "gamesearch", hit: null };
     case "store_download":
       return startJob("download", String(args.id));
     case "downloads_list":

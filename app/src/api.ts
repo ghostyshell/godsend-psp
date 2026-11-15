@@ -104,7 +104,7 @@ export const api = {
 
   // store / debrid / downloads / files / catalog
   debridStatus: () => invoke<import("./types").DebridStatus>("debrid_status"),
-  storeSearch: (query: string, source: "gamesearch" | "ia" | "minerva") =>
+  storeSearch: (query: string, source: "gamesearch" | "ia" | "minerva" | "rroms" | "nps") =>
     invoke<import("./types").StoreResult>("store_search", { query, source, limit: 40 }),
   storeDetail: (source: string, id: string) =>
     invoke<import("./types").StoreResult>("store_detail", { source, id }),

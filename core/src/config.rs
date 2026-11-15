@@ -42,6 +42,14 @@ pub struct Config {
     pub tb_api_key: String,
     /// game-search service base URL (the debrid.link-style index).
     pub gamesearch_base: String,
+    /// Internet Archive S3 access key, for items that need a signed download.
+    pub ia_access_key: String,
+    /// Internet Archive S3 secret key. Never log this value.
+    pub ia_secret_key: String,
+    /// Internet Archive account email. Reserved for cookie-based access.
+    pub ia_email: String,
+    /// Internet Archive account password. Reserved; never log this value.
+    pub ia_password: String,
     /// Public cover base. Default is the production covers host; empty falls
     /// back to catalog cover URLs only.
     pub covers_base: String,
@@ -72,6 +80,10 @@ impl Default for Config {
             rd_api_key: String::new(),
             tb_api_key: String::new(),
             gamesearch_base: "http://localhost:3011".into(),
+            ia_access_key: String::new(),
+            ia_secret_key: String::new(),
+            ia_email: String::new(),
+            ia_password: String::new(),
             covers_base: "https://covers.debrid.in".into(),
             mods_base: "https://psp-mods.debrid.in".into(),
             mcp_enabled: true,
@@ -145,6 +157,23 @@ impl Config {
         *self = next;
         self.save()
     }
+
+    /// True when both Internet Archive S3 keys are set.
+    pub fn ia_keys_set(&self) -> bool {
+        !self.ia_access_key.is_empty() && !self.ia_secret_key.is_empty()
+    }
+
+    /// Strip the Internet Archive credentials from any text headed for a log
+    /// or an error message (aria2c echoes the request URL on failure).
+    pub fn redact(&self, text: &str) -> String {
+        let mut out = text.to_string();
+        for secret in [&self.ia_secret_key, &self.ia_access_key] {
+            if secret.len() >= 4 {
+                out = out.replace(secret.as_str(), "***");
+            }
+        }
+        out
+    }
 }
 
 /// Shallow-merge `patch` over `base` (recursively for nested objects).
@@ -193,5 +222,18 @@ mod tests {
         assert_eq!(cfg.music_format, "m4a");
         assert_eq!(cfg.cso_level, 9);
         assert_eq!(cfg.video_preset, "veryslow");
+    }
+
+    #[test]
+    fn ia_secrets_redact() {
+        let mut cfg = Config::default();
+        cfg.ia_access_key = "ACCESS1234".into();
+        cfg.ia_secret_key = "SECRET9876".into();
+        let text = "https://archive.org/download/x.iso?access_key=ACCESS1234&secret_key=SECRET9876";
+        let clean = cfg.redact(text);
+        assert!(!clean.contains("ACCESS1234"));
+        assert!(!clean.contains("SECRET9876"));
+        assert!(clean.contains("archive.org"));
+        assert!(cfg.ia_keys_set());
     }
 }
