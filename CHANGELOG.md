@@ -60,6 +60,12 @@ All notable changes to GODsend PSP. Newest first.
 
 ### Fixed
 
+- Publish polls the CI run and fetches each artifact archive individually
+  with overwrite-tolerant extraction, so the blocking watch and the
+  duplicate-entry Windows zip can no longer stall a release.
+
+### Fixed
+
 - Installer DMG attach uses an explicit mountpoint (the old field parse
   broke on the space in "GODsend PSP") and convert retries before failing.
 - fetch-ffmpeg no longer renames the binary onto itself on non-Windows

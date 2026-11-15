@@ -83,12 +83,28 @@ else
   done
   [ -n "$RUN_ID" ] || die "the dispatched build never appeared"
   log "waiting for CI run $RUN_ID"
-  gh run watch "$RUN_ID" --repo "$SLUG" --exit-status >/dev/null 2>&1 \
-    || die "CI run $RUN_ID did not succeed"
+  STATUS=""
+  for _ in $(seq 1 160); do
+    STATUS=$(gh run view "$RUN_ID" --repo "$SLUG" --json status,conclusion --jq '.status+"/"+(.conclusion//"-")')
+    case "$STATUS" in
+      completed/success) break ;;
+      completed/*) die "CI run $RUN_ID: $STATUS" ;;
+    esac
+    sleep 15
+  done
+  [ "$STATUS" = "completed/success" ] || die "CI run $RUN_ID timed out"
   rm -rf "$DIST"
-  mkdir -p "$DIST"
-  gh run download "$RUN_ID" --repo "$SLUG" --dir "$DIST" \
-    || die "artifact download failed"
+  mkdir -p "$DIST/raw"
+  gh api "repos/$SLUG/actions/runs/$RUN_ID/artifacts" --jq '.artifacts[] | .name + " " + (.id|tostring)' > "$DIST/arts.txt"
+  while read -r name id; do
+    gh api "repos/$SLUG/actions/artifacts/$id/zip" > "$DIST/$name.zip" 2>/dev/null \
+      && unzip -oq "$DIST/$name.zip" -d "$DIST/raw" \
+      || die "artifact $name failed"
+  done < "$DIST/arts.txt"
+  find "$DIST/raw" -type f \( -name "*.dmg" -o -name "*.exe" -o -name "*.AppImage" \
+    -o -name "*.deb" -o -name "*.tar.gz" -o -name "godsend-psp-cli-*.zip" \) \
+    -exec mv {} "$DIST/" \;
+  rm -rf "$DIST/raw" "$DIST"/*.zip "$DIST/arts.txt"
   # Flatten the per-OS subdirectories.
   find "$DIST" -mindepth 2 -type f -exec mv {} "$DIST/" \; 2>/dev/null || true
   find "$DIST" -mindepth 1 -type d -empty -delete 2>/dev/null || true
