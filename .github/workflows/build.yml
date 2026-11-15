@@ -29,6 +29,8 @@ jobs:
         run: npm ci --no-fund --no-audit
       - name: Unit tests
         run: cargo test --workspace
+      - name: Fetch bundled ffmpeg
+        run: ./scripts/fetch-ffmpeg.sh darwin-${{ matrix.name }}
       - name: Build app bundle
         working-directory: app
         run: npx tauri build --bundles app --target ${{ matrix.target }}
@@ -73,6 +75,8 @@ jobs:
         run: npm ci --no-fund --no-audit
       - name: Unit tests
         run: cargo test --workspace
+      - name: Fetch bundled ffmpeg
+        run: ./scripts/fetch-ffmpeg.sh linux-x64
       - name: Build bundles
         working-directory: app
         run: npx tauri build --bundles deb,appimage
@@ -101,6 +105,9 @@ jobs:
         run: npm ci --no-fund --no-audit
       - name: Unit tests
         run: cargo test --workspace
+      - name: Fetch bundled ffmpeg
+        shell: bash
+        run: ./scripts/fetch-ffmpeg.sh win32-x64
       - name: Build installer
         working-directory: app
         shell: bash

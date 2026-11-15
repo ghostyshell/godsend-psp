@@ -3,6 +3,13 @@
 All notable changes to GODsend PSP. Newest first.
 
 
+## [0.2.4] - 2026-11-15
+
+### Changed
+
+- library covers keep their full aspect, the rail uses real icons, and the PSP tab lists ISO/CSO images from the stick
+
+
 ## [0.2.3] - 2026-11-15
 
 ### Changed

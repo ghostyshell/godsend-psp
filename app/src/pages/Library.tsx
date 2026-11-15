@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { api } from "../api";
-import type { GameEntry, GameInfo, LocalGame } from "../types";
+import type { DiscImage, GameEntry, GameInfo, LocalGame } from "../types";
 import type { PageProps } from "../App";
 import { Btn, Chip, Empty, Seg, fmtBytes } from "../ui";
 
@@ -10,6 +10,7 @@ export default function Library({ snap, toast, refreshKey }: PageProps) {
   const [tab, setTab] = useState<Tab>("psp");
   const [games, setGames] = useState<GameEntry[]>([]);
   const [local, setLocal] = useState<LocalGame[]>([]);
+  const [images, setImages] = useState<DiscImage[]>([]);
   const [covers, setCovers] = useState<Record<string, string>>({});
   const [selected, setSelected] = useState<{ serial: string; title: string; info: GameInfo | null } | null>(null);
   const connected = !!snap.volumes.find((v) => v.is_psp);
@@ -19,6 +20,7 @@ export default function Library({ snap, toast, refreshKey }: PageProps) {
       .libraryScan()
       .then(async (lib) => {
         setGames(lib.games);
+        setImages(lib.images);
         const entries = await Promise.all(
           lib.games.map(async (g) => [g.id, await api.cover(g.id, g.title_id ?? undefined)] as const)
         );
@@ -101,6 +103,33 @@ export default function Library({ snap, toast, refreshKey }: PageProps) {
         />
       ) : (
         <div className="rows">
+          {images.length > 0 ? (
+            <>
+              <div className="section-caption">ISO / CSO on the stick</div>
+              {images.map((image) => (
+                <div className="row" key={image.id}>
+                  <Chip tone={image.format === "iso" ? "laser" : "neutral"}>{image.format}</Chip>
+                  <div className="grow">
+                    <div className="title">{image.title ?? image.file}</div>
+                    <div className="sub">
+                      {image.file}
+                      {image.title_id ? ` - ${image.title_id}` : ""}
+                    </div>
+                  </div>
+                  <span className="size">{fmtBytes(image.size_bytes)}</span>
+                  <Btn
+                    small
+                    onClick={async () => {
+                      await api.fmFromPsp(`iso/${image.file}`);
+                      toast(`copying ${image.file} to local`);
+                    }}
+                  >
+                    To Local
+                  </Btn>
+                </div>
+              ))}
+            </>
+          ) : null}
           {local.map((item) => (
             <div className="row" key={item.id}>
               <Chip tone={item.kind === "iso" || item.kind === "cso" ? "laser" : "neutral"}>

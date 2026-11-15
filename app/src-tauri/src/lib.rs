@@ -18,7 +18,7 @@ use serde::Serialize;
 use std::path::{Path, PathBuf};
 use std::sync::atomic::AtomicBool;
 use std::sync::{Arc, Mutex};
-use tauri::{AppHandle, Emitter, State};
+use tauri::{AppHandle, Emitter, Manager, State};
 
 /// Shared app state.
 pub struct AppState {
@@ -1134,6 +1134,23 @@ pub fn run() {
         .plugin(tauri_plugin_process::init())
         .manage(AppState::new())
         .setup(|app| {
+            // Bundled ffmpeg/ffprobe (shipped in the resource dir, per arch).
+            if let Ok(res) = app.path().resource_dir() {
+                let state = app.state::<AppState>();
+                let mut cfg = state.config.lock().expect("config lock");
+                if cfg.ffmpeg_path.is_empty() {
+                    let p = res.join(if cfg!(windows) { "ffmpeg.exe" } else { "ffmpeg" });
+                    if p.is_file() {
+                        cfg.ffmpeg_path = p.to_string_lossy().to_string();
+                    }
+                }
+                if cfg.ffprobe_path.is_empty() {
+                    let p = res.join(if cfg!(windows) { "ffprobe.exe" } else { "ffprobe" });
+                    if p.is_file() {
+                        cfg.ffprobe_path = p.to_string_lossy().to_string();
+                    }
+                }
+            }
             let handle = app.handle().clone();
             set_progress_hook(Some(Arc::new(move |job_id, done, total| {
                 let _ = handle.emit(
