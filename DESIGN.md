@@ -1,8 +1,7 @@
 # GODsend PSP design system
 
-The "midnight console" look: this app shares a design family with GODsend 360
-and Keepsake Atelier. Near-black ink, one laser accent spectrum, brass as the
-single warm note, hairline glass surfaces, monospaced data, staggered
+The "midnight console" look: near-black ink, one laser accent spectrum, brass
+as the single warm note, hairline glass surfaces, monospaced data, staggered
 entrances, and a hard reduced-motion kill switch.
 
 Everything below is implemented in `app/src/styles.css`. Tokens live on
