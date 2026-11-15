@@ -26,8 +26,8 @@ GODsend 360 and Keepsake Atelier, built on the Keepsake Atelier code stack
 | `godsend-psp-cli-0.2.0-macos-x64.tar.gz` | [Download](https://gofile.io/d/EySNscxt) | [Mirror](https://file.kiwi/93098dab#sOUaypdzRStfi7BwcnqVZA) | 1.9 MiB |
 | `godsend-psp-cli-0.2.0-windows-x64.zip` | [Download](https://gofile.io/d/6obbEvaa) | [Mirror](https://file.kiwi/3f349b05#yYmLK0BWGgAwJBjNSx-oUQ) | 2.0 MiB |
 | `godsend-psp-0.2.0-linux-x64.deb` | [Download](https://gofile.io/d/kbQUKWVa) | [Mirror](https://file.kiwi/90a41ae0#rxM10pDAC1EzjtzIDDxwVw) | 5.0 MiB |
-| `godsend-psp-0.2.0-arm64.dmg` | [Download](https://gofile.io/d/0LqKkKCe) | [Mirror](https://file.kiwi/160724c2#loDH2ewg6pu5WN1cLJDU0w) | 4.4 MiB |
-| `godsend-psp-0.2.0-x64.dmg` | [Download](https://gofile.io/d/0CfpuILX) | [Mirror](https://file.kiwi/795ae981#NynZAZDnErRtOqNX0BjmWA) | 4.7 MiB |
+| `godsend-psp-0.2.0-arm64.dmg` | [Download](https://gofile.io/d/3tAjVvXu) | [Mirror](https://file.kiwi/726115d2#gvM-M4If44nYmX_j0yDzKg) | 5.1 MiB |
+| `godsend-psp-0.2.0-x64.dmg` | [Download](https://gofile.io/d/wqUxMG0z) | [Mirror](https://file.kiwi/4cb66948#8rXo7ygNQoAP4H1wzr1ghA) | 5.5 MiB |
 | `godsend-psp-0.2.0-x64-setup.exe` | [Download](https://gofile.io/d/nme2j4Rn) | [Mirror](https://file.kiwi/bb8dcbec#CwlnMbJ1EacKkWRAqt61Dw) | 3.3 MiB |
 <!-- downloads:end -->
 
