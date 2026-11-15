@@ -12,3 +12,7 @@ screens/
 test-results/
 playwright-report/
 .release-links-*.txt
+
+.gofile-io-token
+.release-publish.lock
+.release-refresh.log
