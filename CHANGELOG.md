@@ -3,6 +3,19 @@
 All notable changes to GODsend PSP. Newest first.
 
 
+## [0.2.16] - 2026-11-15
+
+### Changed
+
+- The site page carries a canonical URL, Open Graph and Twitter cards, and
+  SoftwareApplication structured data, plus a robots.txt and sitemap. Its
+  favicon is now a 3.5 KB SVG mark instead of the 548 KB app icon, and the
+  header mark is a 2.5 KB 64px copy. The header gained a real mobile menu,
+  cards and screenshots rise in on scroll (scroll-driven CSS, no JavaScript),
+  focus rings are visible, and the screenshot viewer dims the page behind it,
+  locks scrolling and returns focus on close.
+
+
 ## [0.2.15] - 2026-11-15
 
 ### Added
