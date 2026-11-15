@@ -1,1 +1,20 @@
-[]
+[
+  {
+    "name": "Blade_660.ctf",
+    "url": "https://psp-mods.debrid.in/psp/files/Blade_660.ctf",
+    "format": "ctf",
+    "size_bytes": 1818578
+  },
+  {
+    "name": "Blade_661.ctf",
+    "url": "https://psp-mods.debrid.in/psp/files/Blade_661.ctf",
+    "format": "ctf",
+    "size_bytes": 1818578
+  },
+  {
+    "name": "xbox_360_660_classic.ctf",
+    "url": "https://psp-mods.debrid.in/psp/files/xbox_360_660_classic.ctf",
+    "format": "ctf",
+    "size_bytes": 3901871
+  }
+]
