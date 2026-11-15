@@ -185,6 +185,64 @@ pub fn cover_bytes(config: &Config, serial: &str, fallback_url: &str) -> Option<
     Some(bytes)
 }
 
+/// Resolve a cover for a device game: the configured R2 base first, then the
+/// game-search index (rawgCover), then nothing. Results are cached on disk.
+pub fn remote_cover(config: &Config, serial: &str, title: &str) -> Option<Vec<u8>> {
+    let key = if serial.is_empty() { title } else { serial };
+    if key.is_empty() {
+        return None;
+    }
+    fs::create_dir_all(covers_cache_dir()).ok()?;
+    let cache = covers_cache_dir().join(format!("{}.png", sanitize(key)));
+    if let Ok(bytes) = fs::read(&cache) {
+        return Some(bytes);
+    }
+    let mut candidates: Vec<String> = Vec::new();
+    if let Some(url) = cover_url(config, serial) {
+        candidates.push(url);
+    }
+    // Ask the index by title when no base is configured (or it missed).
+    if !config.gamesearch_base.is_empty() && !title.is_empty() {
+        if let Ok(hits) = crate::sources::gamesearch(&config.gamesearch_base, title, 5) {
+            let needle = title.to_lowercase();
+            for hit in hits.iter().take(5) {
+                if !hit.title.to_lowercase().contains(&needle[..needle.len().min(10)]) {
+                    continue;
+                }
+                if let Some(detail) =
+                    crate::sources::gamesearch_detail(&config.gamesearch_base, &hit.slug).ok()
+                {
+                    if let Some(url) = detail.rawg_cover.or(detail.cover) {
+                        candidates.push(url);
+                        break;
+                    }
+                }
+            }
+        }
+    }
+    let agent = ureq::AgentBuilder::new()
+        .timeout(std::time::Duration::from_secs(20))
+        .build();
+    for url in candidates {
+        let Ok(response) = agent.get(&url).call() else {
+            continue;
+        };
+        let mut bytes: Vec<u8> = Vec::new();
+        if response
+            .into_reader()
+            .take(16 * 1024 * 1024)
+            .read_to_end(&mut bytes)
+            .is_err()
+            || bytes.len() < 1024
+        {
+            continue;
+        }
+        let _ = fs::write(&cache, &bytes);
+        return Some(bytes);
+    }
+    None
+}
+
 fn sanitize(key: &str) -> String {
     key.chars()
         .map(|c| if c.is_ascii_alphanumeric() || c == '-' { c } else { '_' })

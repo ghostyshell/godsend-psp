@@ -118,7 +118,8 @@ export const api = {
   localLibrary: () => invoke<import("./types").LocalGame[]>("local_library"),
   gameInfo: (serial: string, title: string) =>
     invoke<import("./types").GameInfo>("game_info", { serial, title }),
-  cover: (id: string, serial?: string) => invoke<string | null>("cover", { id, serial: serial ?? null }),
+  cover: (id: string, serial?: string, title?: string) =>
+    invoke<string | null>("cover", { id, serial: serial ?? null, title: title ?? null }),
   modsList: (serial: string) => invoke<import("./types").ModEntry[]>("mods_list", { serial }),
   modsInstall: (serial: string, url: string, name: string) =>
     invoke<number>("mods_install", { serial, url, name }),

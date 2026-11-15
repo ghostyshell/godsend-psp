@@ -3,6 +3,9 @@
 All notable changes to GODsend PSP. Newest first.
 
 
+## [0.2.13] - 2026-11-15
+
+
 ## [0.2.12] - 2026-11-15
 
 
@@ -51,6 +54,12 @@ All notable changes to GODsend PSP. Newest first.
 - Video tiles play a cached three second muted clip of the film on hover or
   keyboard focus, extracted with ffmpeg at 240px wide, the way PSP video
   icons animate.
+
+### Added
+
+- Connected-library covers resolve beyond ICON0: the app asks the configured
+  R2 base first, then the game-search index (rawgCover) by title/serial and
+  caches the result, so device games without icons still get real art.
 
 ### Changed
 
