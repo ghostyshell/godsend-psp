@@ -5,6 +5,11 @@ everything on the memory stick from one window. Same family look and feel as
 GODsend 360 and Keepsake Atelier, built on the Keepsake Atelier code stack
 (Rust engine + Tauri 2 + React).
 
+| Console | Homebrew |
+| --- | --- |
+| ![Console](docs/site-console.png) | ![Homebrew](docs/site-homebrew.png) |
+
+
 ## What it does
 
 - **Game library**: scans PSP/GAME and the ISO folder, parses PARAM.SFO and
