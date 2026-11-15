@@ -18,6 +18,9 @@ pub enum Error {
     #[error("http: {0}")]
     Http(String),
 
+    #[error(transparent)]
+    Ureq(#[from] ureq::Error),
+
     #[error("no mounted volume with a PSP folder was found; connect the PSP and enter USB mode")]
     NoDevice,
 

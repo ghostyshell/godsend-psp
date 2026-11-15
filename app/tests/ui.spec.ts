@@ -14,10 +14,21 @@ test("shell landmarks and nav", async ({ page }) => {
   await expect(current).toHaveText(/Console/);
 });
 
-test("games page lists the fixture library", async ({ page }) => {
-  await page.getByRole("button", { name: "Games" }).click();
+test("library page lists the fixture games", async ({ page }) => {
+  await page.getByRole("button", { name: "Library" }).click();
   await expect(page.locator(".tile")).toHaveCount(7);
   await expect(page.locator(".tile .t").first()).toContainText(/God of War/i);
+});
+
+test("store page wires the debrid index", async ({ page }) => {
+  await page.getByRole("button", { name: "Store", exact: true }).click();
+  await expect(page.getByText("LocoRoco 2")).toBeVisible();
+  await expect(page.getByText("Wipeout Pure")).toBeVisible();
+});
+
+test("downloads page lists local files", async ({ page }) => {
+  await page.getByRole("button", { name: "Downloads" }).click();
+  await expect(page.getByText("LocoRoco 2 (USA).iso")).toBeVisible();
 });
 
 test("homebrew catalog renders with install buttons", async ({ page }) => {

@@ -25,6 +25,19 @@ pub struct Config {
     pub ffprobe_path: String,
     /// ISO to CSO compression level (1-9).
     pub cso_level: u32,
+    /// Where store downloads land. Empty = `<Downloads>/godsend-psp`.
+    pub download_dir: String,
+    /// Real-Debrid API key. Empty = not connected.
+    pub rd_api_key: String,
+    /// TorBox API key. Empty = not connected.
+    pub tb_api_key: String,
+    /// game-search service base URL (the debrid.link-style index).
+    pub gamesearch_base: String,
+    /// Public R2 cover/animation base. Empty = rely on catalog cover URLs.
+    pub covers_base: String,
+    /// Mods catalog base (JSON per serial). Empty = mods disabled.
+    pub mods_base: String,
+
 }
 
 impl Default for Config {
@@ -38,6 +51,12 @@ impl Default for Config {
             ffmpeg_path: String::new(),
             ffprobe_path: String::new(),
             cso_level: 6,
+            download_dir: String::new(),
+            rd_api_key: String::new(),
+            tb_api_key: String::new(),
+            gamesearch_base: "http://localhost:3011".into(),
+            covers_base: String::new(),
+            mods_base: String::new(),
         }
     }
 }

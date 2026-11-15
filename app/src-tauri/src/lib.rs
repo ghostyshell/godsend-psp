@@ -688,6 +688,327 @@ fn open_data_dir() -> Result<String> {
     Ok(dir.to_string_lossy().to_string())
 }
 
+// ---------- store / downloads / debrid / files ----------
+
+#[tauri::command]
+fn debrid_status(state: State<'_, AppState>) -> godsend_core::debrid::DebridStatus {
+    let config = state.config();
+    godsend_core::debrid::status(&config.rd_api_key, &config.tb_api_key)
+}
+
+#[tauri::command]
+fn store_search(state: State<'_, AppState>, query: String, source: String, limit: u32) -> Result<serde_json::Value> {
+    let config = state.config();
+    match source.as_str() {
+        "ia" => {
+            let q = if query.is_empty() {
+                godsend_core::sources::ia_seed_queries()[0].to_string()
+            } else {
+                query
+            };
+            let items = godsend_core::sources::ia_search(&q, 40)?;
+            Ok(serde_json::json!({ "kind": "ia", "items": items }))
+        }
+        _ => {
+            let hits = godsend_core::sources::gamesearch(&config.gamesearch_base, &query, limit.max(1).min(60))?;
+            // record into the catalog db (PPSSPP-style)
+            let games = hits
+                .iter()
+                .map(|h| godsend_core::catalog::CatalogGame {
+                    serial: String::new(),
+                    title: h.title.clone(),
+                    region: String::new(),
+                    size_bytes: h.size.unwrap_or(0),
+                    cover: h.cover.clone().unwrap_or_default(),
+                    animation: String::new(),
+                    source: h.source.clone(),
+                    slug: h.slug.clone(),
+                })
+                .collect();
+            let _ = godsend_core::catalog::upsert(games);
+            Ok(serde_json::json!({ "kind": "gamesearch", "items": hits }))
+        }
+    }
+}
+
+#[tauri::command]
+fn store_detail(state: State<'_, AppState>, source: String, id: String) -> Result<serde_json::Value> {
+    let config = state.config();
+    match source.as_str() {
+        "ia" => {
+            let files = godsend_core::sources::ia_item_files(&id)?;
+            Ok(serde_json::json!({ "kind": "ia", "files": files }))
+        }
+        _ => {
+            let hit = godsend_core::sources::gamesearch_detail(&config.gamesearch_base, &id)?;
+            Ok(serde_json::json!({ "kind": "gamesearch", "hit": hit }))
+        }
+    }
+}
+
+#[tauri::command]
+fn store_download(app: AppHandle, state: State<'_, AppState>, source: String, id: String) -> Result<u64> {
+    let config = state.config();
+    let app2 = app.clone();
+    let job_id = match source.as_str() {
+        "ia" => {
+            // id = "<item>/<file name>"; resolve to a direct IA url
+            let (item, file) = id.split_once('/').ok_or_else(|| Error::Invalid("bad ia id".into()))?;
+            let files = godsend_core::sources::ia_item_files(item)?;
+            let hit = files
+                .iter()
+                .find(|f| f.name == file)
+                .ok_or_else(|| Error::NotFound(file.to_string()))?;
+            let url = hit.url.clone();
+            let label = file.to_string();
+            let dest_dir = godsend_core::aria2::download_dir(&config);
+            state.jobs.spawn(
+                "download",
+                &label.clone(),
+                move |job| {
+                    let _ = app2.emit("job://done", job);
+                },
+                move |ctx| {
+                    ctx.check_cancel()?;
+                    let path = godsend_core::aria2::download(&url, &dest_dir, &label, &config, ctx)?;
+                    ctx.message(format!("downloaded {}", path.display()));
+                    Ok(())
+                },
+            )
+        }
+        _ => {
+            let hit = godsend_core::sources::gamesearch_detail(&config.gamesearch_base, &id)?;
+            let label = hit.title.clone();
+            state.jobs.spawn(
+                "download",
+                &label,
+                move |job| {
+                    let _ = app2.emit("job://done", job);
+                },
+                move |ctx| godsend_core::store::download_game(hit, config, ctx).map(|_| ()),
+            )
+        }
+    };
+    Ok(job_id)
+}
+
+#[derive(Serialize)]
+struct DownloadsView {
+    dir: String,
+    files: Vec<godsend_core::fm::FmEntry>,
+}
+
+#[tauri::command]
+fn downloads_list(state: State<'_, AppState>) -> Result<DownloadsView> {
+    let config = state.config();
+    let dir = godsend_core::aria2::download_dir(&config);
+    let files = godsend_core::fm::list_dir(&dir).unwrap_or_default();
+    Ok(DownloadsView {
+        dir: dir.to_string_lossy().to_string(),
+        files,
+    })
+}
+
+#[tauri::command]
+fn download_dir_set(state: State<'_, AppState>, path: String) -> Result<()> {
+    let dir = PathBuf::from(&path);
+    if !dir.is_dir() {
+        return Err(Error::NotFound(path));
+    }
+    state
+        .config
+        .lock()
+        .expect("config lock")
+        .patch_from_json(&serde_json::json!({ "download_dir": path }))?;
+    Ok(())
+}
+
+#[tauri::command]
+fn download_open(state: State<'_, AppState>, name: String) -> Result<String> {
+    let config = state.config();
+    let dir = godsend_core::aria2::download_dir(&config);
+    let path = dir.join(&name);
+    if !path.exists() {
+        return Err(Error::NotFound(name));
+    }
+    reveal_in_finder(&path)?;
+    Ok(path.to_string_lossy().to_string())
+}
+
+#[tauri::command]
+fn download_delete(state: State<'_, AppState>, name: String) -> Result<()> {
+    let config = state.config();
+    let dir = godsend_core::aria2::download_dir(&config);
+    godsend_core::fm::delete_local(&dir.join(&name), &dir)
+}
+
+#[tauri::command]
+fn download_push(app: AppHandle, state: State<'_, AppState>, name: String) -> Result<u64> {
+    let (volume, paths) = state.paths()?;
+    let config = state.config();
+    let local = godsend_core::aria2::download_dir(&config).join(&name);
+    if !local.exists() {
+        return Err(Error::NotFound(name));
+    }
+    let app2 = app.clone();
+    let volume_label = volume.label.clone();
+    let job_id = state.jobs.spawn(
+        "copy",
+        &format!("{} -> PSP", name),
+        move |job| {
+            let _ = app2.emit("job://done", job);
+        },
+        move |ctx| {
+            let dest = godsend_core::store::push_local_to_psp(&local, &paths, ctx)?;
+            ctx.message(format!("on {} as {}", volume_label, dest.display()));
+            Ok(())
+        },
+    );
+    Ok(job_id)
+}
+
+// ---------- file manager + libraries ----------
+
+#[tauri::command]
+fn fm_list(path: String) -> Result<Vec<godsend_core::fm::FmEntry>> {
+    godsend_core::fm::list_dir(Path::new(&path))
+}
+
+#[tauri::command]
+fn fm_mkdir(path: String, name: String) -> Result<String> {
+    let dir = godsend_core::fm::mkdir(Path::new(&path), &name)?;
+    Ok(dir.to_string_lossy().to_string())
+}
+
+#[tauri::command]
+fn fm_delete(state: State<'_, AppState>, path: String) -> Result<()> {
+    // Allowed roots: the download dir and the PSP volume.
+    let config = state.config();
+    let dl = godsend_core::aria2::download_dir(&config);
+    if Path::new(&path).starts_with(&dl) {
+        return godsend_core::fm::delete_local(Path::new(&path), &dl);
+    }
+    if let Ok((_, paths)) = state.paths() {
+        if Path::new(&path).starts_with(&paths.root) {
+            return godsend_core::fm::delete_local(Path::new(&path), &paths.root);
+        }
+    }
+    Err(Error::Invalid("path outside managed roots".into()))
+}
+
+#[tauri::command]
+fn fm_to_psp(app: AppHandle, state: State<'_, AppState>, path: String, dest_kind: String) -> Result<u64> {
+    let (_, paths) = state.paths()?;
+    let local = PathBuf::from(&path);
+    if !local.exists() {
+        return Err(Error::NotFound(path));
+    }
+    let app2 = app.clone();
+    let job_id = state.jobs.spawn(
+        "copy",
+        &format!("{} -> PSP", local.file_name().unwrap_or_default().to_string_lossy()),
+        move |job| {
+            let _ = app2.emit("job://done", job);
+        },
+        move |ctx| {
+            let dest = godsend_core::fm::copy_to_psp(&local, &paths, &dest_kind, ctx)?;
+            ctx.message(format!("on stick at {}", dest.display()));
+            Ok(())
+        },
+    );
+    Ok(job_id)
+}
+
+#[tauri::command]
+fn fm_from_psp(app: AppHandle, state: State<'_, AppState>, psp_id: String) -> Result<u64> {
+    let (_, paths) = state.paths()?;
+    let config = state.config();
+    let local_root = godsend_core::aria2::download_dir(&config);
+    let app2 = app.clone();
+    let job_id = state.jobs.spawn(
+        "copy",
+        &format!("{} -> local", psp_id),
+        move |job| {
+            let _ = app2.emit("job://done", job);
+        },
+        move |ctx| {
+            let dest = godsend_core::fm::copy_from_psp(&psp_id, &paths, &local_root, ctx)?;
+            ctx.message(format!("local at {}", dest.display()));
+            Ok(())
+        },
+    );
+    Ok(job_id)
+}
+
+#[tauri::command]
+fn local_library(state: State<'_, AppState>) -> Result<Vec<godsend_core::fm::LocalGame>> {
+    let config = state.config();
+    godsend_core::fm::local_library(&godsend_core::aria2::download_dir(&config))
+}
+
+// ---------- catalog covers / info / mods ----------
+
+#[tauri::command]
+fn game_info(state: State<'_, AppState>, serial: String, title: String) -> Result<serde_json::Value> {
+    let config = state.config();
+    let known = godsend_core::catalog::lookup_serial(&serial)
+        .or_else(|| godsend_core::catalog::lookup_best(&title));
+    let mods = godsend_core::mods::list(&config, &serial).unwrap_or_default();
+    let animation = godsend_core::catalog::animation_url(&config, &serial)
+        .or_else(|| known.as_ref().map(|k| k.animation.clone()).filter(|a| !a.is_empty()));
+    Ok(serde_json::json!({
+        "known": known,
+        "animation": animation,
+        "mods": mods,
+    }))
+}
+
+#[tauri::command]
+fn cover(state: State<'_, AppState>, id: String, serial: Option<String>) -> Option<String> {
+    let paths = state.paths().ok()?.1;
+    let config = state.config();
+    // 1. R2/catalog cover by serial (library covers), 2. stick ICON0 fallback.
+    let serial_value = serial.clone().unwrap_or_default();
+    if !serial_value.is_empty() {
+        let fallback = godsend_core::catalog::lookup_serial(&serial_value)
+            .map(|g| g.cover)
+            .unwrap_or_default();
+        if let Some(bytes) = godsend_core::catalog::cover_bytes(&config, &serial_value, &fallback) {
+            return Some(format!("data:image/png;base64,{}", base64_encode(&bytes)));
+        }
+    }
+    let bytes = library::icon_bytes(&paths, &id)?;
+    Some(format!("data:image/png;base64,{}", base64_encode(&bytes)))
+}
+
+#[tauri::command]
+fn mods_list(state: State<'_, AppState>, serial: String) -> Result<Vec<godsend_core::mods::ModEntry>> {
+    let config = state.config();
+    godsend_core::mods::list(&config, &serial)
+}
+
+#[tauri::command]
+fn mods_install(app: AppHandle, state: State<'_, AppState>, serial: String, url: String, name: String) -> Result<u64> {
+    let config = state.config();
+    let dest_dir = godsend_core::mods::mods_dir(&config, &serial);
+    let label = name.clone();
+    let app2 = app.clone();
+    let job_id = state.jobs.spawn(
+        "download",
+        &format!("mod {label}"),
+        move |job| {
+            let _ = app2.emit("job://done", job);
+        },
+        move |ctx| {
+            ctx.check_cancel()?;
+            let path = godsend_core::aria2::download(&url, &dest_dir, &label, &config, ctx)?;
+            ctx.message(format!("mod downloaded to {}", path.display()));
+            Ok(())
+        },
+    );
+    Ok(job_id)
+}
+
 /// Cancel flag registry so ffmpeg conversions can observe cancels from the UI.
 static CANCELS: std::sync::OnceLock<Mutex<std::collections::HashMap<u64, Arc<AtomicBool>>>> =
     std::sync::OnceLock::new();
@@ -864,6 +1185,25 @@ pub fn run() {
             jobs_clear,
             reveal,
             open_data_dir,
+            debrid_status,
+            store_search,
+            store_detail,
+            store_download,
+            downloads_list,
+            download_dir_set,
+            download_open,
+            download_delete,
+            download_push,
+            fm_list,
+            fm_mkdir,
+            fm_delete,
+            fm_to_psp,
+            fm_from_psp,
+            local_library,
+            game_info,
+            cover,
+            mods_list,
+            mods_install,
         ])
         .run(tauri::generate_context!())
         .expect("error while running GODsend PSP");

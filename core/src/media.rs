@@ -80,6 +80,11 @@ fn which(name: &str) -> Option<PathBuf> {
     None
 }
 
+/// PATH lookup for an external tool (used by the aria2c locator).
+pub fn which_bin(name: &str) -> Option<PathBuf> {
+    which(name)
+}
+
 /// `ffmpeg -version` first line, for the status bar.
 pub fn version(bin: &Path) -> String {
     Command::new(bin)
