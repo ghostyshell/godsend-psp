@@ -6,9 +6,8 @@
 [![ETH](https://img.shields.io/badge/ETH-627EEA?style=for-the-badge&logo=ethereum&logoColor=white)](https://etherscan.io/address/0xbBef115aD853236a350EaF04777a2AdB2e7c0317)
 
 A desktop workshop for the PSP: plug the console in over USB and manage
-everything on the memory stick from one window. Same family look and feel as
-GODsend 360 and Keepsake Atelier, built on the Keepsake Atelier code stack
-(Rust engine + Tauri 2 + React).
+everything on the memory stick from one window. Built with a Rust engine,
+Tauri 2 and React.
 
 | Console | Homebrew |
 | --- | --- |
@@ -34,8 +33,8 @@ GODsend 360 and Keepsake Atelier, built on the Keepsake Atelier code stack
 | `godsend-psp-0.2.26-x64-setup.exe` | [Download](https://gofile.io/d/rv4TbKuV) | [Mirror](https://file.kiwi/259e8e46#EAiG6ds8ThDu5fV346wtbA) | 45.0 MiB |
 <!-- downloads:end -->
 
-Mirrors follow the sibling projects: **GoFile** is the primary host and
-**file.kiwi** is the encrypted backup. Links are refreshed weekly by
+**GoFile** is the primary host and **file.kiwi** is the encrypted backup. Links
+are refreshed weekly by
 `scripts/refresh-release-links.sh` (launchd, Sundays 03:47) because GoFile
 expires free-tier files. The desktop builds are not notarized: right-click,
 Open, Open on first launch (or
