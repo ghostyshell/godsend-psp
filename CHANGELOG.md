@@ -37,6 +37,11 @@ All notable changes to GODsend PSP. Newest first.
 
 ### Fixed
 
+- Publish downloads CI artifacts exactly once (a second extraction was
+  colliding with the first and failing with "file exists").
+
+### Fixed
+
 - Publish clears the artifacts directory before downloading, so a retried
   run no longer fails with "file exists" while extracting the CI archive.
 
