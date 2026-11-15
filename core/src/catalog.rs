@@ -201,6 +201,22 @@ pub fn remote_cover(config: &Config, serial: &str, title: &str) -> Option<Vec<u8
     if let Some(url) = cover_url(config, serial) {
         candidates.push(url);
     }
+    // Production covers host stores <base>/games/<slug>.<ext>.
+    if !config.covers_base.is_empty() && !title.is_empty() {
+        let base = config.covers_base.trim_end_matches('/');
+        let slug: String = title
+            .to_lowercase()
+            .chars()
+            .map(|c| if c.is_ascii_alphanumeric() { c } else { '-' })
+            .collect::<String>()
+            .split('-')
+            .filter(|s| !s.is_empty())
+            .collect::<Vec<_>>()
+            .join("-");
+        for ext in ["jpg", "png", "webp"] {
+            candidates.push(format!("{base}/games/{slug}.{ext}"));
+        }
+    }
     // Ask the index by title when no base is configured (or it missed).
     if !config.gamesearch_base.is_empty() && !title.is_empty() {
         if let Ok(hits) = crate::sources::gamesearch(&config.gamesearch_base, title, 5) {
