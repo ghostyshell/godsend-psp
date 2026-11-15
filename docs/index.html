@@ -212,12 +212,16 @@
     scaleLabel.textContent = Math.round(scale * 100) + "%";
   };
   const close = () => {
+    if (box.hidden) return;
     box.hidden = true;
     img.src = "data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==";
     scale = 1;
     apply();
     document.body.style.overflow = "";
+    // Return focus to the thumbnail that opened it, then forget it so a later
+    // Escape (with the viewer closed) cannot move the reader again.
     if (opener) opener.focus();
+    opener = null;
   };
   const open = (href, alt, from) => {
     opener = from || null;
@@ -253,8 +257,17 @@
   // Clicking the transparent area outside the image closes it.
   box.addEventListener("click", close);
   document.addEventListener("keydown", (e) => {
-    if (e.key === "Escape") close();
     if (box.hidden) return;
+    if (e.key === "Escape") { close(); return; }
+    // The viewer declares aria-modal, so Tab has to stay inside it.
+    if (e.key === "Tab") {
+      const f = [...box.querySelectorAll("button, [href]")];
+      if (!f.length) return;
+      const first = f[0], last = f[f.length - 1];
+      if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+      else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+      return;
+    }
     if (e.key === "+" || e.key === "=") { scale = Math.min(4, scale + 0.25); apply(); }
     if (e.key === "-") { scale = Math.max(0.5, scale - 0.25); apply(); }
   });
@@ -265,13 +278,16 @@
   const btn = document.querySelector(".nav-toggle");
   const nav = document.getElementById("primary-nav");
   if (!btn || !nav) return;
-  const set = (open) => {
+  const set = (open, focusToggle) => {
     btn.setAttribute("aria-expanded", String(open));
     nav.classList.toggle("open", open);
+    if (!open && focusToggle) btn.focus();
   };
   btn.addEventListener("click", () => set(btn.getAttribute("aria-expanded") !== "true"));
   nav.addEventListener("click", (e) => { if (e.target.closest("a")) set(false); });
-  document.addEventListener("keydown", (e) => { if (e.key === "Escape") set(false); });
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && btn.getAttribute("aria-expanded") === "true") { e.preventDefault(); set(false, true); }
+  });
   matchMedia("(min-width: 721px)").addEventListener("change", (e) => { if (e.matches) set(false); });
 })();
 
