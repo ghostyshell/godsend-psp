@@ -40,7 +40,7 @@ jobs:
         run: |
           APP=$(find app/src-tauri/target/${{ matrix.target }}/release/bundle/macos -name "*.app" | head -1)
           hdiutil create -volname "GODsend PSP" -srcfolder "$APP" -ov -format UDZO \
-            "godsend-psp-${{ matrix.name }}.dmg"
+            "godsend-psp-macos-${{ matrix.name }}.dmg"
           tar -czf "godsend-psp-cli-macos-${{ matrix.name }}.tar.gz" \
             -C app/src-tauri/target/${{ matrix.target }}/release godsend-psp
       - uses: actions/upload-artifact@v4
@@ -127,3 +127,60 @@ jobs:
         run: |
           npx playwright install chromium --with-deps
           npx playwright test
+
+  release:
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: [macos, linux, windows, ui-check]
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+      - name: Flatten artifacts
+        env:
+          VERSION: ${{ github.ref_name }}
+        run: |
+          VERSION="${VERSION#v}"
+          mkdir release
+          find artifacts -type f \( -name "*.dmg" -o -name "*.exe" -o -name "*.AppImage" \
+            -o -name "*.deb" -o -name "*.tar.gz" -o -name "*.zip" \) -exec mv {} release/ \;
+          cd release
+          # normalize names to godsend-psp-<version>-<platform>.<ext>
+          for f in *.dmg; do [ -e "$f" ] || continue
+            case "$f" in
+              *aarch64*|*arm64*) mv "$f" "godsend-psp-${VERSION}-arm64.dmg";;
+              *x86_64*|*x64*) mv "$f" "godsend-psp-${VERSION}-x64.dmg";;
+            esac
+          done
+          for f in *setup.exe; do [ -e "$f" ] || continue
+            mv "$f" "godsend-psp-${VERSION}-x64-setup.exe"
+          done
+          for f in *.AppImage; do [ -e "$f" ] || continue
+            mv "$f" "godsend-psp-${VERSION}-linux-x64.AppImage"
+          done
+          for f in *.deb; do [ -e "$f" ] || continue
+            mv "$f" "godsend-psp-${VERSION}-linux-x64.deb"
+          done
+          for f in *macos*arm64*; do [ -e "$f" ] || continue
+            case "$f" in *arm64*) mv "$f" "godsend-psp-cli-${VERSION}-macos-arm64.tar.gz";; esac
+          done 2>/dev/null || true
+          for f in *macos*x64*; do [ -e "$f" ] || continue
+            mv "$f" "godsend-psp-cli-${VERSION}-macos-x64.tar.gz"
+          done 2>/dev/null || true
+          for f in *linux-x64.tar.gz; do [ -e "$f" ] || continue
+            mv "$f" "godsend-psp-cli-${VERSION}-linux-x64.tar.gz"
+          done
+          for f in *windows-x64.zip; do [ -e "$f" ] || continue
+            mv "$f" "godsend-psp-cli-${VERSION}-windows-x64.zip"
+          done
+          ls -la
+      - name: Create release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "${{ github.ref_name }}" release/* \
+            --repo "${{ github.repository }}" \
+            --title "GODsend PSP ${{ github.ref_name }}" \
+            --notes "All-platform builds of GODsend PSP. See the README for install notes and docs/guides for walkthroughs."

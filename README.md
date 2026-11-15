@@ -10,6 +10,36 @@ GODsend 360 and Keepsake Atelier, built on the Keepsake Atelier code stack
 | ![Console](docs/site-console.png) | ![Homebrew](docs/site-homebrew.png) |
 
 
+## Download
+
+Latest release (all platforms, built by CI): **[github.com/ghostyshell/godsend-psp/releases/latest](https://github.com/ghostyshell/godsend-psp/releases/latest)**
+
+| Build | File | Platform |
+| --- | --- | --- |
+| Desktop app (Apple Silicon) | `godsend-psp-0.1.0-arm64.dmg` | macOS 12+ |
+| Desktop app (Intel) | `godsend-psp-0.1.0-x64.dmg` | macOS 12+ |
+| Desktop app | `godsend-psp-0.1.0-x64-setup.exe` | Windows 10/11 |
+| Desktop app | `godsend-psp-0.1.0-linux-x64.AppImage` | Linux |
+| Desktop app | `godsend-psp-0.1.0-linux-x64.deb` | Debian/Ubuntu |
+| Headless CLI | `godsend-psp-cli-<platform>.tar.gz` / `.zip` | all of the above |
+
+The CLI is a single self-contained binary covering the entire feature set;
+the desktop builds share the same engine. The macOS DMG is not notarized:
+right-click, Open, Open on first launch (or
+`xattr -dr com.apple.quarantine "/Applications/GODsend PSP.app"`).
+
+## Guides
+
+Step-by-step walkthroughs live in [docs/guides](docs/guides/index.md):
+
+1. [Connect your PSP](docs/guides/connect-your-psp.md)
+2. [Homebrew and custom firmware](docs/guides/homebrew-and-cfw.md)
+3. [Music and video](docs/guides/music-and-video.md)
+4. [Disc images](docs/guides/disc-images.md)
+5. [Saves and mods](docs/guides/saves-and-mods.md)
+6. [Troubleshooting](docs/guides/troubleshooting.md)
+7. [Build from source](docs/guides/build-from-source.md)
+
 ## What it does
 
 - **Game library**: scans PSP/GAME and the ISO folder, parses PARAM.SFO and
@@ -45,7 +75,8 @@ The headless CLI ships alongside every build.
 
 Requirements: Rust 1.85+, Node 20+, and the Tauri 2 prerequisites for your
 platform (Xcode CLT on macOS, MSVC + WebView2 on Windows, webkit2gtk-4.1
-on Linux).
+on Linux). The full walkthrough is in
+[docs/guides/build-from-source.md](docs/guides/build-from-source.md).
 
 ```sh
 npm install --prefix app
