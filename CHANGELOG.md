@@ -16,6 +16,14 @@ All notable changes to GODsend PSP. Newest first.
 
 ### Changed
 
+- Publish builds what the host can produce: macOS arm64 and x64 installers
+  plus CLI tarballs, the Windows CLI via mingw cross-compilation, and the
+  Linux AppImage/deb/CLI through the Tauri Docker image when the daemon is
+  running. Missing toolchains are reported and skipped; artifacts staged in
+  dist/ are still picked up.
+
+### Changed
+
 - Defaults are now maximum quality: x264 **veryslow**, CRF **16**, AAC
   **256 kbps**, 480x272 at 30 fps. Preset, CRF and audio are selectable in
   Settings; slow mediums trade speed for size.

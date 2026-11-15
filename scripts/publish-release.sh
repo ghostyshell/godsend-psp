@@ -69,25 +69,58 @@ else
   DIST="$RUN/artifacts"
   rm -rf "$DIST"
   mkdir -p "$DIST"
-  ARCH=$(uname -m)
-  case "$ARCH" in
-    arm64) PLATARCH=arm64 ;;
-    x86_64) PLATARCH=x64 ;;
-    *) die "unsupported macOS arch: $ARCH" ;;
-  esac
-  log "building locally for macOS $PLATARCH (no CI)"
-  ./scripts/fetch-ffmpeg.sh "darwin-$PLATARCH" >/dev/null
-  ( cd app && npm run build >/dev/null 2>&1 && npx tauri build --bundles app >/dev/null 2>&1 ) \
-    || die "tauri build failed"
-  APP=$(find target/release/bundle/macos -name "*.app" | head -1)
-  [ -n "$APP" ] || die "no app bundle produced"
-  codesign --force --deep --sign - "$APP" >/dev/null 2>&1 || true
-  ./scripts/make-dmg.sh "$APP" "GODsend PSP" "$DIST/godsend-psp-macos-$PLATARCH.dmg" \
-    "app/src-tauri/dmg-background.png" >/dev/null || die "installer DMG failed"
-  cargo build --release -p godsend-psp-cli >/dev/null 2>&1 || die "cli build failed"
-  tar -czf "$DIST/godsend-psp-cli-macos-$PLATARCH.tar.gz" -C target/release godsend-psp
-  # Cross-platform artifacts are built on demand (or copied from a previous
-  # run kept in dist/); the session publishes whatever exists.
+  log "building every platform this machine can produce (no CI)"
+
+  # --- macOS: both arches, full app + installer DMG + CLI ---
+  for pair in "arm64:aarch64-apple-darwin" "x64:x86_64-apple-darwin"; do
+    ARCH=${pair%%:*}
+    TARGET=${pair##*:}
+    log "macOS $ARCH"
+    ./scripts/fetch-ffmpeg.sh "darwin-$ARCH" >/dev/null
+    ( cd app && npm run build >/dev/null 2>&1 \
+        && npx tauri build --bundles app --target "$TARGET" >/dev/null 2>&1 ) \
+      || die "tauri build failed for macOS $ARCH"
+    APP=$(find "target/$TARGET/release/bundle/macos" -name "*.app" | head -1)
+    [ -n "$APP" ] || die "no app bundle for macOS $ARCH"
+    codesign --force --deep --sign - "$APP" >/dev/null 2>&1 || true
+    ./scripts/make-dmg.sh "$APP" "GODsend PSP" "$DIST/godsend-psp-macos-$ARCH.dmg" \
+      "app/src-tauri/dmg-background.png" >/dev/null || die "installer DMG failed ($ARCH)"
+    cargo build --release -p godsend-psp-cli --target "$TARGET" >/dev/null 2>&1 \
+      || die "CLI build failed for macOS $ARCH"
+    tar -czf "$DIST/godsend-psp-cli-macos-$ARCH.tar.gz" \
+      -C "target/$TARGET/release" godsend-psp
+  done
+
+  # --- Windows CLI (cross, mingw) ---
+  if command -v x86_64-w64-mingw32-gcc >/dev/null 2>&1; then
+    log "Windows CLI (mingw cross)"
+    if cargo build --release -p godsend-psp-cli --target x86_64-pc-windows-gnu >/dev/null 2>&1; then
+      ( cd target/x86_64-pc-windows-gnu/release && zip -q "godsend-psp-cli-windows-x64.zip" godsend-psp.exe )
+      mv target/x86_64-pc-windows-gnu/release/godsend-psp-cli-windows-x64.zip "$DIST/"
+    else
+      log "WARNING: Windows CLI cross-build failed; skipping"
+    fi
+  else
+    log "WARNING: mingw not found; skipping Windows CLI (brew install mingw-w64)"
+  fi
+
+  # --- Linux app + CLI (Docker with the Tauri image) ---
+  if docker info >/dev/null 2>&1; then
+    log "Linux AppImage + deb + CLI (docker)"
+    if docker run --rm -v "$PWD":/src -w /src/app ghcr.io/tauri-apps/tauri:latest \
+        bash -lc "npm ci >/dev/null 2>&1 && npx tauri build --bundles deb,appimage >/dev/null 2>&1 \
+          && cd .. && cargo build --release -p godsend-psp-cli >/dev/null 2>&1" ; then
+      cp target/release/bundle/deb/*.deb "$DIST/" 2>/dev/null || true
+      cp target/release/bundle/appimage/*.AppImage "$DIST/" 2>/dev/null || true
+      tar -czf "$DIST/godsend-psp-cli-linux-x64.tar.gz" -C target/release godsend-psp 2>/dev/null || true
+    else
+      log "WARNING: Linux build failed in docker; skipping"
+    fi
+  else
+    log "WARNING: docker daemon not running; skipping Linux app (start Docker Desktop and re-run, or build on Linux)"
+  fi
+
+  # --- Anything staged manually in dist/ (for example from another machine) ---
   if [ -d dist ]; then
     for f in dist/*.AppImage dist/*.deb dist/*setup.exe dist/*linux*.tar.gz dist/*windows*.zip; do
       [ -f "$f" ] && cp "$f" "$DIST/"
