@@ -3,6 +3,9 @@
 All notable changes to GODsend PSP. Newest first.
 
 
+## [0.2.28] - 2026-11-16
+
+
 ## [0.2.27] - 2026-11-16
 
 
@@ -26,6 +29,12 @@ All notable changes to GODsend PSP. Newest first.
 - Hosted PSP catalog pipeline: a validating sync script with `--dry-run`, a
   Playwright scraper driven by `psp-catalog/sources.json`, and a daily launchd
   job that scrapes and syncs at 04:12.
+
+### Changed
+
+- Library merges the Images section into a Games/Homebrew split, each with
+  PSP and Local sides. ISO/CSO entries appear under Games with their
+  convert/delete actions; the separate Images nav entry is gone.
 
 ### Changed
 

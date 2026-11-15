@@ -158,7 +158,6 @@ export const PAGE_TITLES: Record<string, string> = {
   store: "Homebrew",
   music: "Music",
   video: "Video",
-  iso: "Disc Images",
   saves: "Save Data",
   mods: "Mods",
   settings: "Settings",

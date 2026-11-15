@@ -5,9 +5,11 @@ import type { PageProps } from "../App";
 import { Btn, Chip, Empty, GameHover, Seg, fmtBytes } from "../ui";
 
 type Tab = "psp" | "local";
+type Category = "homebrew" | "games";
 
 export default function Library({ snap, toast, refreshKey }: PageProps) {
   const [tab, setTab] = useState<Tab>("psp");
+  const [category, setCategory] = useState<Category>("games");
   const [games, setGames] = useState<GameEntry[]>([]);
   const [local, setLocal] = useState<LocalGame[]>([]);
   const [images, setImages] = useState<DiscImage[]>([]);
@@ -37,9 +39,24 @@ export default function Library({ snap, toast, refreshKey }: PageProps) {
     setSelected({ serial, title, info });
   }
 
+  const isHomebrew = (kind: string) => kind === "homebrew" || kind === "loader";
+  const pspGames = games.filter((g) => !isHomebrew(g.kind));
+  const pspHomebrew = games.filter((g) => isHomebrew(g.kind));
+  const localGames = local.filter((l) => l.kind === "iso" || l.kind === "cso" || l.kind === "pbp");
+  const localHomebrew = local.filter((l) => l.kind === "eboot_dir");
+
   return (
     <div className="page">
       <div style={{ display: "flex", gap: 10, alignItems: "center", flexWrap: "wrap" }}>
+        <Seg
+          ariaLabel="Library category"
+          value={category}
+          onChange={setCategory}
+          options={[
+            { value: "games", label: "Games" },
+            { value: "homebrew", label: "Homebrew" },
+          ]}
+        />
         <Seg
           ariaLabel="Library side"
           value={tab}
@@ -56,11 +73,14 @@ export default function Library({ snap, toast, refreshKey }: PageProps) {
       {tab === "psp" ? (
         !connected ? (
           <Empty title="No PSP connected" hint="Connect the console in USB mode to browse its library." />
-        ) : games.length === 0 ? (
-          <Empty title="No games on the stick" hint="Pull something from the Store or copy from the Local tab." />
+        ) : (category === "games" ? pspGames.length + images.length : pspHomebrew.length) === 0 ? (
+          <Empty
+            title={category === "games" ? "No games on the stick" : "No homebrew on the stick"}
+            hint="Pull something from the Store, Homebrew or copy from the Local tab."
+          />
         ) : (
           <div className="grid">
-            {games.map((game) => (
+            {(category === "games" ? pspGames : pspHomebrew).map((game) => (
               <div className="tile" key={game.id}>
                 <div className="cover" onClick={() => void openDetail(game.title_id ?? "", game.title)}>
                   {covers[game.id] ? (
@@ -103,11 +123,11 @@ export default function Library({ snap, toast, refreshKey }: PageProps) {
       ) : local.length === 0 ? (
         <Empty
           title="Local library is empty"
-          hint="Store downloads land here; copy PSP games over from the PSP tab."
+          hint={category === "games" ? "Store downloads land here; copy PSP games over from the PSP tab." : "Install homebrew from the Homebrew page; it appears here after installing to the stick."}
         />
       ) : (
         <div className="rows">
-          {images.length > 0 ? (
+          {category === "games" && images.length > 0 ? (
             <>
               <div className="section-caption">ISO / CSO on the stick</div>
               {images.map((image) => (
@@ -134,7 +154,7 @@ export default function Library({ snap, toast, refreshKey }: PageProps) {
               ))}
             </>
           ) : null}
-          {local.map((item) => (
+          {(category === "games" ? localGames : localHomebrew).map((item) => (
             <div className="row" key={item.id}>
               <Chip tone={item.kind === "iso" || item.kind === "cso" ? "laser" : "neutral"}>
                 {item.kind}

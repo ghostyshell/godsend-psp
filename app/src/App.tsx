@@ -12,7 +12,6 @@ import {
   Package as PackageIcon,
   Music as MusicIcon,
   Film as FilmIcon,
-  Disc3,
   Save as SaveIcon,
   Wrench,
   Settings as SettingsIcon,
@@ -27,7 +26,6 @@ import Files from "./pages/Files";
 import Store from "./pages/Store";
 import Music from "./pages/Music";
 import Video from "./pages/Video";
-import Iso from "./pages/Iso";
 import Saves from "./pages/Saves";
 import Mods from "./pages/Mods";
 import Settings from "./pages/Settings";
@@ -55,13 +53,12 @@ const NAV: { id: Page; label: string; icon: LucideIcon }[] = [
   { id: "store", label: "Homebrew", icon: PackageIcon },
   { id: "music", label: "Music", icon: MusicIcon },
   { id: "video", label: "Video", icon: FilmIcon },
-  { id: "iso", label: "Images", icon: Disc3 },
   { id: "saves", label: "Saves", icon: SaveIcon },
   { id: "mods", label: "Mods", icon: Wrench },
   { id: "settings", label: "Settings", icon: SettingsIcon },
 ];
 
-const VERSION = "0.2.27";
+const VERSION = "0.2.28";
 
 export interface PageProps {
   snap: Snapshot;
@@ -221,7 +218,6 @@ export default function App() {
         {page === "store" && <Store {...pageProps} />}
         {page === "music" && <Music {...pageProps} />}
         {page === "video" && <Video {...pageProps} />}
-        {page === "iso" && <Iso {...pageProps} />}
         {page === "saves" && <Saves {...pageProps} />}
         {page === "mods" && <Mods {...pageProps} />}
         {page === "settings" && <Settings {...pageProps} />}
