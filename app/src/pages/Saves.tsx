@@ -150,15 +150,20 @@ function SaveIcon({
     if (hasIcon) void api.savedataIcon(folder).then(setUrl);
   }, [folder, hasIcon]);
   return (
-    <div className="save-icon">
-      {url ? (
-        <img src={url} alt="" />
-      ) : (
-        <div className="cover-fallback">
-          <span className="cf-title">{title}</span>
-          <span className="cf-serial">{folder}</span>
-        </div>
-      )}
+    <div className="save-cell">
+      <div className="save-icon">
+        {url ? (
+          <img src={url} alt="" />
+        ) : (
+          <div className="cover-fallback">
+            <span className="cf-title">{title}</span>
+            <span className="cf-serial">{folder}</span>
+          </div>
+        )}
+      </div>
+      <div className="save-caption" title={title}>
+        {title}
+      </div>
     </div>
   );
 }

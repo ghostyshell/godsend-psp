@@ -3,6 +3,9 @@
 All notable changes to GODsend PSP. Newest first.
 
 
+## [0.2.22] - 2026-11-15
+
+
 ## [0.2.21] - 2026-11-15
 
 
@@ -19,6 +22,11 @@ All notable changes to GODsend PSP. Newest first.
 
 
 ## [0.2.16] - 2026-11-15
+
+### Changed
+
+- Each save slot now shows its title under the icon, the way the console
+  lists saves, clamped to two lines.
 
 ### Changed
 
