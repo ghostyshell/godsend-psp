@@ -17,6 +17,12 @@ All notable changes to GODsend PSP. Newest first.
 
 ## [0.2.4] - 2026-11-15
 
+### Fixed
+
+- CI fetches the bundled ffmpeg pair before unit tests; the resource config
+  previously made the Tauri build script fail during `cargo test` on all
+  three platforms, which blocked the 0.2.7 publish.
+
 ### Changed
 
 - Library tiles are landscape (9:5, matching PSP ICON0 art) with a PSP XMB
