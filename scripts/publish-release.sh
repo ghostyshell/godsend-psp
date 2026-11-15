@@ -68,12 +68,24 @@ if [ -n "$ARTIFACTS" ]; then
 else
   DIST="$RUN/artifacts"
   mkdir -p "$DIST"
-  log "downloading the latest CI run artifacts"
-  command -v gh >/dev/null 2>&1 || die "gh not found (needed to fetch CI artifacts)"
-  RUN_ID=$(gh run list --repo ghostyshell/godsend-psp --workflow build --json databaseId,conclusion \
-    --jq '[.[] | select(.conclusion=="success")][0].databaseId' 2>/dev/null || true)
-  [ -n "$RUN_ID" ] || die "no successful CI run found"
-  gh run download "$RUN_ID" --repo ghostyshell/godsend-psp --dir "$DIST" \
+  command -v gh >/dev/null 2>&1 || die "gh not found (needed to run the CI build)"
+  SLUG=ghostyshell/godsend-psp
+  log "dispatching the all-platform CI build"
+  gh workflow run build.yml --repo "$SLUG" || die "could not dispatch the build"
+  RUN_ID=""
+  for _ in $(seq 1 60); do
+    RUN_ID=$(gh run list --repo "$SLUG" --workflow build --limit 3 \
+      --json databaseId,status,event \
+      --jq '[.[] | select(.event=="workflow_dispatch" and (.status=="queued" or .status=="in_progress" or .status=="requested"))][0].databaseId' 2>/dev/null || true)
+    [ -n "$RUN_ID" ] && break
+    sleep 5
+  done
+  [ -n "$RUN_ID" ] || die "the dispatched build never appeared"
+  log "waiting for CI run $RUN_ID"
+  gh run watch "$RUN_ID" --repo "$SLUG" --exit-status >/dev/null 2>&1 \
+    || gh run download "$RUN_ID" --repo "$SLUG" --dir "$DIST" >/dev/null 2>&1 \
+    || true
+  gh run download "$RUN_ID" --repo "$SLUG" --dir "$DIST" \
     || die "artifact download failed"
   # Flatten the per-OS subdirectories.
   find "$DIST" -mindepth 2 -type f -exec mv {} "$DIST/" \; 2>/dev/null || true

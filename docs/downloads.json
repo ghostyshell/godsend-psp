@@ -53,18 +53,18 @@
     {
       "name": "godsend-psp-0.2.0-arm64.dmg",
       "label": "macOS (Apple Silicon)",
-      "gofile": "https://gofile.io/d/0LqKkKCe",
-      "kiwi": "https://file.kiwi/160724c2#loDH2ewg6pu5WN1cLJDU0w",
-      "size": "4.4 MiB",
-      "sha256": "2ade26012805351fbbc31592afc015dbfa1e3f61901141c21a122e9b509069ec"
+      "gofile": "https://gofile.io/d/3tAjVvXu",
+      "kiwi": "https://file.kiwi/726115d2#gvM-M4If44nYmX_j0yDzKg",
+      "size": "5.1 MiB",
+      "sha256": "68152434c5c2c360d45510b779e25a2cd2f2fed1f2280a92e655fe179d50bed4"
     },
     {
       "name": "godsend-psp-0.2.0-x64.dmg",
       "label": "macOS (Intel)",
-      "gofile": "https://gofile.io/d/0CfpuILX",
-      "kiwi": "https://file.kiwi/795ae981#NynZAZDnErRtOqNX0BjmWA",
-      "size": "4.7 MiB",
-      "sha256": "6537bfc6e7c1dc134c826e5d7b5779d4569c429b2f12722b19d5a44a2daa37db"
+      "gofile": "https://gofile.io/d/wqUxMG0z",
+      "kiwi": "https://file.kiwi/4cb66948#8rXo7ygNQoAP4H1wzr1ghA",
+      "size": "5.5 MiB",
+      "sha256": "ffef3571a9bad047afd33eafd8b3320233c0de91a1771d4b87b5ad03de4f3752"
     },
     {
       "name": "godsend-psp-0.2.0-x64-setup.exe",
