@@ -40,6 +40,10 @@ All notable changes to GODsend PSP. Newest first.
 
 ### Fixed
 
+- GitHub Releases and tags removed; CI builds only on manual dispatch and
+  the publish script dispatches its own build, so nothing recreates a
+  release.
+
 - macOS DMGs are ad-hoc signed as a bundle before packaging. Previously the
   app carried only a linker-level signature, so Gatekeeper reported "damaged"
   on Apple Silicon. CI now signs the bundle and verifies it before the DMG
