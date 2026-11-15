@@ -46,7 +46,7 @@ const NAV: { id: Page; label: string; glyph: string }[] = [
   { id: "settings", label: "Settings", glyph: "SE" },
 ];
 
-const VERSION = "0.2.0";
+const VERSION = "0.2.1";
 
 export interface PageProps {
   snap: Snapshot;

@@ -2,35 +2,15 @@
 
 All notable changes to GODsend PSP. Newest first.
 
-## 0.2.0 - 2026-11-15
+## [0.2.1] - 2026-11-15
 
 ### Added
 
-- Video guides: `docs/video-guides.html` lists twelve short recordings, one per tab, with a walkthrough and steps each. Videos are on R2, the page is linked from the site and the README. Recorded from the renderer's `?mock=1` bridge with the demo-reels skill.
-- Store page with two sources: the game-search debrid index (platform=psp,
-  ddl/magnet/torrent links with supportedBy) and Internet Archive sets in
-  the r/Roms megathread style. Per-game link list, mods, and one-click
-  downloads.
-- aria2c downloads (16 connections) on every platform with a single
-  connection ureq fallback; configurable download folder and a Downloads
-  page (queue, open, delete, push to PSP).
-- Real-Debrid and TorBox clients: unrestrict DDL links and resolve
-  torrent/magnet links into direct downloads. Keys live in Settings and are
-  never sent anywhere but the provider APIs.
-- File manager (local vs stick panes) with copy in both directions, new
-  folder, delete; Local Library and PSP Library tabs with copy between
-  them.
-- PPSSPP-style local game database (serial keyed JSON), R2 cover and
-  animation URLs with disk cache, per-game mods catalog with pull-to-download.
-- Settings: debrid keys, source URL, R2 covers base, mods base, download
-  folder.
-
-### Changed
-
-- Library nav entry replaces the old Games page; Homebrew moved down the
-  rail.
-
-## Unreleased
+- Version-bump and changelog enforcement: `scripts/bump-version.sh` syncs
+  every version location, `scripts/check-changelog.sh` runs from the
+  pre-commit hook, and `docs/agents/skills/changelog.md` documents the rule.
+  The changelog no longer uses an Unreleased section; each change lands
+  under a versioned, dated header.
 
 ### Changed
 
@@ -65,6 +45,34 @@ All notable changes to GODsend PSP. Newest first.
 - CI release job: pushing a v* tag builds all platforms and attaches the
   artifacts to a GitHub Release.
 - README download table and guide index.
+
+## 0.2.0 - 2026-11-15
+
+### Added
+
+- Video guides: `docs/video-guides.html` lists twelve short recordings, one per tab, with a walkthrough and steps each. Videos are on R2, the page is linked from the site and the README. Recorded from the renderer's `?mock=1` bridge with the demo-reels skill.
+- Store page with two sources: the game-search debrid index (platform=psp,
+  ddl/magnet/torrent links with supportedBy) and Internet Archive sets in
+  the r/Roms megathread style. Per-game link list, mods, and one-click
+  downloads.
+- aria2c downloads (16 connections) on every platform with a single
+  connection ureq fallback; configurable download folder and a Downloads
+  page (queue, open, delete, push to PSP).
+- Real-Debrid and TorBox clients: unrestrict DDL links and resolve
+  torrent/magnet links into direct downloads. Keys live in Settings and are
+  never sent anywhere but the provider APIs.
+- File manager (local vs stick panes) with copy in both directions, new
+  folder, delete; Local Library and PSP Library tabs with copy between
+  them.
+- PPSSPP-style local game database (serial keyed JSON), R2 cover and
+  animation URLs with disk cache, per-game mods catalog with pull-to-download.
+- Settings: debrid keys, source URL, R2 covers base, mods base, download
+  folder.
+
+### Changed
+
+- Library nav entry replaces the old Games page; Homebrew moved down the
+  rail.
 
 ## 0.1.0 - 2026-11-15
 

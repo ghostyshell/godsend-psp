@@ -21,8 +21,12 @@ and raw hex in components is banned.
    progress + cancellation; never block the UI thread with I/O.
 4. Destructive stick operations require explicit confirmation in the UI and
    must path-escape-guard anything joined from user input or archive names.
-5. Copy follows the no-em-dashes rule (`no-em-dashes.mdc`); update
-   `CHANGELOG.md` with every product change.
+5. Copy follows the no-em-dashes rule (`no-em-dashes.mdc`). Every product
+   change bumps the version and writes a `CHANGELOG.md` entry in the same
+   commit: `scripts/bump-version.sh x.y.z "Fixed: ..."`. No `[Unreleased]`
+   section; newest dated header wins. `scripts/install-hooks.sh` enables the
+   pre-commit check (`scripts/check-changelog.sh`). See
+   `docs/agents/skills/changelog.md`.
 6. Design: follow DESIGN.md tokens and motion rules; respect the
    reduced-motion kill switch; keep state chips dot+word so nothing is
    color-only.
