@@ -3,6 +3,16 @@
 All notable changes to GODsend PSP. Newest first.
 
 
+## [0.2.15] - 2026-11-15
+
+### Added
+
+- A loopback MCP server (JSON-RPC over HTTP on 127.0.0.1:8849) that starts
+  with the desktop app and runs headless via `godsend-psp mcp`, exposing
+  read-only device, library, store, downloads, plugins and doctor tools.
+  Toggle it in Settings.
+
+
 ## [0.2.14] - 2026-11-15
 
 

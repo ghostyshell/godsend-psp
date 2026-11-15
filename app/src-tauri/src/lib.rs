@@ -1209,6 +1209,14 @@ pub fn run() {
                     }
                 }
             }
+            let config = app.state::<AppState>().config();
+            if config.mcp_enabled {
+                let endpoint = godsend_core::mcp::ServerConfig::from_config(&config).url();
+                match godsend_core::mcp::serve(&config) {
+                    Ok(_) => tracing::info!("MCP server listening on {}", endpoint),
+                    Err(err) => tracing::warn!("MCP server not started on {}: {}", endpoint, err),
+                }
+            }
             let handle = app.handle().clone();
             set_progress_hook(Some(Arc::new(move |job_id, done, total| {
                 let _ = handle.emit(

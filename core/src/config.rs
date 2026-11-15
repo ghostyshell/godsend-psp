@@ -37,7 +37,10 @@ pub struct Config {
     pub covers_base: String,
     /// Mods catalog base (JSON per serial). Empty = mods disabled.
     pub mods_base: String,
-
+    /// Serve the loopback MCP endpoint while the desktop app runs.
+    pub mcp_enabled: bool,
+    /// Loopback port for the MCP endpoint.
+    pub mcp_port: u16,
 }
 
 impl Default for Config {
@@ -57,6 +60,8 @@ impl Default for Config {
             gamesearch_base: "http://localhost:3011".into(),
             covers_base: String::new(),
             mods_base: String::new(),
+            mcp_enabled: true,
+            mcp_port: 8849,
         }
     }
 }

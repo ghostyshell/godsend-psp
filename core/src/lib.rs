@@ -15,6 +15,7 @@ pub mod iso;
 pub mod cso;
 pub mod library;
 pub mod media;
+pub mod mcp;
 pub mod mods;
 pub mod aria2;
 pub mod pbp;

@@ -119,6 +119,7 @@ godsend-psp convert image.iso             # ISO <-> CSO
 godsend-psp saves backup --out saves.zip  # zip all saves
 godsend-psp plugins list                  # seplugins state
 godsend-psp doctor                        # environment checks
+godsend-psp mcp                           # loopback MCP server on 127.0.0.1:8849
 ```
 
 ## Platform notes

@@ -239,6 +239,37 @@ export default function Settings({ snap, reload, toast, refreshKey }: PageProps)
 
       <section className="card panel">
         <div className="panel-head">
+          <h2>MCP server</h2>
+          <div className="spacer" />
+          <Chip tone={config.mcp_enabled ? "good" : "neutral"}>
+            {config.mcp_enabled ? "on" : "off"}
+          </Chip>
+        </div>
+        <p style={{ margin: "0 0 12px", fontSize: 12.5, color: "var(--text-faint)" }}>
+          Model Context Protocol endpoint for local agents: read-only device,
+          library, store, downloads, plugins and doctor tools over JSON-RPC.
+          Restart the app after changing the port in the config file.
+        </p>
+        <div className="field">
+          <label>MCP server</label>
+          <code style={endpointStyle}>http://127.0.0.1:{config.mcp_port}</code>
+        </div>
+        <div className="field">
+          <label>Start with the app</label>
+          <Toggle
+            checked={config.mcp_enabled}
+            onChange={async (next) => {
+              await api.configSet({ mcp_enabled: next });
+              toast(next ? "MCP server enabled" : "MCP server disabled");
+              reload();
+            }}
+            label="Serve the MCP endpoint while the app runs"
+          />
+        </div>
+      </section>
+
+      <section className="card panel">
+        <div className="panel-head">
           <h2>Tools</h2>
           <div className="spacer" />
           <Btn small onClick={async () => toast(`checks: ${(await api.doctorRun()).filter((c) => c.ok).length} ok`)}>
@@ -260,12 +291,23 @@ export default function Settings({ snap, reload, toast, refreshKey }: PageProps)
           <Btn onClick={() => void api.openDataDir()}>Open Data Folder</Btn>
         </div>
         <p style={{ margin: "12px 0 0", fontSize: 12.5, color: "var(--text-faint)" }}>
-          godsend-psp 0.2.14 - Rust engine + Tauri. USB mass storage, no drivers.
+          godsend-psp 0.2.15 - Rust engine + Tauri. USB mass storage, no drivers.
         </p>
       </section>
     </div>
   );
 }
+
+const endpointStyle: React.CSSProperties = {
+  fontFamily: "var(--mono)",
+  fontSize: 12.5,
+  color: "var(--text)",
+  background: "rgba(255,255,255,0.03)",
+  border: "1px solid var(--line-strong)",
+  borderRadius: "var(--radius-sm)",
+  padding: "8px 10px",
+  display: "block",
+};
 
 const inputStyle: React.CSSProperties = {
   flex: 1,
