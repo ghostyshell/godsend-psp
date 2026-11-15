@@ -507,22 +507,57 @@ pub fn prune_mac_metadata(paths: &PspPaths) -> Result<()> {
     Ok(())
 }
 
-/// True when a catalog entry's folder already exists on the stick.
+/// True when a catalog entry is actually present on the stick.
+///
+/// CFW entries check for their savedata payload; homebrew entries scan
+/// PSP/GAME for a folder whose name or PARAM.SFO title matches the catalog
+/// name. An empty PSP/GAME never counts as installed.
 pub fn is_installed(entry: &CatalogEntry, paths: &PspPaths) -> bool {
-    match entry.id.as_str() {
-        "ark-4" | "ark-5" => paths.savedata().join("ARK_01234").is_dir(),
-        id => {
-            let target = guess_game_folder(id);
-            paths.game().join(target).is_dir()
+    if matches!(entry.id.as_str(), "ark-4" | "ark-5") {
+        return paths.savedata().join("ARK_01234").is_dir();
+    }
+    let needle = normalize_name(&entry.name);
+    if needle.is_empty() {
+        return false;
+    }
+    let Ok(entries) = fs::read_dir(paths.game()) else {
+        return false;
+    };
+    for dir in entries.flatten() {
+        let path = dir.path();
+        if !path.is_dir() || !path.join("EBOOT.PBP").is_file() {
+            continue;
+        }
+        let folder = dir.file_name().to_string_lossy().to_string();
+        if name_matches(&folder, &needle) {
+            return true;
+        }
+        if let Ok(bytes) = fs::read(path.join("PARAM.SFO")) {
+            if let Ok(sfo) = crate::sfo::Sfo::parse(&bytes) {
+                if let Some(title) = sfo.title() {
+                    if name_matches(title, &needle) {
+                        return true;
+                    }
+                }
+            }
         }
     }
+    false
 }
 
-fn guess_game_folder(id: &str) -> String {
-    // Best-effort folder match against known names; a full install report
-    // would be needed for exactness, so also scan GAME dirs for the names.
-    let _ = id;
-    String::new()
+fn normalize_name(text: &str) -> String {
+    text.chars()
+        .filter(|c| c.is_ascii_alphanumeric())
+        .map(|c| c.to_ascii_lowercase())
+        .collect()
+}
+
+fn name_matches(candidate: &str, needle: &str) -> bool {
+    let c = normalize_name(candidate);
+    if c.is_empty() {
+        return false;
+    }
+    c.contains(needle) || needle.contains(&c)
 }
 
 /// Cancel-aware wrapper used by job threads.
@@ -557,6 +592,31 @@ mod tests {
         assert!(catalog.iter().any(|e| e.id == "ark-4"));
         assert!(catalog.iter().any(|e| e.repo == "tzubertowski/FrogGBA"));
         assert!(catalog.iter().all(|e| e.repo.contains('/')));
+    }
+
+    #[test]
+    fn installed_requires_a_real_folder() {
+        let dir = std::env::temp_dir().join(format!("godsend-hb-{}", std::process::id()));
+        let paths = crate::device::PspPaths::new(&dir);
+        let entry = bundled_catalog()
+            .into_iter()
+            .find(|e| e.id == "froggba")
+            .expect("froggba entry");
+        // An existing but empty PSP/GAME must not read as installed.
+        fs::create_dir_all(paths.game()).unwrap();
+        assert!(!is_installed(&entry, &paths));
+        // A real EBOOT folder with a matching name does.
+        let game = paths.game().join("FrogGBA");
+        fs::create_dir_all(&game).unwrap();
+        fs::write(game.join("EBOOT.PBP"), b"x").unwrap();
+        assert!(is_installed(&entry, &paths));
+        // A different homebrew is still not installed.
+        let other = bundled_catalog()
+            .into_iter()
+            .find(|e| e.id == "daedalusx64")
+            .unwrap();
+        assert!(!is_installed(&other, &paths));
+        std::fs::remove_dir_all(&dir).ok();
     }
 
     #[test]

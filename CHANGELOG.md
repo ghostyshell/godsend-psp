@@ -3,6 +3,9 @@
 All notable changes to GODsend PSP. Newest first.
 
 
+## [0.2.23] - 2026-11-15
+
+
 ## [0.2.22] - 2026-11-15
 
 
@@ -132,6 +135,13 @@ All notable changes to GODsend PSP. Newest first.
 
 
 ## [0.2.4] - 2026-11-15
+
+### Fixed
+
+- Homebrew install badges were wrong: the installed check joined an empty
+  folder name, so any existing PSP/GAME counted as installed. It now scans
+  for a real EBOOT folder matching the catalog name (folder or PARAM.SFO
+  title), and an empty GAME directory reports nothing installed.
 
 ### Fixed
 
