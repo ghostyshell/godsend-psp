@@ -221,6 +221,8 @@ async function invoke(cmd: string, args: Record<string, any> = {}): Promise<unkn
       return music;
     case "video_list":
       return videos;
+    case "video_preview":
+      return null;
     case "media_delete": {
       const list = args.kind === "video" ? videos : music;
       const i = list.findIndex((f) => f.rel === args.rel);
