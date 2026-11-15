@@ -3,7 +3,16 @@
 All notable changes to GODsend PSP. Newest first.
 
 
+## [0.2.5] - 2026-11-15
+
+
 ## [0.2.4] - 2026-11-15
+
+### Changed
+
+- App and site icon now derive from the supplied glossy emblem
+  (`scripts/iconize-source.mjs`: white background removed, art cropped
+  square and centered at 1024, then the full Tauri icon set regenerated).
 
 ### Changed
 
