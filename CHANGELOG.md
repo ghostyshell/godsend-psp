@@ -31,6 +31,15 @@ All notable changes to GODsend PSP. Newest first.
 
 ## Unreleased
 
+### Changed
+
+- Releases now publish to GoFile (primary) and file.kiwi (backup) like the
+  sibling projects; the README table is rewritten from the upload manifest.
+  GitHub Releases are no longer created (tags still trigger CI builds).
+- scripts/publish-release.sh, refresh-release-links.sh and
+  install-refresh-job.sh mirror the keepsake-atelier flow (weekly Sunday
+  refresh via launchd).
+
 ### Added
 
 - Guides under docs/guides: connecting the PSP, homebrew and CFW, music and
