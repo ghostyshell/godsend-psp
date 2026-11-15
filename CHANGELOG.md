@@ -3,6 +3,9 @@
 All notable changes to GODsend PSP. Newest first.
 
 
+## [0.2.10] - 2026-11-15
+
+
 ## [0.2.9] - 2026-11-15
 
 
@@ -37,6 +40,12 @@ All notable changes to GODsend PSP. Newest first.
 - Video tiles play a cached three second muted clip of the film on hover or
   keyboard focus, extracted with ffmpeg at 240px wide, the way PSP video
   icons animate.
+
+### Changed
+
+- Site screenshots are zoomable: clicking any capture opens a full-screen
+  lightbox (click, Close or Escape to dismiss), and the strip now shows the
+  console, library and store.
 
 ### Changed
 

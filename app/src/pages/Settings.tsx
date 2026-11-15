@@ -260,7 +260,7 @@ export default function Settings({ snap, reload, toast, refreshKey }: PageProps)
           <Btn onClick={() => void api.openDataDir()}>Open Data Folder</Btn>
         </div>
         <p style={{ margin: "12px 0 0", fontSize: 12.5, color: "var(--text-faint)" }}>
-          godsend-psp 0.2.9 - Rust engine + Tauri. USB mass storage, no drivers.
+          godsend-psp 0.2.10 - Rust engine + Tauri. USB mass storage, no drivers.
         </p>
       </section>
     </div>

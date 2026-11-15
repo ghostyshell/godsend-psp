@@ -50,10 +50,21 @@
   </section>
 
   <section id="screens" class="screens">
-    <img src="site-console.png" alt="Console page with device status, checks and activity" loading="lazy" />
-    <img src="site-games.png" alt="Game library with cover tiles" loading="lazy" />
-    <img src="site-homebrew.png" alt="Homebrew catalog with installers" loading="lazy" />
+    <a class="shot" href="site-console.png" aria-label="Open the console screenshot">
+      <img src="site-console.png" alt="Console page with device status, checks and activity" loading="lazy" />
+    </a>
+    <a class="shot" href="site-library.png" aria-label="Open the library screenshot">
+      <img src="site-library.png" alt="PSP library with landscape cover tiles" loading="lazy" />
+    </a>
+    <a class="shot" href="site-store.png" aria-label="Open the store screenshot">
+      <img src="site-store.png" alt="Store with debrid and Internet Archive sources" loading="lazy" />
+    </a>
   </section>
+
+  <div id="lightbox" class="lightbox" hidden>
+    <button class="lightbox-close" aria-label="Close the screenshot">Close</button>
+    <img id="lightbox-img" alt="" />
+  </div>
 
   <section id="features">
     <h2>Everything on the stick</h2>
@@ -143,6 +154,23 @@
 </footer>
 
 <script>
+// Screenshot lightbox: click to zoom, Escape or click to close.
+(function () {
+  const box = document.getElementById("lightbox");
+  const img = document.getElementById("lightbox-img");
+  const close = () => { box.hidden = true; img.src = ""; };
+  document.querySelectorAll(".shot").forEach((a) => {
+    a.addEventListener("click", (e) => {
+      e.preventDefault();
+      img.src = a.getAttribute("href");
+      img.alt = a.querySelector("img")?.alt ?? "";
+      box.hidden = false;
+    });
+  });
+  box.addEventListener("click", close);
+  document.addEventListener("keydown", (e) => { if (e.key === "Escape") close(); });
+})();
+
 fetch("downloads.json?v=" + Date.now(), { cache: "no-store" }).then(r => r.json()).then(data => {
   const el = document.getElementById("downloads-table");
   if (!data.artifacts || !data.artifacts.length) return;
