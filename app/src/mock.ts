@@ -402,26 +402,32 @@ function fileName(path: string): string {
 function iconDataUrl(id: string): string {
   // Draw a deterministic 96x96 tile with a monogram; reads as a real cover at grid size.
   const canvas = document.createElement("canvas");
-  canvas.width = 96;
-  canvas.height = 96;
+  canvas.width = 288;
+  canvas.height = 160;
   const ctx = canvas.getContext("2d")!;
   let hash = 0;
   for (const ch of id) hash = (hash * 31 + ch.charCodeAt(0)) | 0;
   const hue = Math.abs(hash) % 360;
-  const grad = ctx.createLinearGradient(0, 0, 96, 96);
-  grad.addColorStop(0, `hsl(${hue} 55% 30%)`);
-  grad.addColorStop(1, `hsl(${(hue + 40) % 360} 60% 18%)`);
+  const grad = ctx.createLinearGradient(0, 0, 288, 160);
+  grad.addColorStop(0, `hsl(${hue} 58% 34%)`);
+  grad.addColorStop(1, `hsl(${(hue + 45) % 360} 62% 16%)`);
   ctx.fillStyle = grad;
-  ctx.fillRect(0, 0, 96, 96);
-  ctx.fillStyle = "rgba(255,255,255,0.92)";
-  ctx.font = "700 34px 'Chakra Petch', sans-serif";
-  ctx.textAlign = "center";
-  ctx.textBaseline = "middle";
-  const words = id.replace(/^game\//, "").replace(/^iso\//, "");
-  ctx.fillText(words.slice(0, 2).toUpperCase(), 48, 44);
-  ctx.fillStyle = "rgba(255,255,255,0.55)";
-  ctx.font = "500 9px 'JetBrains Mono', monospace";
-  ctx.fillText(words.slice(0, 12), 48, 78);
+  ctx.fillRect(0, 0, 288, 160);
+  const glow = ctx.createRadialGradient(230, 10, 10, 230, 10, 160);
+  glow.addColorStop(0, "rgba(255,255,255,0.22)");
+  glow.addColorStop(1, "rgba(255,255,255,0)");
+  ctx.fillStyle = glow;
+  ctx.fillRect(0, 0, 288, 160);
+  ctx.fillStyle = "rgba(255,255,255,0.95)";
+  ctx.font = "700 22px 'Chakra Petch', sans-serif";
+  ctx.textAlign = "left";
+  ctx.textBaseline = "bottom";
+  const words = id.replace(/^game\//, "").replace(/^iso\//, "").replace(/\.[a-z]+$/i, "");
+  const title = words.replace(/([a-z])([A-Z])/g, "$1 $2").replace(/-/g, " ");
+  ctx.fillText(title.slice(0, 26), 16, 128);
+  ctx.fillStyle = "rgba(255,255,255,0.6)";
+  ctx.font = "500 10px 'JetBrains Mono', monospace";
+  ctx.fillText(words.slice(0, 30).toUpperCase(), 16, 146);
   return canvas.toDataURL("image/png");
 }
 

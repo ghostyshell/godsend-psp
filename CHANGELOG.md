@@ -3,6 +3,9 @@
 All notable changes to GODsend PSP. Newest first.
 
 
+## [0.2.8] - 2026-11-15
+
+
 ## [0.2.7] - 2026-11-15
 
 
@@ -13,6 +16,14 @@ All notable changes to GODsend PSP. Newest first.
 
 
 ## [0.2.4] - 2026-11-15
+
+### Changed
+
+- Library tiles are landscape (9:5, matching PSP ICON0 art) with a PSP XMB
+  style focus: lift, laser rim, cover zoom and a light sweep on hover or
+  keyboard focus. Entries without art render a real cover card (gradient,
+  title, serial) instead of a monogram placeholder. Mock covers are
+  landscape too. Version 0.2.8.
 
 ### Changed
 

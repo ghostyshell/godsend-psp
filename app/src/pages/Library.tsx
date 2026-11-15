@@ -66,7 +66,10 @@ export default function Library({ snap, toast, refreshKey }: PageProps) {
                   {covers[game.id] ? (
                     <img src={covers[game.id]} alt={`${game.title} cover`} />
                   ) : (
-                    <span className="monogram">{game.folder.slice(0, 2).toUpperCase()}</span>
+                    <div className="cover-fallback">
+                      <span className="cf-title">{game.title}</span>
+                      <span className="cf-serial">{game.title_id ?? game.kind}</span>
+                    </div>
                   )}
                 </div>
                 <div className="body">
