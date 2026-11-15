@@ -20,6 +20,15 @@
         ],
         "createdAt": "2026-11-15T08:50:09.237Z",
         "reason": "deliberate product identity: the page renders docs/site.css, which mirrors the GODsend PSP desktop app's laser glow"
+      },
+      {
+        "rule": "hero-eyebrow-chip",
+        "value": "*",
+        "files": [
+          "docs/index.html"
+        ],
+        "createdAt": "2026-11-15T09:17:29.935Z",
+        "reason": "intentional: the tracked-caps status line is the app's identity, present before this task"
       }
     ]
   }
