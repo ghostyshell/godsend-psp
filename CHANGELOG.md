@@ -3,6 +3,9 @@
 All notable changes to GODsend PSP. Newest first.
 
 
+## [0.2.7] - 2026-11-15
+
+
 ## [0.2.6] - 2026-11-15
 
 
@@ -10,6 +13,14 @@ All notable changes to GODsend PSP. Newest first.
 
 
 ## [0.2.4] - 2026-11-15
+
+### Changed
+
+- Ship checklist now includes screenshots and a full publish: every change
+  regenerates the site captures (`app/scripts/capture-screens.mjs`), builds
+  through `scripts/publish-release.sh`, uploads to GoFile + file.kiwi and
+  verifies the live feed. Captures refreshed for the new nav, library and
+  store pages. Version 0.2.7.
 
 ### Changed
 

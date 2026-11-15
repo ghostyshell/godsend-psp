@@ -33,6 +33,20 @@
    `scripts/`, `.github/`) comes without a staged `CHANGELOG.md` diff, or
    when the mirrored version files disagree.
 
+## Ship checklist (every change)
+
+1. Bump + changelog entry (above).
+2. Regenerate screenshots:
+   ```sh
+   (cd app && npm run dev &) ; sleep 4
+   (cd app && node scripts/capture-screens.mjs)
+   ```
+   Outputs `docs/site-console.png`, `site-library.png`, `site-games.png`,
+   `site-store.png`, `site-homebrew.png`.
+3. Commit, then `scripts/publish-release.sh` to build all platforms and
+   upload to GoFile + file.kiwi.
+4. Confirm the live feed check the script prints.
+
 ## Release
 
 `scripts/publish-release.sh` reads the version from `tauri.conf.json` and

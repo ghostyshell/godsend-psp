@@ -39,6 +39,12 @@ offers GODsend 360 style features for the PSP.
 - Savedata operations must skip `ARK_01234` (CFW payload, not a save).
 - Installs prune `__MACOSX`, `._*` and `.DS_Store` from the stick (ARK-4
   ships the same fix on-console; do it at the source).
+- **Every change ships complete.** Running "build and upload" means:
+  bump the version, regenerate screenshots (`app/scripts/capture-screens.mjs`
+  against the mock UI), run `scripts/publish-release.sh` (CI build, GoFile +
+  file.kiwi upload, README/site repoint), and confirm the live feed. A change
+  is not done with source commits alone. Recordings, when they change, go
+  through the demo-reels pipeline and the pages under docs/.
 - **Releases are not done until the live feed proves it.** After running
   `scripts/publish-release.sh`, confirm
   `https://ghostyshell.github.io/godsend-psp/downloads.json` (cache-busted)
