@@ -192,6 +192,6 @@ mod tests {
         cfg.patch_from_json(&patch).expect("patch must apply");
         assert_eq!(cfg.music_format, "m4a");
         assert_eq!(cfg.cso_level, 9);
-        assert_eq!(cfg.video_preset, "psp_avc_480");
+        assert_eq!(cfg.video_preset, "veryslow");
     }
 }
