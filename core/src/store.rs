@@ -105,6 +105,7 @@ mod tests {
             link_type: "ddl".into(),
             supported_by: vec![],
             cover: None,
+            rawg_cover: None,
             size: None,
             links: vec![
                 crate::sources::GameLink {
@@ -138,6 +139,7 @@ mod tests {
             link_type: "ddl".into(),
             supported_by: vec![],
             cover: None,
+            rawg_cover: None,
             size: None,
             links: vec![],
         };

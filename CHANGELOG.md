@@ -57,6 +57,8 @@ All notable changes to GODsend PSP. Newest first.
 
 ### Added
 
+- Fixture hits carry the new rawgCover field so the core tests match the
+  index shape.
 - Connected-library covers resolve beyond ICON0: the app asks the configured
   R2 base first, then the game-search index (rawgCover) by title/serial and
   caches the result, so device games without icons still get real art.
