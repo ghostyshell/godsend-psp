@@ -7,6 +7,8 @@ Rows are `name | gofile-url | kiwi-url | size | sha256`. A row whose URL is
 missing or EMPTY still appears with `pending`, so a failed mirror never blanks
 out the half that worked.
 """
+import datetime
+import json
 import re
 import sys
 from pathlib import Path
@@ -68,6 +70,33 @@ def main():
         table.append(
             f"| `{name}` | {cell(gofile, 'Download')} | {cell(kiwi, 'Mirror')} | {size or ''} |"
         )
+
+    artifacts = [
+        {
+            "name": name,
+            "label": label_for(name),
+            "gofile": "" if gofile == "EMPTY" else gofile,
+            "kiwi": "" if kiwi == "EMPTY" else kiwi,
+            "size": size or "",
+            "sha256": sha or "",
+        }
+        for name, gofile, kiwi, size, sha, *_ in [row[:5] for row in rows]
+    ]
+    version = ""
+    m = re.search(r"\d+\.\d+\.\d+", artifacts[0]["name"]) if artifacts else None
+    if m:
+        version = m.group(0)
+    (ROOT / "docs" / "downloads.json").write_text(
+        json.dumps(
+            {
+                "version": version,
+                "updated": datetime.date.today().isoformat(),
+                "artifacts": artifacts,
+            },
+            indent=2,
+        )
+        + "\n"
+    )
 
     text = README.read_text()
     start = text.index(START) + len(START)

@@ -158,7 +158,7 @@ done
 python3 -I scripts/patch-release-links.py "$LINKS" || die "could not patch README"
 
 # --- 4. Commit and push ----------------------------------------------------------
-if git diff --quiet -- README.md; then
+if git diff --quiet -- README.md docs/downloads.json; then
   log "download links already current - nothing to commit"
 else
   git add README.md
