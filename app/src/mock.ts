@@ -262,6 +262,8 @@ async function invoke(cmd: string, args: Record<string, any> = {}): Promise<unkn
       if (i >= 0) images.splice(i, 1);
       return null;
     }
+    case "savedata_icon":
+      return iconDataUrl(`save/${args.folder}`);
     case "savedata_list":
       return saves;
     case "savedata_backup":

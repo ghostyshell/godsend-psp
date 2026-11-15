@@ -72,6 +72,7 @@ export const api = {
   imageDelete: (imageId: string) => invoke<void>("image_delete", { imageId }),
 
   savedataList: () => invoke<SaveEntry[]>("savedata_list"),
+  savedataIcon: (folder: string) => invoke<string | null>("savedata_icon", { folder }),
   savedataBackup: (folders: string[]) => invoke<number>("savedata_backup", { folders }),
   savedataRestore: (zip: string) => invoke<number>("savedata_restore", { zip }),
   savedataDelete: (folder: string) => invoke<void>("savedata_delete", { folder }),

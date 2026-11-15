@@ -3,6 +3,9 @@
 All notable changes to GODsend PSP. Newest first.
 
 
+## [0.2.21] - 2026-11-15
+
+
 ## [0.2.20] - 2026-11-15
 
 
@@ -16,6 +19,12 @@ All notable changes to GODsend PSP. Newest first.
 
 
 ## [0.2.16] - 2026-11-15
+
+### Changed
+
+- Save Data shows each slot's own ICON0.PNG as a landscape thumbnail, the
+  way the PSP save utility does, with a cover-card fallback when a save has
+  no icon.
 
 ### Changed
 

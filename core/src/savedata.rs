@@ -178,6 +178,12 @@ pub fn restore(paths: &PspPaths, zip_path: &Path, ctx: Option<&JobContext>) -> R
     Ok(count)
 }
 
+/// ICON0.PNG from a save folder, exactly what the PSP save utility shows.
+pub fn icon_bytes(paths: &PspPaths, folder: &str) -> Option<Vec<u8>> {
+    let dir = paths.savedata().join(folder);
+    std::fs::read(dir.join("ICON0.PNG")).ok()
+}
+
 /// Delete a save folder from the stick.
 pub fn delete_save(paths: &PspPaths, folder: &str) -> Result<()> {
     if NON_SAVE_FOLDERS.iter().any(|f| folder.eq_ignore_ascii_case(f)) {
