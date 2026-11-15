@@ -3,6 +3,9 @@
 All notable changes to GODsend PSP. Newest first.
 
 
+## [0.2.31] - 2026-11-16
+
+
 ## [0.2.30] - 2026-11-16
 
 
@@ -19,6 +22,12 @@ All notable changes to GODsend PSP. Newest first.
 
 
 ## [0.2.25] - 2026-11-15
+
+### Added
+
+- First real theme catalog: three CTF XMB themes scraped from
+  caseyjkey/psp-xmb-themes into psp-catalog/files and published to
+  psp-mods.debrid.in for the app's Themes tab.
 
 ### Added
 
