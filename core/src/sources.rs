@@ -140,9 +140,19 @@ pub struct IaFile {
 
 /// Search IA items matching a query (megathread-style PSP sets).
 pub fn ia_search(query: &str, rows: u32) -> Result<Vec<IaItem>> {
+    // Megathread sets are PSP-specific; keep the query anchored so IA does
+    // not return unrelated software items.
+    let terms = if query.is_empty() {
+        "PSP".to_string()
+    } else {
+        format!("({query})")
+    };
+    let q = format!(
+        "{terms} AND mediatype:(software) AND (title:(psp) OR identifier:(psp) OR title:(\"playstation portable\") OR subject:(psp))"
+    );
     let url = format!(
         "https://archive.org/advancedsearch.php?q={}&fl%5B%5D=identifier&fl%5B%5D=title&fl%5B%5D=item_size&fl%5B%5D=files_count&rows={}&page=1&output=json",
-        urlencode(&format!("{query} AND mediatype:(software)")),
+        urlencode(&q),
         rows.max(1).min(100)
     );
     let v: serde_json::Value = agent().get(&url).call()?.into_json()?;
@@ -157,12 +167,18 @@ pub fn ia_search(query: &str, rows: u32) -> Result<Vec<IaItem>> {
         if id.is_empty() {
             continue;
         }
+        // Post-filter: identifiers and titles must look PSP-related.
+        let title = doc
+            .get("title")
+            .and_then(|t| t.as_str())
+            .unwrap_or(&id)
+            .to_string();
+        let probe = format!("{} {}", id.to_lowercase(), title.to_lowercase());
+        if !(probe.contains("psp") || probe.contains("playstation portable")) {
+            continue;
+        }
         out.push(IaItem {
-            title: doc
-                .get("title")
-                .and_then(|t| t.as_str())
-                .unwrap_or(&id)
-                .to_string(),
+            title,
             files_count: doc.get("files_count").and_then(|f| f.as_u64()).unwrap_or(0),
             size_bytes: doc
                 .get("item_size")
@@ -177,12 +193,66 @@ pub fn ia_search(query: &str, rows: u32) -> Result<Vec<IaItem>> {
 
 /// Megathread-style default queries surfaced in the Store.
 pub fn ia_seed_queries() -> Vec<&'static str> {
+    // Drawn from the r/Roms megathread PSP rows.
     vec![
-        "PSP ISO collection",
+        "PSP ISO",
         "PSP ROM set",
-        "PlayStation Portable library",
-        "PSP game archive",
+        "PlayStation Portable",
+        "PSP Redump",
+        "PSP No-Intro",
     ]
+}
+
+// ---------- Minerva Archive (Myrient PSP sets) ----------
+
+const MINERVA_ASSETS: &str = "https://minerva-archive.org/assets/Minerva_Myrient_v0.3";
+
+#[derive(Debug, Clone, Serialize)]
+pub struct MinervaSet {
+    /// Torrent file name, used as the download id.
+    pub id: String,
+    pub title: String,
+    pub url: String,
+}
+
+/// Probe the known PSP torrent names and return the ones that exist.
+pub fn minerva_sets() -> Result<Vec<MinervaSet>> {
+    let candidates = [
+        "Minerva_Myrient - Redump - Sony - PlayStation Portable.torrent",
+        "Minerva_Myrient - No-Intro - Sony - PlayStation Portable.torrent",
+        "Minerva_Myrient - Redump - Sony - PlayStation Portable (PSP).torrent",
+        "Minerva_Myrient - No-Intro - Sony - PlayStation Portable (PSN).torrent",
+    ];
+    let agent = ureq::AgentBuilder::new()
+        .timeout(std::time::Duration::from_secs(15))
+        .build();
+    let mut out = Vec::new();
+    for name in candidates {
+        let url = format!("{MINERVA_ASSETS}/{}", urlencode(name));
+        let ok = agent
+            .head(&url)
+            .call()
+            .map(|r| r.status() == 200)
+            .unwrap_or(false);
+        if ok {
+            out.push(MinervaSet {
+                id: name.to_string(),
+                title: name
+                    .trim_start_matches("Minerva_Myrient - ")
+                    .trim_end_matches(".torrent")
+                    .to_string(),
+                url,
+            });
+        }
+    }
+    Ok(out)
+}
+
+pub fn minerva_download(id: &str) -> Option<String> {
+    if id.contains("..") || id.contains('/') {
+        return None;
+    }
+    Some(format!("{MINERVA_ASSETS}/{}", urlencode(id)))
 }
 
 /// List the downloadable game files inside an IA item.

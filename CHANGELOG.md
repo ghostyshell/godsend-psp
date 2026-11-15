@@ -3,6 +3,9 @@
 All notable changes to GODsend PSP. Newest first.
 
 
+## [0.2.20] - 2026-11-15
+
+
 ## [0.2.19] - 2026-11-15
 
 
@@ -13,6 +16,14 @@ All notable changes to GODsend PSP. Newest first.
 
 
 ## [0.2.16] - 2026-11-15
+
+### Changed
+
+- Internet Archive search is PSP-anchored (query + title/identifier
+  post-filter) so results no longer include unrelated software, with
+  megathread-style seed queries.
+- Minerva is a Store source: it probes the Myrient PSP torrent sets and
+  downloads the chosen torrent for aria2c.
 
 ### Changed
 

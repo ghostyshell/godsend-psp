@@ -4,7 +4,7 @@ import type { GameHit, GameInfo, IaItem, IaFile } from "../types";
 import type { PageProps } from "../App";
 import { Btn, Chip, Empty, Seg, fmtBytes } from "../ui";
 
-type Source = "gamesearch" | "ia";
+type Source = "gamesearch" | "ia" | "minerva";
 type View =
   | { kind: "none" }
   | { kind: "game"; hit: GameHit; info: GameInfo | null }
@@ -15,6 +15,7 @@ export default function Store({ snap, reload, toast, refreshKey }: PageProps) {
   const [query, setQuery] = useState("");
   const [items, setItems] = useState<GameHit[]>([]);
   const [iaItems, setIaItems] = useState<IaItem[]>([]);
+  const [minervaItems, setMinervaItems] = useState<{ id: string; title: string; url: string }[]>([]);
   const [view, setView] = useState<View>({ kind: "none" });
   const [busy, setBusy] = useState(false);
   const [debrid, setDebrid] = useState({ realdebrid: false, torbox: false });
@@ -31,6 +32,9 @@ export default function Store({ snap, reload, toast, refreshKey }: PageProps) {
       const result = await api.storeSearch(q, src);
       if (src === "ia") {
         setIaItems((result.items as unknown as IaItem[]) ?? []);
+        setItems([]);
+      } else if (src === "minerva") {
+        setMinervaItems((result.items as unknown as { id: string; title: string; url: string }[]) ?? []);
         setItems([]);
       } else {
         setItems((result.items as unknown as GameHit[]) ?? []);
@@ -70,7 +74,7 @@ export default function Store({ snap, reload, toast, refreshKey }: PageProps) {
     }
   }
 
-  async function download(source: Source, id: string, label: string) {
+  async function download(source: "gamesearch" | "ia" | "minerva", id: string, label: string) {
     if (!debrid.realdebrid && !debrid.torbox && source === "gamesearch") {
       toast("no debrid account: DDL links work, torrents need Settings > Debrid");
     }
@@ -107,12 +111,19 @@ export default function Store({ snap, reload, toast, refreshKey }: PageProps) {
             options={[
               { value: "gamesearch", label: "Game Debrid" },
               { value: "ia", label: "Internet Archive" },
+              { value: "minerva", label: "Minerva" },
             ]}
           />
           <input
             type="text"
             className="mono"
-            placeholder={source === "ia" ? "PSP ISO collection" : "search PSP games"}
+            placeholder={
+              source === "ia"
+                ? "PSP ISO (megathread set)"
+                : source === "minerva"
+                  ? "Minerva PSP sets load automatically"
+                  : "search PSP games"
+            }
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             onKeyDown={(e) => {
@@ -137,7 +148,9 @@ export default function Store({ snap, reload, toast, refreshKey }: PageProps) {
         <p style={{ margin: "8px 0 0", fontSize: 12.5, color: "var(--text-faint)" }}>
           {source === "gamesearch"
             ? "Debrid index wired to the game-search service. Links are resolved through Real-Debrid or TorBox when connected, then downloaded with aria2c."
-            : "Internet Archive sets in the r/Roms megathread style. Direct downloads, no account needed."}
+            : source === "minerva"
+              ? "Minerva Archive Myrient PSP torrents. Downloading saves the torrent, which aria2c can fetch."
+              : "Internet Archive sets in the r/Roms megathread style. Direct downloads, no account needed."}
         </p>
       </div>
 
@@ -289,6 +302,29 @@ export default function Store({ snap, reload, toast, refreshKey }: PageProps) {
                   </Btn>
                 </div>
               </article>
+            ))}
+          </div>
+        )
+      ) : source === "minerva" ? (
+        minervaItems.length === 0 ? (
+          <Empty title="No Minerva sets" hint="Minerva PSP torrents could not be probed; check the connection." />
+        ) : (
+          <div className="rows">
+            {minervaItems.map((set) => (
+              <div className="row" key={set.id}>
+                <Chip tone="laser">minerva</Chip>
+                <div className="grow">
+                  <div className="title">{set.title}</div>
+                  <div className="sub">{set.id}</div>
+                </div>
+                <Btn
+                  small
+                  variant="primary"
+                  onClick={() => void download("minerva", set.id, set.title)}
+                >
+                  Download
+                </Btn>
+              </div>
             ))}
           </div>
         )
