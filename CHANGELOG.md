@@ -3,6 +3,19 @@
 All notable changes to GODsend PSP. Newest first.
 
 
+## [0.2.48] - 2026-11-17
+
+### Fixed
+
+- Keys and Internet Archive details no longer disappear when the app is
+  replaced. A save built from a defaulted config could overwrite
+  `secrets.json` with empty values. Credential writes now keep any key that is
+  already on disk unless the Settings patch explicitly clears that key.
+- `config.json` and `secrets.json` are copied to `.bak` before every write, and
+  a config that fails to parse is copied to `config.json.corrupt-<timestamp>`
+  and noted in `config-errors.log` instead of being silently replaced by
+  defaults on the next save.
+
 ## [0.2.47] - 2026-11-17
 
 ### Added
