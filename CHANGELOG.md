@@ -3,6 +3,9 @@
 All notable changes to GODsend PSP. Newest first.
 
 
+## [0.2.34] - 2026-11-16
+
+
 ## [0.2.33] - 2026-11-16
 
 
@@ -28,6 +31,12 @@ All notable changes to GODsend PSP. Newest first.
 
 
 ## [0.2.25] - 2026-11-15
+
+### Added
+
+- ARK-5 as FasterARK (PSP-Arkfive/FasterARK): the catalog prefers the
+  ARK_UPDATE.zip asset and installs its PSP tree, with on-console cIPL
+  steps in the note. Release assets can now name a preferred zip.
 
 ### Added
 

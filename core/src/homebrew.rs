@@ -46,6 +46,9 @@ pub struct CatalogEntry {
     pub layout: Layout,
     /// Optional note shown in the UI (e.g. "needs gba_bios.bin").
     pub note: Option<String>,
+    /// Asset-name substring to prefer when picking the release zip.
+    #[serde(default)]
+    pub prefer: Option<String>,
     /// Filled after a release refresh: latest tag + zip asset URL.
     pub latest_tag: Option<String>,
     pub zip_url: Option<String>,
@@ -63,18 +66,20 @@ pub fn bundled_catalog() -> Vec<CatalogEntry> {
             repo: "PSP-Archive/ARK-4".into(),
             layout: Layout::Ark,
             note: Some("Copies ARK_01234 to PSP/SAVEDATA and loaders to PSP/GAME. Launch ARK Loader on the PSP to boot the CFW.".into()),
+            prefer: None,
             latest_tag: None,
             zip_url: None,
             published_at: None,
         },
         CatalogEntry {
-            id: "ark-5".into(),
-            name: "ARK-5".into(),
-            description: "Successor to ARK-4. Fresh rewrite of the ARK custom firmware line.".into(),
+            id: "fasterark".into(),
+            name: "ARK-5 (FasterARK)".into(),
+            description: "ARK loader and installer for PSP. Ships the ARK_UPDATE PSP tree plus cIPL installers; the successor path from ARK-4.".into(),
             category: "cfw".into(),
-            repo: "PSP-Arkfive/ARK-5".into(),
-            layout: Layout::Ark,
-            note: Some("New CFW line; check the project wiki for model support.".into()),
+            repo: "PSP-Arkfive/FasterARK".into(),
+            layout: Layout::PspRoot,
+            note: Some("Installs the ARK_UPDATE PSP folder. On the console run CustomIPL to install New cIPL; the full variant adds DC10.".into()),
+            prefer: Some("ARK_UPDATE".into()),
             latest_tag: None,
             zip_url: None,
             published_at: None,
@@ -87,6 +92,7 @@ pub fn bundled_catalog() -> Vec<CatalogEntry> {
             repo: "tzubertowski/FrogGBA".into(),
             layout: Layout::PspRoot,
             note: Some("Needs gba_bios.bin dropped into the game folder after install.".into()),
+            prefer: None,
             latest_tag: None,
             zip_url: None,
             published_at: None,
@@ -99,6 +105,7 @@ pub fn bundled_catalog() -> Vec<CatalogEntry> {
             repo: "andymcca/TempGBA4PSP-mod".into(),
             layout: Layout::Auto,
             note: Some("Needs gba_bios.bin in the emulator folder.".into()),
+            prefer: None,
             latest_tag: None,
             zip_url: None,
             published_at: None,
@@ -111,6 +118,7 @@ pub fn bundled_catalog() -> Vec<CatalogEntry> {
             repo: "DaedalusX64/daedalus".into(),
             layout: Layout::Auto,
             note: None,
+            prefer: None,
             latest_tag: None,
             zip_url: None,
             published_at: None,
@@ -180,11 +188,23 @@ pub fn refresh_catalog(catalog: &mut [CatalogEntry]) -> Result<usize> {
         };
         entry.latest_tag = release.tag_name;
         entry.published_at = release.published_at;
-        entry.zip_url = release
-            .assets
-            .iter()
-            .find(|a| a.name.to_lowercase().ends_with(".zip"))
-            .map(|a| a.browser_download_url.clone());
+        let pick = entry
+            .prefer
+            .as_deref()
+            .map(|p| p.to_lowercase())
+            .and_then(|p| {
+                release
+                    .assets
+                    .iter()
+                    .find(|a| a.name.to_lowercase().contains(&p) && a.name.to_lowercase().ends_with(".zip"))
+            })
+            .or_else(|| {
+                release
+                    .assets
+                    .iter()
+                    .find(|a| a.name.to_lowercase().ends_with(".zip"))
+            });
+        entry.zip_url = pick.map(|a| a.browser_download_url.clone());
         updated += 1;
     }
     if updated > 0 {

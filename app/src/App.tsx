@@ -58,7 +58,7 @@ const NAV: { id: Page; label: string; icon: LucideIcon }[] = [
   { id: "settings", label: "Settings", icon: SettingsIcon },
 ];
 
-const VERSION = "0.2.33";
+const VERSION = "0.2.34";
 
 export interface PageProps {
   snap: Snapshot;
