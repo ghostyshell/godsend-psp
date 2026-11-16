@@ -3,6 +3,20 @@
 All notable changes to GODsend PSP. Newest first.
 
 
+## [0.2.42] - 2026-11-16
+
+### Fixed
+
+- Downloads were launching ffmpeg as if it were aria2c whenever aria2c was
+  not on the app's PATH. The aria2 lookup was handed `config.ffmpeg_path`,
+  and a packaged macOS app does not inherit `/opt/homebrew/bin`. Resolution
+  now checks bundled resources, PATH, then `/opt/homebrew/bin`,
+  `/usr/local/bin`, `/usr/bin` and `/snap/bin`, and refuses any binary whose
+  name is not aria2c.
+- Single-file torrent downloads now fail with an install hint (brew or apt)
+  when aria2c is genuinely missing, instead of a raw aria2c exit message.
+
+
 ## [0.2.41] - 2026-11-16
 
 ### Changed
