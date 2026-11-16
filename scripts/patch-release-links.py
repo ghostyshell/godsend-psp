@@ -3,9 +3,10 @@
 
 Usage: python3 -I scripts/patch-release-links.py <links.txt>
 
-Rows are `name | gofile-url | kiwi-url | size | sha256`. A row whose URL is
-missing or EMPTY still appears with `pending`, so a failed mirror never blanks
-out the half that worked.
+Rows are `name | gofile-url | kiwi-url | size | sha256 | r2-url | bytes`. A row
+whose URL is missing or EMPTY still appears with `pending`, so a failed mirror
+never blanks out the half that worked. The R2 URL and exact byte count feed the
+in-app updater; older manifests without them still parse.
 """
 import datetime
 import json
@@ -42,6 +43,10 @@ def cell(url, text):
     return f"[{text}]({url})" if url and url != "EMPTY" else "pending"
 
 
+def direct(url):
+    return "" if not url or url == "EMPTY" else url
+
+
 def main():
     manifest = Path(sys.argv[1])
     version_arg = sys.argv[2] if len(sys.argv) > 2 else ""
@@ -76,12 +81,16 @@ def main():
         {
             "name": name,
             "label": label_for(name),
-            "gofile": "" if gofile == "EMPTY" else gofile,
-            "kiwi": "" if kiwi == "EMPTY" else kiwi,
+            "gofile": direct(gofile),
+            "kiwi": direct(kiwi),
+            "r2": direct(r2),
             "size": size or "",
+            "bytes": int(bytes) if bytes.isdigit() else None,
             "sha256": sha or "",
         }
-        for name, gofile, kiwi, size, sha, *_ in [row[:5] for row in rows]
+        for name, gofile, kiwi, size, sha, r2, bytes in [
+            (row + [""] * 7)[:7] for row in rows
+        ]
     ]
     version = version_arg
     if not version and artifacts:

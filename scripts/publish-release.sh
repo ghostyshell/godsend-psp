@@ -152,12 +152,80 @@ for f in "$DIST"/*.dmg "$DIST"/*.tar.gz "$DIST"/*.zip "$DIST"/*.AppImage "$DIST"
 done
 log "artifacts: ${FILES[*]}"
 
+# --- 1b. R2 direct mirror --------------------------------------------------------
+# GoFile and file.kiwi serve HTML pages, so the desktop updater needs a plain
+# binary URL. Mirror every artifact to our own bucket; never fail the publish
+# because of R2.
+R2_BUCKET=torrent-search-covers-eu
+R2_PREFIX=psp/releases
+R2_BASE=https://covers.debrid.in
+R2_READY=0
+if [ -f "$HOME/.r2.env" ]; then
+  # shellcheck disable=SC1090
+  . "$HOME/.r2.env"
+  if [ -n "${R2_S3_ACCESS_KEY_ID:-}" ] && [ -n "${R2_S3_SECRET_ACCESS_KEY:-}" ] && [ -n "${R2_S3_ENDPOINT:-}" ]; then
+    if command -v aws >/dev/null 2>&1; then
+      R2_READY=1
+    else
+      log "WARNING: aws CLI missing; R2 direct mirror skipped"
+    fi
+  else
+    log "WARNING: $HOME/.r2.env has no R2 S3 keys; R2 direct mirror skipped"
+  fi
+else
+  log "WARNING: no $HOME/.r2.env; R2 direct mirror skipped"
+fi
+
+r2_aws() {
+  AWS_ACCESS_KEY_ID=$R2_S3_ACCESS_KEY_ID \
+  AWS_SECRET_ACCESS_KEY=$R2_S3_SECRET_ACCESS_KEY \
+  AWS_DEFAULT_REGION=auto \
+  aws "$@" --endpoint-url "$R2_S3_ENDPOINT"
+}
+
+r2_upload() {
+  [ "$R2_READY" = 1 ] || return 1
+  local f=$1
+  r2_aws s3 cp "$DIST/$f" "s3://$R2_BUCKET/$R2_PREFIX/$V/$f" \
+    --content-type application/octet-stream --no-progress >/dev/null 2>&1
+}
+
+prune_r2() {
+  [ "$R2_READY" = 1 ] || return 0
+  local listing old keep
+  listing=$(r2_aws s3api list-objects-v2 --bucket "$R2_BUCKET" \
+    --prefix "$R2_PREFIX/" --delimiter "/" \
+    --query 'CommonPrefixes[].Prefix' --output text 2>/dev/null) || {
+    log "WARNING: could not list $R2_PREFIX/ for pruning"
+    return 0
+  }
+  # Sort by parsed x.y.z, not lexically (0.2.9 < 0.2.10).
+  listing=$(printf '%s\n' "$listing" | tr '\t' '\n' \
+    | sed "s#^$R2_PREFIX/##; s#/\$##" \
+    | grep -E '^[0-9]+\.[0-9]+\.[0-9]+$' \
+    | sort -t. -k1,1n -k2,2n -k3,3n || true)
+  keep=$( { printf '%s\n' "$listing" | tail -3; printf '%s\n' "$V"; } )
+  local pruned=0
+  for old in $listing; do
+    if printf '%s\n' "$keep" | grep -qx "$old"; then
+      continue
+    fi
+    log "pruning R2 $R2_PREFIX/$old"
+    if r2_aws s3 rm "s3://$R2_BUCKET/$R2_PREFIX/$old/" --recursive --only-show-errors >/dev/null 2>&1; then
+      pruned=$((pruned + 1))
+    else
+      log "WARNING: could not prune $R2_PREFIX/$old"
+    fi
+  done
+  [ "$pruned" -eq 0 ] || log "pruned $pruned old R2 release(s)"
+}
+
 # --- 2. Upload ------------------------------------------------------------------
 field() { grep -F "$1 |" "$LINKS" 2>/dev/null | tail -1 | cut -d'|' -f"$2" | sed 's/^ *//;s/ *$//' || true; }
 row() {
   grep -v -F "$1 |" "$LINKS" > "$LINKS.tmp" 2>/dev/null || true
   mv "$LINKS.tmp" "$LINKS"
-  printf '%s | %s | %s | %s | %s\n' "$1" "$2" "$3" "$4" "$5" >> "$LINKS"
+  printf '%s | %s | %s | %s | %s | %s | %s\n' "$1" "$2" "$3" "$4" "$5" "$6" "$7" >> "$LINKS"
 }
 
 human_size() {
@@ -200,11 +268,14 @@ incomplete=0
 for f in "${FILES[@]}"; do
   gf=$(field "$f" 2)
   kw=$(field "$f" 3)
-  if [ -n "$gf" ] && [ "$gf" != "EMPTY" ] && [ -n "$kw" ] && [ "$kw" != "EMPTY" ]; then
+  r2=$(field "$f" 6)
+  if [ -n "$gf" ] && [ "$gf" != "EMPTY" ] && [ -n "$kw" ] && [ "$kw" != "EMPTY" ] \
+     && [ -n "$r2" ] && [ "$r2" != "EMPTY" ]; then
     log "[skip] $f already uploaded"
     continue
   fi
   size=$(human_size "$DIST/$f")
+  bytes=$(python3 -c 'import os,sys;print(os.path.getsize(sys.argv[1]))' "$DIST/$f")
   sha=$(shasum -a 256 "$DIST/$f" | cut -d' ' -f1)
   log "[start] $f ($size)"
   if [ -z "$gf" ] || [ "$gf" = "EMPTY" ]; then
@@ -213,11 +284,21 @@ for f in "${FILES[@]}"; do
   if [ -z "$kw" ] || [ "$kw" = "EMPTY" ]; then
     kw=$(put_kiwi "$f")
   fi
+  if [ -z "$r2" ] || [ "$r2" = "EMPTY" ]; then
+    if r2_upload "$f"; then
+      r2="$R2_BASE/$R2_PREFIX/$V/$f"
+    else
+      log "WARNING: R2 mirror failed for $f"
+      r2="EMPTY"
+    fi
+  fi
   [ -n "$gf" ] && [ "$gf" != "EMPTY" ] || incomplete=1
   [ -n "$kw" ] && [ "$kw" != "EMPTY" ] || incomplete=1
-  log "[done] $f | ${gf:-EMPTY} | ${kw:-EMPTY}"
-  row "$f" "${gf:-EMPTY}" "${kw:-EMPTY}" "$size" "$sha"
+  log "[done] $f | ${gf:-EMPTY} | ${kw:-EMPTY} | ${r2:-EMPTY}"
+  row "$f" "${gf:-EMPTY}" "${kw:-EMPTY}" "$size" "$sha" "${r2:-EMPTY}" "$bytes"
 done
+
+prune_r2
 
 # --- 3. Rewrite the README table -------------------------------------------------
 python3 -I scripts/patch-release-links.py "$LINKS" "$V" || die "could not patch README"

@@ -105,6 +105,26 @@ test("settings exposes config controls", async ({ page }) => {
   await expect(page.getByText("ISO to CSO compression level")).toBeVisible();
 });
 
+test("settings updates section shows the current version and status", async ({ page }) => {
+  await page.getByRole("button", { name: "Settings" }).click();
+  await expect(page.getByRole("heading", { name: "Updates" })).toBeVisible();
+  await expect(page.getByText(/^godsend-psp \d+\.\d+\.\d+$/)).toBeVisible();
+  await page.getByRole("button", { name: "Check for updates now" }).click();
+  await expect(page.getByText("You are up to date")).toBeVisible();
+});
+
+test("update banner offers install and dismiss", async ({ page }) => {
+  await page.evaluate(async () => {
+    const api = (window as unknown as Record<string, any>).__TAURI_INTERNALS__;
+    await api.invoke("update_check", { simulate: true });
+  });
+  const banner = page.locator(".update-banner");
+  await expect(banner).toBeVisible();
+  await expect(banner).toContainText("Update 0.2.47 available");
+  await banner.getByRole("button", { name: "Dismiss" }).click();
+  await expect(banner).toHaveCount(0);
+});
+
 test("theme studio creates a pack", async ({ page }) => {
   await page.getByRole("button", { name: "Mods" }).click();
   await page.getByRole("tab", { name: "Themes" }).click();

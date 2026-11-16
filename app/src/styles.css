@@ -418,6 +418,41 @@ html[data-os="mac"] .topbar {
   margin-right: 320px;
 }
 
+/* Update offer strip: lives inside the workspace column, so the macOS
+   drag region in the topbar never moves. */
+.update-banner {
+  max-width: 980px;
+  margin: 0 auto 16px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  border: 1px solid var(--line-laser);
+  border-radius: var(--radius);
+  background: linear-gradient(112deg, var(--laser-soft), var(--cyan-soft));
+  box-shadow: var(--glow-laser);
+  animation: rise-in 0.3s var(--ease-out) backwards;
+}
+
+.update-banner-text {
+  font-size: 13px;
+  color: var(--text);
+}
+
+.update-banner-text strong {
+  font-family: var(--mono);
+  font-weight: 500;
+}
+
+.update-banner-text .sub {
+  color: var(--text-faint);
+  font-size: 12px;
+}
+
+.update-banner .spacer {
+  flex: 1;
+}
+
 .session-card {
   padding: 14px;
   border-radius: var(--radius-lg);

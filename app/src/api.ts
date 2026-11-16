@@ -18,6 +18,7 @@ import type {
   Snapshot,
   ThemeEntry,
   ThemePack,
+  UpdateInfo,
   Volume,
 } from "./types";
 
@@ -112,6 +113,11 @@ export const api = {
 
   reveal: (path: string) => invoke<void>("reveal", { path }),
   openDataDir: () => invoke<string>("open_data_dir"),
+
+  // self-update (core/src/update.rs)
+  updateCheck: (simulate?: boolean) =>
+    invoke<UpdateInfo>("update_check", simulate ? { simulate: true } : undefined),
+  updateDownload: () => invoke<number>("update_download"),
 
   // store / debrid / downloads / files / catalog
   debridStatus: () => invoke<import("./types").DebridStatus>("debrid_status"),

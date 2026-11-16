@@ -33,6 +33,24 @@ export interface Config {
   mods_base: string;
   mcp_enabled: boolean;
   mcp_port: number;
+  auto_update_check: boolean;
+}
+
+/** One released build plus its direct mirror (core/src/update.rs). */
+export interface UpdateArtifact {
+  name: string;
+  label: string;
+  size_bytes: number;
+  sha256: string;
+  url: string;
+  fallback_url: string;
+}
+
+export interface UpdateInfo {
+  current: string;
+  latest: string;
+  available: boolean;
+  artifact: UpdateArtifact | null;
 }
 
 export interface Check {
