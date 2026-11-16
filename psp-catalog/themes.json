@@ -1,20 +1,146 @@
 [
   {
+    "name": "Armored_Core_3_Portable.ptf",
+    "url": "https://covers.debrid.in/psp/files/Armored_Core_3_Portable.ptf",
+    "format": "ptf",
+    "size_bytes": 534588
+  },
+  {
+    "name": "Bakemonogatari.ctf",
+    "url": "https://covers.debrid.in/psp/files/Bakemonogatari.ctf",
+    "format": "ctf",
+    "size_bytes": 3761116
+  },
+  {
     "name": "Blade_660.ctf",
-    "url": "https://psp-mods.debrid.in/psp/files/Blade_660.ctf",
+    "url": "https://covers.debrid.in/psp/files/Blade_660.ctf",
     "format": "ctf",
     "size_bytes": 1818578
   },
   {
     "name": "Blade_661.ctf",
-    "url": "https://psp-mods.debrid.in/psp/files/Blade_661.ctf",
+    "url": "https://covers.debrid.in/psp/files/Blade_661.ctf",
     "format": "ctf",
     "size_bytes": 1818578
   },
   {
+    "name": "Carbon_Fiber.ptf",
+    "url": "https://covers.debrid.in/psp/files/Carbon_Fiber.ptf",
+    "format": "ptf",
+    "size_bytes": 111328
+  },
+  {
+    "name": "Clear_XMB_Black.ctf",
+    "url": "https://covers.debrid.in/psp/files/Clear_XMB_Black.ctf",
+    "format": "ctf",
+    "size_bytes": 2468688
+  },
+  {
+    "name": "Ferrari_California.ptf",
+    "url": "https://covers.debrid.in/psp/files/Ferrari_California.ptf",
+    "format": "ptf",
+    "size_bytes": 325844
+  },
+  {
+    "name": "Gran_Turismo_5.ctf",
+    "url": "https://covers.debrid.in/psp/files/Gran_Turismo_5.ctf",
+    "format": "ctf",
+    "size_bytes": 5026387
+  },
+  {
+    "name": "Hatsune_Miku.ctf",
+    "url": "https://covers.debrid.in/psp/files/Hatsune_Miku.ctf",
+    "format": "ctf",
+    "size_bytes": 3849834
+  },
+  {
+    "name": "Mac_OS_X_10_Aqua.ptf",
+    "url": "https://covers.debrid.in/psp/files/Mac_OS_X_10_Aqua.ptf",
+    "format": "ptf",
+    "size_bytes": 368680
+  },
+  {
+    "name": "Mario_Galaxy_661.ctf",
+    "url": "https://covers.debrid.in/psp/files/Mario_Galaxy_661.ctf",
+    "format": "ctf",
+    "size_bytes": 4004910
+  },
+  {
+    "name": "Matrix_Dynamic.ctf",
+    "url": "https://covers.debrid.in/psp/files/Matrix_Dynamic.ctf",
+    "format": "ctf",
+    "size_bytes": 4724615
+  },
+  {
+    "name": "Nichijou.ctf",
+    "url": "https://covers.debrid.in/psp/files/Nichijou.ctf",
+    "format": "ctf",
+    "size_bytes": 5803189
+  },
+  {
+    "name": "Persona_3.ctf",
+    "url": "https://covers.debrid.in/psp/files/Persona_3.ctf",
+    "format": "ctf",
+    "size_bytes": 6953193
+  },
+  {
+    "name": "Pikachu.ctf",
+    "url": "https://covers.debrid.in/psp/files/Pikachu.ctf",
+    "format": "ctf",
+    "size_bytes": 3920517
+  },
+  {
+    "name": "Red_Wave.ptf",
+    "url": "https://covers.debrid.in/psp/files/Red_Wave.ptf",
+    "format": "ptf",
+    "size_bytes": 322240
+  },
+  {
+    "name": "Star_Wars_Episode_3.ptf",
+    "url": "https://covers.debrid.in/psp/files/Star_Wars_Episode_3.ptf",
+    "format": "ptf",
+    "size_bytes": 419928
+  },
+  {
+    "name": "Sword_Art_Online.ctf",
+    "url": "https://covers.debrid.in/psp/files/Sword_Art_Online.ctf",
+    "format": "ctf",
+    "size_bytes": 5093839
+  },
+  {
+    "name": "Ultimate_PS3.ctf",
+    "url": "https://covers.debrid.in/psp/files/Ultimate_PS3.ctf",
+    "format": "ctf",
+    "size_bytes": 4425196
+  },
+  {
+    "name": "Windows_8.ptf",
+    "url": "https://covers.debrid.in/psp/files/Windows_8.ptf",
+    "format": "ptf",
+    "size_bytes": 379916
+  },
+  {
+    "name": "Windows_Phone_7.ctf",
+    "url": "https://covers.debrid.in/psp/files/Windows_Phone_7.ctf",
+    "format": "ctf",
+    "size_bytes": 1465922
+  },
+  {
+    "name": "Windows_XP_Autumn.ptf",
+    "url": "https://covers.debrid.in/psp/files/Windows_XP_Autumn.ptf",
+    "format": "ptf",
+    "size_bytes": 623500
+  },
+  {
     "name": "xbox_360_660_classic.ctf",
-    "url": "https://psp-mods.debrid.in/psp/files/xbox_360_660_classic.ctf",
+    "url": "https://covers.debrid.in/psp/files/xbox_360_660_classic.ctf",
     "format": "ctf",
     "size_bytes": 3901871
+  },
+  {
+    "name": "Xbox360.ctf",
+    "url": "https://covers.debrid.in/psp/files/Xbox360.ctf",
+    "format": "ctf",
+    "size_bytes": 3827573
   }
 ]
