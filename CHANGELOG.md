@@ -5,6 +5,15 @@ All notable changes to GODsend PSP. Newest first.
 
 ## [0.2.35] - 2026-11-16
 
+### Added
+
+- Theme Studio under Mods > Themes: build wallpaper packs with an accent
+  colour and an optional wallpaper, install them to PSP/PICTURE, apply a pack
+  as the app accent (persisted), and import or manage existing CXMB .ctf and
+  Sony .ptf themes (both remain closed containers).
+- Theme catalog expanded to 24 verified CTF and PTF themes, all hosted on R2
+  and served from covers.debrid.in/psp/themes.json.
+
 
 ## [0.2.34] - 2026-11-16
 

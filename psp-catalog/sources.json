@@ -1,14 +1,122 @@
 [
   {
     "kind": "themes",
+    "name": "Armored_Core_3_Portable.ptf",
+    "url": "https://raw.githubusercontent.com/Shenron0/PSP-Themes/master/Armored%20Core%203%20portable.ptf"
+  },
+  {
+    "kind": "themes",
+    "name": "Bakemonogatari.ctf",
+    "url": "https://raw.githubusercontent.com/Shenron0/PSP-Themes/master/Bakemonogatari.ctf"
+  },
+  {
+    "kind": "themes",
+    "name": "Blade_660.ctf",
     "url": "https://github.com/caseyjkey/psp-xmb-themes/releases/download/v0.2.0/Blade_660.ctf"
   },
   {
     "kind": "themes",
+    "name": "Blade_661.ctf",
     "url": "https://github.com/caseyjkey/psp-xmb-themes/releases/download/v0.2.0/Blade_661.ctf"
   },
   {
     "kind": "themes",
+    "name": "Carbon_Fiber.ptf",
+    "url": "https://raw.githubusercontent.com/Shenron0/PSP-Themes/master/Carbon%20Fiber.ptf"
+  },
+  {
+    "kind": "themes",
+    "name": "Clear_XMB_Black.ctf",
+    "url": "https://raw.githubusercontent.com/Shenron0/PSP-Themes/master/Clear%20XMB%20Black.ctf"
+  },
+  {
+    "kind": "themes",
+    "name": "Ferrari_California.ptf",
+    "url": "https://raw.githubusercontent.com/Shenron0/PSP-Themes/master/Ferrari%20California.ptf"
+  },
+  {
+    "kind": "themes",
+    "name": "Gran_Turismo_5.ctf",
+    "url": "https://raw.githubusercontent.com/Shenron0/PSP-Themes/master/Gran%20Turismo%205.ctf"
+  },
+  {
+    "kind": "themes",
+    "name": "Hatsune_Miku.ctf",
+    "url": "https://raw.githubusercontent.com/Shenron0/PSP-Themes/master/Hatsune%20Miku.ctf"
+  },
+  {
+    "kind": "themes",
+    "name": "Mac_OS_X_10_Aqua.ptf",
+    "url": "https://raw.githubusercontent.com/Kpavel325-404/PSP-PTF-Themes/main/PSP/THEME/Mac_OS_X_10_Aqua.ptf"
+  },
+  {
+    "kind": "themes",
+    "name": "Mario_Galaxy_661.ctf",
+    "url": "https://raw.githubusercontent.com/saaeiddev/PSP-Nostalgic-Themes-Collection/main/mario%20galaxy.661.ctf"
+  },
+  {
+    "kind": "themes",
+    "name": "Matrix_Dynamic.ctf",
+    "url": "https://raw.githubusercontent.com/Shenron0/PSP-Themes/master/Matrix%20Dynamic.ctf"
+  },
+  {
+    "kind": "themes",
+    "name": "Nichijou.ctf",
+    "url": "https://raw.githubusercontent.com/Shenron0/PSP-Themes/master/Nichijou.ctf"
+  },
+  {
+    "kind": "themes",
+    "name": "Persona_3.ctf",
+    "url": "https://raw.githubusercontent.com/Shenron0/PSP-Themes/master/Persona%203.ctf"
+  },
+  {
+    "kind": "themes",
+    "name": "Pikachu.ctf",
+    "url": "https://raw.githubusercontent.com/Shenron0/PSP-Themes/master/Pikachu.ctf"
+  },
+  {
+    "kind": "themes",
+    "name": "Red_Wave.ptf",
+    "url": "https://raw.githubusercontent.com/Shenron0/PSP-Themes/master/Red%20Wave.ptf"
+  },
+  {
+    "kind": "themes",
+    "name": "Star_Wars_Episode_3.ptf",
+    "url": "https://raw.githubusercontent.com/Shenron0/PSP-Themes/master/Star%20Wars%20Episode%203.ptf"
+  },
+  {
+    "kind": "themes",
+    "name": "Sword_Art_Online.ctf",
+    "url": "https://raw.githubusercontent.com/Shenron0/PSP-Themes/master/Sword%20Art%20Online.ctf"
+  },
+  {
+    "kind": "themes",
+    "name": "Ultimate_PS3.ctf",
+    "url": "https://raw.githubusercontent.com/Shenron0/PSP-Themes/master/Ultimate%20PS3.ctf"
+  },
+  {
+    "kind": "themes",
+    "name": "Windows_8.ptf",
+    "url": "https://raw.githubusercontent.com/Shenron0/PSP-Themes/master/Windows%208.ptf"
+  },
+  {
+    "kind": "themes",
+    "name": "Windows_Phone_7.ctf",
+    "url": "https://raw.githubusercontent.com/Shenron0/PSP-Themes/master/Windows%20Phone%207.ctf"
+  },
+  {
+    "kind": "themes",
+    "name": "Windows_XP_Autumn.ptf",
+    "url": "https://raw.githubusercontent.com/Kpavel325-404/PSP-PTF-Themes/main/PSP/THEME/Windows_XP_Autumn.ptf"
+  },
+  {
+    "kind": "themes",
+    "name": "xbox_360_660_classic.ctf",
     "url": "https://github.com/caseyjkey/psp-xmb-themes/releases/download/v0.2.0/xbox_360_660_classic.ctf"
+  },
+  {
+    "kind": "themes",
+    "name": "Xbox360.ctf",
+    "url": "https://raw.githubusercontent.com/Shenron0/PSP-Themes/master/Xbox360.ctf"
   }
 ]

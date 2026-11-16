@@ -1,10 +1,11 @@
 #!/usr/bin/env node
 // Scrape the hosted PSP catalog sources listed in psp-catalog/sources.json.
 //
-// Each source is {kind: "themes"|"mods", url, selector?, serial?}. themes
-// sources contribute .ctf/.ptf files and rewrite themes.json; mods sources
-// need a serial and add entries to mods/<SERIAL>.json. Downloads land in
-// psp-catalog/files and are deduplicated by SHA-256 across runs.
+// Each source is {kind: "themes"|"mods", url, name?, selector?, serial?}.
+// themes sources contribute .ctf/.ptf files and rewrite themes.json; mods
+// sources need a serial and add entries to mods/<SERIAL>.json. Downloads land
+// in psp-catalog/files and are deduplicated by SHA-256 across runs. `name`
+// overrides the on-disk filename for a direct file URL.
 //
 //   node scripts/scrape-psp-catalog.mjs
 //
@@ -19,7 +20,7 @@ import { fileURLToPath, pathToFileURL } from "node:url";
 const REPO = resolve(fileURLToPath(new URL("..", import.meta.url)));
 const CATALOG = resolve(REPO, process.env.PSP_CATALOG_DIR || "psp-catalog");
 const SOURCES = join(CATALOG, "sources.json");
-const PUBLIC_BASE = (process.env.PSP_CATALOG_PUBLIC_BASE || "https://psp-mods.debrid.in/psp").replace(/\/+$/, "");
+const PUBLIC_BASE = (process.env.PSP_CATALOG_PUBLIC_BASE || "https://covers.debrid.in/psp").replace(/\/+$/, "");
 const THEME_EXT = new Set([".ctf", ".ptf"]);
 const MOD_EXT = new Set([".zip", ".7z", ".rar", ".prx", ".pbp"]);
 const THEME_FORMATS = new Set(["ctf", "ptf"]);
@@ -41,6 +42,17 @@ function extensionOf(nameOrUrl) {
   return extname(String(nameOrUrl).split("?")[0].split("#")[0]).toLowerCase();
 }
 
+function cleanName(value) {
+  return (
+    String(value)
+      .split(/[\\/]/)
+      .pop()
+      .replace(/[^\w.\- ]+/g, "-")
+      .replace(/\s+/g, " ")
+      .replace(/^[.\- ]+|[.\- ]+$/g, "") || "file"
+  );
+}
+
 function cleanFileName(url) {
   let name;
   try {
@@ -49,11 +61,7 @@ function cleanFileName(url) {
   } catch {
     name = String(url).split("?")[0].split("/").pop() || "";
   }
-  name = name
-    .replace(/[^\w.\- ]+/g, "-")
-    .replace(/\s+/g, " ")
-    .replace(/^[.\- ]+|[.\- ]+$/g, "");
-  return name || "file";
+  return cleanName(name);
 }
 
 function publicUrl(rel) {
@@ -150,6 +158,7 @@ async function loadSources() {
       fail(`sources.json[${index}]: url must start with http:// or https://`);
     }
     const source = { kind, url };
+    if (raw.name) source.name = cleanName(raw.name);
     if (raw.selector) source.selector = String(raw.selector);
     if (raw.serial) source.serial = String(raw.serial).trim().toUpperCase();
     sources.push(source);
@@ -242,7 +251,7 @@ async function main() {
   const browser = await chromium.launch({ headless: true });
   const context = await browser.newContext();
 
-  async function persist(href) {
+  async function persist(href, preferredName) {
     const bytes = await download(context, href);
     const hash = sha256(bytes);
     const prior = known.get(hash);
@@ -250,7 +259,7 @@ async function main() {
       reused += 1;
       return prior;
     }
-    const name = uniqueRel(cleanFileName(href), hash, usedNames);
+    const name = uniqueRel(preferredName || cleanFileName(href), hash, usedNames);
     const dest = join(CATALOG, "files", name);
     await mkdir(join(CATALOG, "files"), { recursive: true });
     await writeFile(dest, bytes);
@@ -272,7 +281,8 @@ async function main() {
 
         if (source.kind === "themes") {
           for (const href of links) {
-            const file = await persist(href);
+            const preferred = source.name && links.length === 1 ? source.name : undefined;
+            const file = await persist(href, preferred);
             const ext = extensionOf(file.rel).replace(".", "");
             if (!THEME_FORMATS.has(ext)) continue;
             const name = displayName(file.rel);
