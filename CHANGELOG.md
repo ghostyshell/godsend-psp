@@ -3,6 +3,32 @@
 All notable changes to GODsend PSP. Newest first.
 
 
+## [0.2.45] - 2026-11-17
+
+### Fixed
+
+- "To PSP" now unpacks `.zip` downloads and routes them by content instead
+  of copying the archive into `PSP/GAME`, where the XMB listed it as
+  Corrupted Data. Minerva and r-roms deliver per-game zips, so this was the
+  common case.
+- A zip with a top-level `PSP/` folder merges that tree over the stick, so
+  `PSP/GAME/<x>/EBOOT.PBP` and `PSP/SAVEDATA/...` land where the console
+  expects them. A zip holding an `EBOOT.PBP` folder installs it under
+  `PSP/GAME/<folder>`, a zip with an ISO or CSO copies each image into
+  `ISO/`, and a zip holding a bare `.pbp` wraps it as
+  `PSP/GAME/<stem>/EBOOT.PBP`.
+- Direct `.iso`/`.cso` pushes still go to `ISO/`, and a direct `.pbp` push
+  now installs as `PSP/GAME/<stem>/EBOOT.PBP` instead of a loose file.
+- `.chd`, `.7z` and `.rar` now fail with an explanation instead of being
+  copied blindly: CHD is not bootable on the PSP (convert it to ISO or CSO),
+  and 7z/rar are not unpacked (extract first and push the ISO). Any other
+  file type lists the supported ones.
+- Zip entries that escape the extraction folder are rejected, and
+  `__MACOSX`, `._*` and `.DS_Store` are skipped while extracting.
+- The same routing serves the Downloads, Library and Files "To PSP"
+  buttons.
+
+
 ## [0.2.44] - 2026-11-16
 
 ### Fixed

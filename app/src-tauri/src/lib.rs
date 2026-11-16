@@ -1258,6 +1258,8 @@ fn fm_to_psp(app: AppHandle, state: State<'_, AppState>, path: String, dest_kind
     if !local.exists() {
         return Err(Error::NotFound(path));
     }
+    // Routing now follows the file contents, so the UI hint is unused.
+    let _ = dest_kind;
     let app2 = app.clone();
     let job_id = state.jobs.spawn(
         "copy",
@@ -1266,7 +1268,7 @@ fn fm_to_psp(app: AppHandle, state: State<'_, AppState>, path: String, dest_kind
             let _ = app2.emit("job://done", job);
         },
         move |ctx| {
-            let dest = godsend_core::fm::copy_to_psp(&local, &paths, &dest_kind, ctx)?;
+            let dest = godsend_core::store::push_local_to_psp(&local, &paths, ctx)?;
             ctx.message(format!("on stick at {}", dest.display()));
             Ok(())
         },
