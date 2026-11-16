@@ -198,4 +198,13 @@ else
   echo "configure rclone r2: or aws with R2_S3_* env first" >&2
   exit 1
 fi
+# Also push to the R2 bucket the app reads by default.
+R2_ENV=${R2_ENV:-$HOME/.r2.env}
+BUCKET=torrent-search-covers-eu
+if [ -f "$R2_ENV" ] && command -v aws >/dev/null 2>&1; then
+  set -a; . "$R2_ENV"; set +a
+  export AWS_ACCESS_KEY_ID="$R2_S3_ACCESS_KEY_ID" AWS_SECRET_ACCESS_KEY="$R2_S3_SECRET_ACCESS_KEY" AWS_DEFAULT_REGION=auto
+  aws --endpoint-url "$R2_S3_ENDPOINT" s3 sync "$SRC" "s3://$BUCKET/$DEST" --delete >/dev/null \
+    && echo "uploaded $SRC to s3://$BUCKET/$DEST"
+fi
 echo "uploaded $SRC to $DEST on R2"

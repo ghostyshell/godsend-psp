@@ -85,7 +85,7 @@ impl Default for Config {
             ia_email: String::new(),
             ia_password: String::new(),
             covers_base: "https://covers.debrid.in".into(),
-            mods_base: "https://psp-mods.debrid.in".into(),
+            mods_base: "https://covers.debrid.in".into(),
             mcp_enabled: true,
             mcp_port: 8849,
         }
