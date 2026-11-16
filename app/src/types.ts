@@ -241,9 +241,23 @@ export interface NpsEntry {
   zrif: string | null;
 }
 
+export interface StoreGame {
+  id: string;
+  title: string;
+  size_bytes: number;
+  container: string;
+  source: string;
+}
+
 export interface StoreResult {
   kind: "gamesearch" | "ia" | "minerva" | "rroms" | "nps";
-  items?: GameHit[] | IaItem[] | RromsItem[] | NpsEntry[] | { id: string; title: string; url: string }[];
+  items?:
+    | GameHit[]
+    | IaItem[]
+    | RromsItem[]
+    | NpsEntry[]
+    | StoreGame[]
+    | { id: string; title: string; url: string }[];
   files?: IaFile[];
 }
 

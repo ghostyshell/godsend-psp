@@ -27,6 +27,7 @@ pub mod store;
 pub mod savedata;
 pub mod theme_pack;
 pub mod themes;
+pub mod torrent;
 pub mod transfer;
 
 pub use config::Config;

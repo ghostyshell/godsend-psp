@@ -76,24 +76,96 @@ fn run_aria2(
     dest: &str,
     ctx: &JobContext,
 ) -> Result<PathBuf> {
-    use std::io::BufRead;
-    let mut child = Command::new(aria2)
-        .args([
-            "-x", "16", "-s", "16", "-k", "1M",
-            "--file-allocation=none",
-            "--console-log-level=warn",
-            "--summary-interval=2",
-            "--continue=true",
-            "--auto-file-renaming=false",
-            "--allow-overwrite=true",
-            "-d",
-        ])
-        .arg(dest_dir)
+    let mut command = base_command(aria2, dest_dir);
+    command
         .arg("-o")
         .arg(Path::new(dest).file_name().expect("dest has file name"))
-        .arg(url)
+        .arg(url);
+
+    let dest_path = Path::new(dest);
+    let (status, tail) = spawn_and_watch(command, Some(dest_path), ctx)?;
+    if !status.success() {
+        // aria2 exits non-zero with --continue when the server lacks ranges;
+        // fall back once to the single-connection path.
+        if tail.contains("Range") || tail.contains("range") || tail.contains("416") {
+            return run_fallback(url, dest_path, ctx);
+        }
+        return Err(Error::Other(format!("aria2c exited badly: {tail}")));
+    }
+    let size = std::fs::metadata(dest_path).map(|m| m.len()).unwrap_or(0);
+    ctx.progress(size, size);
+    Ok(dest_path.to_path_buf())
+}
+
+/// Download one file out of a torrent URL. aria2 fetches the torrent, picks
+/// the entry with `select_file` (1-based, as reported by `torrent::parse_files`)
+/// and writes it under `dest_dir` keeping the torrent's folder layout.
+/// Returns `<dest_dir>/<expect_path>` when it landed there, else the basename.
+pub fn download_selected(
+    url: &str,
+    dest_dir: &Path,
+    expect_path: &str,
+    select_file: u32,
+    config: &Config,
+    ctx: &JobContext,
+) -> Result<PathBuf> {
+    std::fs::create_dir_all(dest_dir)?;
+    let aria2 = find_aria2("")
+        .or_else(|| find_aria2(&config.ffmpeg_path))
+        .ok_or_else(|| {
+            Error::Other("aria2c is required to download a single file from a torrent".into())
+        })?;
+    ctx.message("downloading one file (aria2c torrent selection)");
+
+    let mut command = base_command(&aria2, dest_dir);
+    command
+        .arg("--follow-torrent=mem")
+        .arg(format!("--select-file={select_file}"))
+        .arg(url);
+    let (status, tail) = spawn_and_watch(command, None, ctx)?;
+    if !status.success() {
+        return Err(Error::Other(format!("aria2c exited badly: {tail}")));
+    }
+
+    let fallback = dest_dir.join(Path::new(expect_path).file_name().unwrap_or_default());
+    let path = safe_relative(expect_path)
+        .map(|rel| dest_dir.join(rel))
+        .filter(|candidate| candidate.is_file())
+        .unwrap_or(fallback);
+    let size = std::fs::metadata(&path).map(|m| m.len()).unwrap_or(0);
+    ctx.progress(size, size);
+    Ok(path)
+}
+
+/// The shared aria2c flags for HTTP and torrent downloads. The caller adds
+/// the destination name or selection flags and the URL.
+fn base_command(aria2: &Path, dest_dir: &Path) -> Command {
+    let mut command = Command::new(aria2);
+    command.args([
+        "-x", "16", "-s", "16", "-k", "1M",
+        "--file-allocation=none",
+        "--console-log-level=warn",
+        "--summary-interval=2",
+        "--continue=true",
+        "--auto-file-renaming=false",
+        "--allow-overwrite=true",
+    ]);
+    command.arg("-d").arg(dest_dir);
+    command
+}
+
+/// Run aria2c, relaying percentage readouts and honoring cancellation.
+/// Returns the exit status and the last few stderr lines.
+fn spawn_and_watch(
+    mut command: Command,
+    cleanup: Option<&Path>,
+    ctx: &JobContext,
+) -> Result<(std::process::ExitStatus, String)> {
+    use std::io::BufRead;
+    command
         .stdout(std::process::Stdio::piped())
-        .stderr(std::process::Stdio::piped())
+        .stderr(std::process::Stdio::piped());
+    let mut child = command
         .spawn()
         .map_err(|e| Error::Other(format!("aria2c failed to start: {e}")))?;
 
@@ -102,7 +174,9 @@ fn run_aria2(
         for line in reader.lines().map_while(std::result::Result::ok) {
             if ctx.check_cancel().is_err() {
                 let _ = child.kill();
-                let _ = std::fs::remove_file(dest);
+                if let Some(path) = cleanup {
+                    let _ = std::fs::remove_file(path);
+                }
                 return Err(Error::Cancelled(ctx.job_id()));
             }
             // console readout: `[#8f01 12MiB/1.5GiB(8%)CN:16 DL:3.2MiB]`
@@ -115,28 +189,31 @@ fn run_aria2(
             }
         }
     }
-    let status = child.wait()?;
-    if !status.success() {
-        let stderr = child
-            .stderr
-            .map(|mut e| {
-                use std::io::Read;
-                let mut buf = String::new();
-                let _ = e.read_to_string(&mut buf);
-                buf
-            })
-            .unwrap_or_default();
-        let tail: String = stderr.lines().rev().take(4).collect::<Vec<_>>().join("; ");
-        // aria2 exits non-zero with --continue when the server lacks ranges;
-        // fall back once to the single-connection path.
-        if tail.contains("Range") || tail.contains("range") || tail.contains("416") {
-            return run_fallback(url, Path::new(dest), ctx);
-        }
-        return Err(Error::Other(format!("aria2c exited badly: {tail}")));
+    let mut tail = String::new();
+    if let Some(mut stderr) = child.stderr.take() {
+        use std::io::Read;
+        let mut buf = String::new();
+        let _ = stderr.read_to_string(&mut buf);
+        tail = buf.lines().rev().take(4).collect::<Vec<_>>().join("; ");
     }
-    let size = std::fs::metadata(dest).map(|m| m.len()).unwrap_or(0);
-    ctx.progress(size, size);
-    Ok(Path::new(dest).to_path_buf())
+    Ok((child.wait()?, tail))
+}
+
+/// Reject absolute paths and `..` so a torrent path cannot escape dest_dir.
+fn safe_relative(path: &str) -> Option<PathBuf> {
+    let mut out = PathBuf::new();
+    for part in path.split(['/', '\\']) {
+        let part = part.trim();
+        if part.is_empty() || part == "." || part == ".." {
+            continue;
+        }
+        out.push(part);
+    }
+    if out.as_os_str().is_empty() {
+        None
+    } else {
+        Some(out)
+    }
 }
 
 fn run_fallback(url: &str, dest: &Path, ctx: &JobContext) -> Result<PathBuf> {
@@ -184,5 +261,17 @@ mod tests {
         assert_eq!(download_dir(&cfg), PathBuf::from("/tmp/custom-dl"));
         cfg.download_dir = String::new();
         assert!(download_dir(&cfg).ends_with("godsend-psp"));
+    }
+
+    #[test]
+    fn selected_paths_stay_inside_the_download_dir() {
+        assert_eq!(
+            safe_relative("Redump/Sony - PSP/007 - Game.zip"),
+            Some(PathBuf::from("Redump/Sony - PSP/007 - Game.zip"))
+        );
+        assert_eq!(safe_relative("/etc/passwd"), Some(PathBuf::from("etc/passwd")));
+        assert_eq!(safe_relative("../../escape.zip"), Some(PathBuf::from("escape.zip")));
+        assert_eq!(safe_relative(""), None);
+        assert_eq!(safe_relative("/"), None);
     }
 }

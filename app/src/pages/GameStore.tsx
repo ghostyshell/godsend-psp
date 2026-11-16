@@ -1,8 +1,10 @@
 import { useEffect, useState } from "react";
 import { api } from "../api";
-import type { GameHit, GameInfo, IaItem, IaFile, NpsEntry, RromsItem } from "../types";
+import type { GameHit, GameInfo, IaItem, IaFile, NpsEntry, StoreGame } from "../types";
 import type { PageProps } from "../App";
 import { Btn, Chip, Empty, Seg, fmtBytes } from "../ui";
+
+const MAX_ROWS = 300;
 
 type Source = "gamesearch" | "ia" | "minerva" | "rroms" | "nps";
 type View =
@@ -15,8 +17,7 @@ export default function Store({ snap, reload, toast, refreshKey }: PageProps) {
   const [query, setQuery] = useState("");
   const [items, setItems] = useState<GameHit[]>([]);
   const [iaItems, setIaItems] = useState<IaItem[]>([]);
-  const [minervaItems, setMinervaItems] = useState<{ id: string; title: string; url: string }[]>([]);
-  const [rromsItems, setRromsItems] = useState<RromsItem[]>([]);
+  const [storeGames, setStoreGames] = useState<StoreGame[]>([]);
   const [npsItems, setNpsItems] = useState<NpsEntry[]>([]);
   const [view, setView] = useState<View>({ kind: "none" });
   const [busy, setBusy] = useState(false);
@@ -35,13 +36,10 @@ export default function Store({ snap, reload, toast, refreshKey }: PageProps) {
       if (src === "ia") {
         setIaItems((result.items as unknown as IaItem[]) ?? []);
         setItems([]);
-      } else if (src === "minerva") {
-        setMinervaItems((result.items as unknown as { id: string; title: string; url: string }[]) ?? []);
-        setItems([]);
-      } else if (src === "rroms") {
-        const all = (result.items as unknown as RromsItem[]) ?? [];
-        const needle = q.trim().toLowerCase();
-        setRromsItems(needle ? all.filter((item) => item.title.toLowerCase().includes(needle)) : all);
+      } else if (src === "minerva" || src === "rroms") {
+        // Both sources return per-game rows; the query filters locally.
+        const games = (result.items as unknown as StoreGame[]) ?? [];
+        setStoreGames(games);
         setItems([]);
       } else if (src === "nps") {
         setNpsItems((result.items as unknown as NpsEntry[]) ?? []);
@@ -97,6 +95,15 @@ export default function Store({ snap, reload, toast, refreshKey }: PageProps) {
     }
   }
 
+  const needle = query.trim().toLowerCase();
+  const gameMatches = storeGames.filter(
+    (game) =>
+      !needle ||
+      game.title.toLowerCase().includes(needle) ||
+      game.container.toLowerCase().includes(needle),
+  );
+  const visibleGames = gameMatches.slice(0, MAX_ROWS);
+
   return (
     <div className="page">
       <div className="card panel">
@@ -133,9 +140,9 @@ export default function Store({ snap, reload, toast, refreshKey }: PageProps) {
               source === "ia"
                 ? "PSP ISO (megathread set)"
                 : source === "minerva"
-                  ? "Minerva PSP sets load automatically"
+                  ? "search Minerva games"
                   : source === "rroms"
-                    ? "filter the r-roms links"
+                    ? "search r-roms games"
                     : source === "nps"
                       ? "filter NoPayStation by title"
                       : "search PSP games"
@@ -165,9 +172,9 @@ export default function Store({ snap, reload, toast, refreshKey }: PageProps) {
           {source === "gamesearch"
             ? "Debrid index wired to the game-search service. Links are resolved through Real-Debrid or TorBox when connected, then downloaded with aria2c."
             : source === "minerva"
-              ? "Minerva Archive Myrient PSP torrents. Downloading saves the torrent, which aria2c can fetch."
+              ? "Every Redump and No-Intro PSP game inside the Minerva Archive torrents, as individual titles. The first load builds the index from the Minerva torrent (about 3 MB); it is cached for 10 minutes."
               : source === "rroms"
-                ? "The r-roms PSP page: Internet Archive sets and direct archives. An archive.org item downloads every game file in that set."
+                ? "Every game inside the r-roms Internet Archive PSP sets, as individual titles. The first load reads the Internet Archive metadata to build the index; it is cached for 10 minutes."
                 : source === "nps"
                   ? "NoPayStation PSP packages. Installing a .pkg needs pkg2zip or NoPayStation to decrypt it; the .zrif sidecar is saved next to the download."
                   : "Internet Archive sets in the r/Roms megathread style. Direct downloads, no account needed."}
@@ -325,57 +332,39 @@ export default function Store({ snap, reload, toast, refreshKey }: PageProps) {
             ))}
           </div>
         )
-      ) : source === "minerva" ? (
-        minervaItems.length === 0 ? (
-          <Empty title="No Minerva sets" hint="Minerva PSP torrents could not be probed; check the connection." />
-        ) : (
-          <div className="rows">
-            {minervaItems.map((set) => (
-              <div className="row" key={set.id}>
-                <Chip tone="laser">minerva</Chip>
-                <div className="grow">
-                  <div className="title">{set.title}</div>
-                  <div className="sub">{set.id}</div>
-                </div>
-                <Btn
-                  small
-                  variant="primary"
-                  onClick={() => void download("minerva", set.id, set.title)}
-                >
-                  Download
-                </Btn>
-              </div>
-            ))}
-          </div>
-        )
-      ) : source === "rroms" ? (
-        rromsItems.length === 0 ? (
+      ) : source === "minerva" || source === "rroms" ? (
+        gameMatches.length === 0 ? (
           <Empty
-            title="No r-roms links"
-            hint="No links matched. Clear the filter to load the page, or check the connection."
+            title={source === "minerva" ? "No Minerva games" : "No r-roms games"}
+            hint={
+              query.trim()
+                ? "No game or collection matches that filter. Clear the search box to see the whole index."
+                : "The game index could not be built; check the connection and search again."
+            }
           />
         ) : (
           <div className="rows">
-            {rromsItems.map((item) => (
-              <div className="row" key={item.id}>
-                <Chip tone={item.kind === "ia_item" ? "laser" : "neutral"}>
-                  {item.kind === "ia_item" ? "IA" : item.kind}
-                </Chip>
+            {visibleGames.map((game) => (
+              <div className="row" key={game.id}>
+                <Chip tone="laser">{game.container}</Chip>
                 <div className="grow">
-                  <div className="title">{item.title}</div>
-                  <div className="sub mono" style={{ fontSize: 11.5 }}>
-                    {item.id}
-                  </div>
+                  <div className="title">{game.title}</div>
                 </div>
+                <span className="size">{fmtBytes(game.size_bytes)}</span>
                 <Btn
                   small
                   variant="primary"
-                  onClick={() => void download("rroms", item.id, item.title)}
+                  onClick={() => void download(source, game.id, game.title)}
                 >
                   Download
                 </Btn>
               </div>
             ))}
+            {gameMatches.length > MAX_ROWS ? (
+              <p style={{ margin: 0, fontSize: 12.5, color: "var(--text-faint)" }}>
+                Showing {MAX_ROWS} of {gameMatches.length} games - type to narrow
+              </p>
+            ) : null}
           </div>
         )
       ) : source === "nps" ? (
