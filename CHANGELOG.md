@@ -7,6 +7,11 @@ All notable changes to GODsend PSP. Newest first.
 
 ### Fixed
 
+- The macOS window can be dragged by its header again. The bar relied on
+  `-webkit-app-region`, which WKWebView ignores; the header and its title
+  elements now carry `data-tauri-drag-region`, so Tauri's native drag handler
+  works while buttons and chips stay clickable.
+
 - "To PSP" now unpacks `.zip` downloads and routes them by content instead
   of copying the archive into `PSP/GAME`, where the XMB listed it as
   Corrupted Data. Minerva and r-roms deliver per-game zips, so this was the
