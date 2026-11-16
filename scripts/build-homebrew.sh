@@ -154,6 +154,8 @@ if [ "$VERIFY" -eq 1 ]; then
 	fail=0
 	for app in "${APPS[@]}"; do
 		url="$BASE_URL/$PREFIX/$app.zip"
+		# Cache-bust the edge: R2 overwrites can serve a stale object briefly.
+		url="$url?cb=$(date +%s)-$RANDOM"
 		local_bytes="$(file_size "$OUT/$app.zip")"
 		tmp="$(mktemp)"
 		code="$(curl -sS -L -o "$tmp" -w '%{http_code}' "$url")"

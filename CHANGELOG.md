@@ -3,6 +3,25 @@
 All notable changes to GODsend PSP. Newest first.
 
 
+## [0.2.37] - 2026-11-16
+
+### Added
+
+- The four GODsend utilities now carry XMB art: a 144x80 ICON0 cover and a
+  480x272 PIC1 background packed into each EBOOT. `homebrew/common/make-art.py`
+  regenerates them from the indigo-to-cyan family, and the zips on R2 were
+  rebuilt and verified byte for byte.
+
+### Fixed
+
+- The ARK-5 migration plan no longer claims PSP-3000, Street and E1000 cannot
+  install cIPL. ARK's New cIPL supports every PSP model; the plan now says to
+  install DC10 first as the recovery path, then run CustomIPL once ARK boots
+  reliably.
+- `scripts/build-homebrew.sh --verify` cache-busts the public zip URLs, since
+  an R2 overwrite can serve a stale object at the edge for a short window.
+
+
 ## [0.2.36] - 2026-11-16
 
 ### Added

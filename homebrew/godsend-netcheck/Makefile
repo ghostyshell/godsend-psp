@@ -10,6 +10,8 @@ LIBS = -lpspwlan -lpspnet_inet
 
 BUILD_PRX = 1
 EXTRA_TARGETS = EBOOT.PBP
+PSP_EBOOT_ICON = icon0.png
+PSP_EBOOT_PIC1 = pic1.png
 PSP_EBOOT_TITLE = GODsend NetCheck
 
 PSPSDK = $(shell psp-config --pspsdk-path)
