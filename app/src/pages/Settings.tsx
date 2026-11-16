@@ -8,6 +8,8 @@ export default function Settings({ snap, reload, toast, refreshKey }: PageProps)
   const [tbKey, setTbKey] = useState("");
   const [iaKey, setIaKey] = useState("");
   const [iaSecret, setIaSecret] = useState("");
+  const [iaEmail, setIaEmail] = useState("");
+  const [iaPass, setIaPass] = useState("");
   const [downloadDir, setDownloadDir] = useState("");
   const [debrid, setDebrid] = useState({ realdebrid: false, torbox: false });
 
@@ -16,7 +18,32 @@ export default function Settings({ snap, reload, toast, refreshKey }: PageProps)
   useEffect(() => {
     void api.debridStatus().then(setDebrid);
     setDownloadDir(config.download_dir);
-  }, [refreshKey, config.download_dir]);
+    setIaEmail(config.ia_email);
+  }, [refreshKey, config.download_dir, config.ia_email]);
+
+  async function saveIaEmail() {
+    const value = iaEmail.trim();
+    await api.configSet({ ia_email: value } as never);
+    toast(value ? "Internet Archive username saved" : "Internet Archive username cleared");
+    reload();
+  }
+
+  async function saveIaPassword() {
+    if (!iaPass) {
+      toast("type the Internet Archive password first");
+      return;
+    }
+    await api.configSet({ ia_password: iaPass } as never);
+    toast("Internet Archive password saved");
+    setIaPass("");
+    reload();
+  }
+
+  async function clearIaPassword() {
+    await api.configSet({ ia_password: "" } as never);
+    toast("Internet Archive password cleared");
+    reload();
+  }
 
   return (
     <div className="page">
@@ -138,34 +165,37 @@ export default function Settings({ snap, reload, toast, refreshKey }: PageProps)
         </p>
         <div className="field">
           <label>Internet Archive username</label>
-          <input
-            type="text"
-            defaultValue={config.ia_email}
-            placeholder="archive.org account email"
-            onBlur={async (e) => {
-              if (e.target.value !== config.ia_email) {
-                await api.configSet({ ia_email: e.target.value.trim() } as never);
-                toast("Internet Archive username saved");
-              }
-            }}
-            style={inputStyle}
-          />
+          <div style={{ display: "flex", gap: 8 }}>
+            <input
+              type="text"
+              value={iaEmail}
+              onChange={(e) => setIaEmail(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") void saveIaEmail();
+              }}
+              placeholder="archive.org account email"
+              style={inputStyle}
+            />
+            <Btn onClick={() => void saveIaEmail()}>Save</Btn>
+          </div>
         </div>
         <div className="field">
           <label>Internet Archive password</label>
           <div style={{ display: "flex", gap: 8 }}>
             <input
               type="password"
-              defaultValue=""
-              placeholder={config.ia_password ? "saved" : "archive.org password"}
-              onBlur={async (e) => {
-                if (e.target.value) {
-                  await api.configSet({ ia_password: e.target.value } as never);
-                  toast("Internet Archive password saved");
-                }
+              value={iaPass}
+              onChange={(e) => setIaPass(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") void saveIaPassword();
               }}
+              placeholder={config.ia_password ? "saved" : "archive.org password"}
               style={inputStyle}
             />
+            <Btn onClick={() => void saveIaPassword()}>Save</Btn>
+            {config.ia_password ? (
+              <Btn onClick={() => void clearIaPassword()}>Clear</Btn>
+            ) : null}
           </div>
         </div>
         <div className="field">
@@ -460,7 +490,7 @@ export default function Settings({ snap, reload, toast, refreshKey }: PageProps)
           <Btn onClick={() => void api.openDataDir()}>Open Data Folder</Btn>
         </div>
         <p style={{ margin: "12px 0 0", fontSize: 12.5, color: "var(--text-faint)" }}>
-          godsend-psp 0.2.43 - Rust engine + Tauri. USB mass storage, no drivers.
+          godsend-psp 0.2.44 - Rust engine + Tauri. USB mass storage, no drivers.
         </p>
       </section>
     </div>
