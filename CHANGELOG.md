@@ -30,7 +30,9 @@ All notable changes to GODsend PSP. Newest first.
 - Homebrew has an Apps filter for the four GODsend utilities.
 - `scripts/psp-migrate.sh` finishes the LME to ARK-5 move on a mounted stick
   (installs the utilities, retires the LME apps into PSP/GAME/_retired and
-  disables leda.prx), dry run by default.
+  disables leda.prx), dry run by default. `--purge` archives the retired LME
+  apps and SEPLUGINS to ~/Backups/godsend-psp, verifies the zip, then removes
+  them.
 
 
 ## [0.2.35] - 2026-11-16
