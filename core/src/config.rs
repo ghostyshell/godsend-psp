@@ -246,14 +246,21 @@ struct Secrets {
 }
 
 fn read_secrets() -> Secrets {
-    fs::read(secrets_path())
+    read_secrets_at(&secrets_path())
+}
+
+fn read_secrets_at(path: &Path) -> Secrets {
+    fs::read(path)
         .ok()
         .and_then(|b| serde_json::from_slice(&b).ok())
         .unwrap_or_default()
 }
 
 fn write_secrets(cfg: &Config) -> Result<()> {
-    let path = secrets_path();
+    write_secrets_at(cfg, &secrets_path())
+}
+
+fn write_secrets_at(cfg: &Config, path: &Path) -> Result<()> {
     if let Some(parent) = path.parent() {
         fs::create_dir_all(parent)?;
     }
@@ -265,11 +272,11 @@ fn write_secrets(cfg: &Config) -> Result<()> {
         ia_email: cfg.ia_email.clone(),
         ia_password: cfg.ia_password.clone(),
     };
-    fs::write(&path, serde_json::to_vec_pretty(&secrets)?)?;
+    fs::write(path, serde_json::to_vec_pretty(&secrets)?)?;
     #[cfg(unix)]
     {
         use std::os::unix::fs::PermissionsExt;
-        let _ = fs::set_permissions(&path, fs::Permissions::from_mode(0o600));
+        let _ = fs::set_permissions(path, fs::Permissions::from_mode(0o600));
     }
     Ok(())
 }
@@ -293,6 +300,23 @@ mod tests {
         assert_eq!(cfg.music_format, "m4a");
         assert_eq!(cfg.cso_level, 9);
         assert_eq!(cfg.video_preset, "veryslow");
+    }
+
+    #[test]
+    fn ia_credentials_round_trip_through_secrets() {
+        let dir = std::env::temp_dir().join(format!("godsend-secrets-{}", std::process::id()));
+        let _ = fs::remove_dir_all(&dir);
+        let path = dir.join("secrets.json");
+        let mut cfg = Config::default();
+        cfg.ia_email = "user@example.com".into();
+        cfg.ia_password = "s3cret".into();
+        cfg.rd_api_key = "rd-token".into();
+        write_secrets_at(&cfg, &path).expect("write secrets");
+        let back = read_secrets_at(&path);
+        assert_eq!(back.ia_email, "user@example.com");
+        assert_eq!(back.ia_password, "s3cret");
+        assert_eq!(back.rd_api_key, "rd-token");
+        let _ = fs::remove_dir_all(&dir);
     }
 
     #[test]

@@ -3,6 +3,24 @@
 All notable changes to GODsend PSP. Newest first.
 
 
+## [0.2.44] - 2026-11-16
+
+### Fixed
+
+- Internet Archive username and password now save reliably. They previously
+  wrote only on input blur, so typing and then closing the window (or never
+  leaving the field) silently lost them. Both fields have an explicit Save
+  button and Enter support, the password has a Clear action, and the stored
+  values go to config.json and secrets.json like the debrid keys.
+- Added a secrets round-trip test that writes and reads the Internet Archive
+  email, password and the debrid keys through a temporary file.
+
+### Note
+
+- The Internet Archive username and password are stored locally and are not
+  used for downloads yet. archive.org downloads authenticate with the S3
+  access and secret keys; set those for items that need an account.
+
 ## [0.2.43] - 2026-11-16
 
 ### Fixed
