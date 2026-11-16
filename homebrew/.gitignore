@@ -1,0 +1,7 @@
+out/
+*.o
+*.elf
+*.prx
+EBOOT.PBP
+PARAM.SFO
+core
