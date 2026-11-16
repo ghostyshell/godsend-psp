@@ -1,102 +1,102 @@
 {
-  "version": "0.2.42",
+  "version": "0.2.43",
   "updated": "2026-11-16",
   "artifacts": [
     {
-      "name": "godsend-psp-0.2.42-linux-x64.AppImage",
+      "name": "godsend-psp-0.2.43-linux-x64.AppImage",
       "label": "Linux (x86_64, AppImage)",
-      "gofile": "https://gofile.io/d/KClG6iHb",
-      "kiwi": "https://file.kiwi/3cf773ce#9kOUbOCqmoXm4pVDJclLUg",
+      "gofile": "https://gofile.io/d/yT3twftR",
+      "kiwi": "https://file.kiwi/da809bc2#RypHJV8ijKeWpFbcWnPcwQ",
       "size": "131.9 MiB",
-      "sha256": "1339d3f1f41262af02b8bc31fa78bf6be5c2fdf00e6f0375696d267e355a0fd2"
+      "sha256": "5bc2468eb3cecb0c767a45c09988cf270e961096aa93f71aaa0bbc5767580684"
     },
     {
-      "name": "godsend-psp-cli-0.2.42-linux-x64.tar.gz",
+      "name": "godsend-psp-cli-0.2.43-linux-x64.tar.gz",
       "label": "Linux (x86_64, CLI)",
-      "gofile": "https://gofile.io/d/HvIM95kY",
-      "kiwi": "https://file.kiwi/af11e285#E_D6D2xB32ORs4_WB9GQLw",
+      "gofile": "https://gofile.io/d/GAZwulOa",
+      "kiwi": "https://file.kiwi/6ef0d009#hPLRXzZtqeTanEmyyXrXFA",
       "size": "2.1 MiB",
-      "sha256": "ea009fb60e3494b64247a6ea505b24728cb9235035e15d1dc0ebf8fc89f343b6"
+      "sha256": "0c943da93336a4b64ac793b8ecdfe1ce00deb6a79521e59942e8815df0eefb45"
     },
     {
-      "name": "godsend-psp-cli-0.2.42-macos-arm64.tar.gz",
+      "name": "godsend-psp-cli-0.2.43-macos-arm64.tar.gz",
       "label": "macOS (Apple Silicon, CLI)",
-      "gofile": "https://gofile.io/d/PUoq3EkX",
-      "kiwi": "https://file.kiwi/c44e3458#sTYn-uo3EJ6lekuU26NuTQ",
+      "gofile": "https://gofile.io/d/i0ldOvA7",
+      "kiwi": "https://file.kiwi/162eca93#alf9O4NUMrJEYW0shHJ5-w",
       "size": "1.9 MiB",
-      "sha256": "dbcba1d0052535534b56c71cc467f51964d28548c2ef70cece83e8d64bbd7d8d"
+      "sha256": "21527f2ea9af19ca5959a640a8187a15cd3c1fc56af2e707db254aa583dce031"
     },
     {
-      "name": "godsend-psp-cli-0.2.42-macos-x64.tar.gz",
+      "name": "godsend-psp-cli-0.2.43-macos-x64.tar.gz",
       "label": "macOS (Intel, CLI)",
-      "gofile": "https://gofile.io/d/oMulNEq0",
-      "kiwi": "https://file.kiwi/bfbb124b#PUH1p4JdEqNUyYxKg_FLWg",
+      "gofile": "https://gofile.io/d/Rcymh3PB",
+      "kiwi": "https://file.kiwi/ac676c00#B9yELGU94-G5obq8QaaRog",
       "size": "2.0 MiB",
-      "sha256": "0c4ad1fb0c436db2363d777251aed725c8c57fa4d1cfa79c61796b3b4d873d60"
+      "sha256": "f3f4562c0164de2b19d679ca915a43c0060782644ceb3e651c8c52a4d26ecf87"
     },
     {
-      "name": "godsend-psp-cli-0.2.42-windows-x64.zip",
+      "name": "godsend-psp-cli-0.2.43-windows-x64.zip",
       "label": "Windows (x86_64, CLI)",
-      "gofile": "https://gofile.io/d/rZgPKRpf",
-      "kiwi": "https://file.kiwi/322eea3a#-eoO2h1AerbcjAivTt7hjQ",
+      "gofile": "https://gofile.io/d/IqJutkVj",
+      "kiwi": "https://file.kiwi/1b16e578#AQ7QGS5zBFiSVp1zW22_Ng",
       "size": "2.1 MiB",
-      "sha256": "1ffa983b465b0c55fac38395adff19269abccb4943b57c9f600d14d0b563549a"
+      "sha256": "8b99345c32bc905012a9f2b85b9e4b97a75d72ce0b1b49c250ab1ad75bb7d526"
     },
     {
       "name": "linux-x64.zip",
       "label": "Windows (x86_64, CLI)",
-      "gofile": "https://gofile.io/d/XVp1veq5",
-      "kiwi": "https://file.kiwi/9c415b2d#uSej6L7uqCTcDl_UK4KLMw",
+      "gofile": "https://gofile.io/d/Yc4sOWPh",
+      "kiwi": "https://file.kiwi/03ca8667#u14oB0BmFVwTy6Fu7LP7-Q",
       "size": "196.0 MiB",
-      "sha256": "cc4e98aea1c8eb2c8b7c87ba451c3488761c17d39e4086fff4203695df57b5ad"
+      "sha256": "86c8f44a538a6d15badc0546ed352feb7ded0e1c98cabdc4d21ad18dbcb3bd10"
     },
     {
       "name": "macos-arm64.zip",
       "label": "Windows (x86_64, CLI)",
-      "gofile": "https://gofile.io/d/Al3dXh1n",
-      "kiwi": "https://file.kiwi/169aa694#7BMTkFYwQxrCQ_LLU2DfmA",
+      "gofile": "https://gofile.io/d/ntv7B5bN",
+      "kiwi": "https://file.kiwi/d7faee5d#zYPJ3Y8_VQyJ4EJc2QKYrA",
       "size": "46.1 MiB",
-      "sha256": "7c356eb9a0a947f03cb716bcfb93d76d21781d26209b306cd41eeb68084f3ada"
+      "sha256": "72f2911601910977b9d28d71bd4177ab4dd7f504690b467d95f53356f0b182ae"
     },
     {
       "name": "macos-x64.zip",
       "label": "Windows (x86_64, CLI)",
-      "gofile": "https://gofile.io/d/jssHiCwx",
-      "kiwi": "https://file.kiwi/d9548bff#wgjSK7IOXl8cRy5jKY1gjQ",
-      "size": "60.9 MiB",
-      "sha256": "ee473803dffeb1a00a851cc91118e567a0431373c52f56bba494be97c89c8de8"
+      "gofile": "https://gofile.io/d/70v4fXHj",
+      "kiwi": "https://file.kiwi/1f120aef#CmG6ZyAXvDfFCIOrbJj9dQ",
+      "size": "61.0 MiB",
+      "sha256": "ea8b814f73ee0d194820f72faef9a71c50ed3f0dea0149b7b1ac0975d2a52dab"
     },
     {
-      "name": "godsend-psp-0.2.42-linux-x64.deb",
+      "name": "godsend-psp-0.2.43-linux-x64.deb",
       "label": "Linux (x86_64, deb)",
-      "gofile": "https://gofile.io/d/uIGEyCAk",
-      "kiwi": "https://file.kiwi/45c82fd1#McQT-rzlsgEZONJhDVnB1g",
-      "size": "62.7 MiB",
-      "sha256": "7e3c471ca2be760f0953b94e529964a4c38a443207405a6f1fcea162ed9956c7"
+      "gofile": "https://gofile.io/d/eFjllrrG",
+      "kiwi": "https://file.kiwi/16bd9b72#LmQyGAAlW9KhNqwff8eUoA",
+      "size": "62.8 MiB",
+      "sha256": "b4b44afd1d911f12bbfda3cfa145672e004ad3728cd66f23afa8810f8416b806"
     },
     {
-      "name": "godsend-psp-0.2.42-arm64.dmg",
+      "name": "godsend-psp-0.2.43-arm64.dmg",
       "label": "macOS (Apple Silicon)",
-      "gofile": "https://gofile.io/d/kFqeoeIY",
-      "kiwi": "https://file.kiwi/e5b74bae#ntaKGqn8tkbBCEyWbh5_Ag",
-      "size": "44.3 MiB",
-      "sha256": "0d775a2f4bbb9207177a4e95a714403fc56ee432a9aba9f0dead7666656efadc"
+      "gofile": "https://gofile.io/d/qS9Bij8F",
+      "kiwi": "https://file.kiwi/60fab759#FK0Pcor4tgiB51TgMZYyGg",
+      "size": "44.4 MiB",
+      "sha256": "7db689db00ecef0f88024226d78d8d37582466ecd8effbc7dfa8d52d941b4d18"
     },
     {
-      "name": "godsend-psp-0.2.42-x64.dmg",
+      "name": "godsend-psp-0.2.43-x64.dmg",
       "label": "macOS (Intel)",
-      "gofile": "https://gofile.io/d/4wJSAGSn",
-      "kiwi": "https://file.kiwi/e53a3690#9SfC-IY41c2N0LXzUvTnHw",
+      "gofile": "https://gofile.io/d/J2dcutsW",
+      "kiwi": "https://file.kiwi/bbda12c2#p_AlST3JPQTRK_RUWlCwyg",
       "size": "59.2 MiB",
-      "sha256": "ea7c19712d1c18cbb4688a2e6c12604ba270b19ce506cdb2b56257459078bad4"
+      "sha256": "ec034b0c9a720af2c20c06f5152e79c90da32d42153be54b3fbcf20391042677"
     },
     {
-      "name": "godsend-psp-0.2.42-x64-setup.exe",
+      "name": "godsend-psp-0.2.43-x64-setup.exe",
       "label": "Windows (x86_64, installer)",
-      "gofile": "https://gofile.io/d/2tozlouS",
-      "kiwi": "https://file.kiwi/42464008#uj-h2HQGSdYezDs5uQ--sQ",
+      "gofile": "https://gofile.io/d/6a2HNJ9d",
+      "kiwi": "https://file.kiwi/b95259bc#9tWAgybE50azbqQcSMWfJw",
       "size": "45.1 MiB",
-      "sha256": "3158f855d7d30d7c54e7fb5f868ceaaa2f637ff7d36806b21987688f8b402cf5"
+      "sha256": "3e0086cfa79296fb6e226513244ff27e1586520cc0528623229829acd05cfd74"
     }
   ]
 }
