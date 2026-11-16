@@ -4,7 +4,7 @@ import type { CatalogEntry } from "../types";
 import type { PageProps } from "../App";
 import { Btn, Chip, Empty, Seg } from "../ui";
 
-type Category = "all" | "emu" | "cfw";
+type Category = "all" | "app" | "emu" | "cfw";
 
 export default function Store({ snap, toast, refreshKey }: PageProps) {
   const [catalog, setCatalog] = useState<CatalogEntry[]>([]);
@@ -64,6 +64,7 @@ export default function Store({ snap, toast, refreshKey }: PageProps) {
           onChange={setCategory}
           options={[
             { value: "all", label: "All" },
+            { value: "app", label: "Apps" },
             { value: "emu", label: "Emulators" },
             { value: "cfw", label: "CFW" },
           ]}

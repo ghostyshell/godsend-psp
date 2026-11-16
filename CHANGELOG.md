@@ -3,7 +3,7 @@
 All notable changes to GODsend PSP. Newest first.
 
 
-## [0.2.35] - 2026-11-16
+## [0.2.36] - 2026-11-16
 
 ### Added
 
@@ -20,6 +20,22 @@ All notable changes to GODsend PSP. Newest first.
   space, MAC and UMD report) and GODsend NetCheck (WLAN switch plus apctl
   connection, IP and gateway check). `scripts/build-homebrew.sh` rebuilds,
   zips, uploads and verifies them.
+
+### Changed
+
+- The ARK-5 migration plan is model aware: PSP-1000 and PSP-2000 (except
+  TA-088v3) can install New cIPL, while PSP-3000, PSP Street and E1000 keep
+  booting the ARK Loader once per boot, with DC10 installed first on
+  cIPL-capable consoles.
+- Homebrew has an Apps filter for the four GODsend utilities.
+
+
+## [0.2.35] - 2026-11-16
+
+### Added
+
+- Dedicated Jailbreak section with CFW detection and the ARK-5 migration
+  plan, plus ARK-4 and ARK-5 (FasterARK) install cards.
 
 
 ## [0.2.34] - 2026-11-16
