@@ -17,6 +17,8 @@ All notable changes to GODsend PSP. Newest first.
   the game by its path basename (falling back to the file index), selects
   that one file and unrestricts its link. Any debrid error falls back to the
   existing P2P path with the reason in the job message.
+- The debrid magnet carries a URL-encoded display name, so set titles with
+  spaces and parentheses resolve cleanly.
 
 ### Changed
 
