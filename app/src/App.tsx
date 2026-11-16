@@ -3,7 +3,7 @@ import { api, listen } from "./api";
 import { applyStoredTheme } from "./theme";
 import type { Job, Snapshot } from "./types";
 import { PAGE_TITLES } from "./types";
-import { Chip } from "./ui";
+import { Chip, progressText } from "./ui";
 import {
   House,
   Library as LibraryIcon,
@@ -63,7 +63,7 @@ const NAV: { id: Page; label: string; icon: LucideIcon }[] = [
   { id: "settings", label: "Settings", icon: SettingsIcon },
 ];
 
-const VERSION = "0.2.42";
+const VERSION = "0.2.43";
 
 export interface PageProps {
   snap: Snapshot;
@@ -106,14 +106,22 @@ export default function App() {
         void loadSnapshot();
         setRefreshKey((k) => k + 1);
       }),
-      listen<{ id: number; done: number; total: number }>("job://progress", (update) => {
+      listen<{ id: number; done: number; total: number; speed: number; eta: number }>(
+        "job://progress",
+        (update) => {
         setSnap((cur) =>
           cur
             ? {
                 ...cur,
                 jobs: cur.jobs.map((job) =>
                   job.id === update.id
-                    ? { ...job, done_bytes: update.done, total_bytes: update.total }
+                    ? {
+                        ...job,
+                        done_bytes: update.done,
+                        total_bytes: update.total,
+                        speed_bps: update.speed,
+                        eta_secs: update.eta,
+                      }
                     : job
                 ),
               }
@@ -357,23 +365,6 @@ export default function App() {
       ) : null}
     </div>
   );
-}
-
-function progressText(job: Job): string {
-  if (!job.total_bytes) return "";
-  const pct = Math.min(100, Math.round((job.done_bytes / job.total_bytes) * 100));
-  let eta = "";
-  const elapsed = Math.max(1, Math.floor(Date.now() / 1000) - job.started_at);
-  if (job.done_bytes > 0 && job.done_bytes < job.total_bytes) {
-    const rate = job.done_bytes / elapsed;
-    if (rate > 0) {
-      const remain = Math.round((job.total_bytes - job.done_bytes) / rate);
-      const m = Math.floor(remain / 60);
-      const secs = remain % 60;
-      eta = ` - ${m}:${String(secs).padStart(2, "0")} left`;
-    }
-  }
-  return `${pct}%${eta}`;
 }
 
 function JobRow({ job, onCancel }: { job: Job; onCancel: () => void }) {

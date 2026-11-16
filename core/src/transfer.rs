@@ -33,6 +33,12 @@ pub struct Job {
     pub state: JobState,
     pub done_bytes: u64,
     pub total_bytes: u64,
+    /// Live transfer rate in bytes per second (0 when unknown).
+    #[serde(default)]
+    pub speed_bps: u64,
+    /// Seconds left at the current rate (0 when unknown).
+    #[serde(default)]
+    pub eta_secs: u64,
     pub message: String,
     pub started_at: u64,
     pub finished_at: Option<u64>,
@@ -43,9 +49,9 @@ struct JobSlot {
     cancel: Arc<AtomicBool>,
 }
 
-/// Live progress hook: `(job_id, done, total)` fired from job threads.
-/// The desktop layer installs one to emit UI events.
-pub type ProgressHook = dyn Fn(u64, u64, u64) + Send + Sync;
+/// Live progress hook: `(job_id, done, total, speed, eta)` fired from job
+/// threads. The desktop layer installs one to emit UI events.
+pub type ProgressHook = dyn Fn(u64, u64, u64, u64, u64) + Send + Sync;
 static PROGRESS_HOOK: std::sync::Mutex<Option<Arc<ProgressHook>>> = std::sync::Mutex::new(None);
 
 /// Install the process-wide progress hook (call once at app startup).
@@ -53,10 +59,10 @@ pub fn set_progress_hook(hook: Option<Arc<ProgressHook>>) {
     *PROGRESS_HOOK.lock().expect("hook lock") = hook;
 }
 
-fn fire_progress(job_id: u64, done: u64, total: u64) {
+fn fire_progress(job_id: u64, done: u64, total: u64, speed: u64, eta: u64) {
     let hook = PROGRESS_HOOK.lock().expect("hook lock").clone();
     if let Some(hook) = hook {
-        hook(job_id, done, total);
+        hook(job_id, done, total, speed, eta);
     }
 }
 
@@ -78,8 +84,23 @@ impl JobContext {
             let mut slot = self.slot.lock().expect("job slot lock");
             slot.job.done_bytes = done;
             slot.job.total_bytes = total;
+            slot.job.speed_bps = 0;
+            slot.job.eta_secs = 0;
         }
-        fire_progress(self.job_id(), done, total);
+        fire_progress(self.job_id(), done, total, 0, 0);
+    }
+
+    /// Byte progress plus live rate and remaining time, for transfers that
+    /// can report both (aria2 summary lines).
+    pub fn metrics(&self, done: u64, total: u64, speed: u64, eta: u64) {
+        {
+            let mut slot = self.slot.lock().expect("job slot lock");
+            slot.job.done_bytes = done;
+            slot.job.total_bytes = total;
+            slot.job.speed_bps = speed;
+            slot.job.eta_secs = eta;
+        }
+        fire_progress(self.job_id(), done, total, speed, eta);
     }
 
     pub fn message(&self, msg: impl Into<String>) {
@@ -174,6 +195,8 @@ impl JobManager {
                 state: JobState::Running,
                 done_bytes: 0,
                 total_bytes: 0,
+                speed_bps: 0,
+                eta_secs: 0,
                 message: String::new(),
                 started_at: now(),
                 finished_at: None,

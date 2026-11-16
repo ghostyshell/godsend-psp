@@ -3,6 +3,30 @@
 All notable changes to GODsend PSP. Newest first.
 
 
+## [0.2.43] - 2026-11-16
+
+### Fixed
+
+- Torrent downloads no longer stall at 99% seeding. aria2 now runs with
+  `--seed-time=0` and `--seed-ratio=0.0` and exits the moment the payload is
+  complete, for both single-file torrent selection and whole-torrent
+  downloads.
+- Minerva downloads resolve the chosen game file through the connected
+  Real-Debrid or TorBox account and fetch the direct link, instead of always
+  pulling the whole set over P2P. The resolver adds the set magnet, matches
+  the game by its path basename (falling back to the file index), selects
+  that one file and unrestricts its link. Any debrid error falls back to the
+  existing P2P path with the reason in the job message.
+
+### Changed
+
+- Downloads show real progress. aria2 summary lines are parsed into bytes
+  done of total, live speed and time left, rendered as
+  `78% - 1.2 GiB of 1.5 GiB - 3.2 MiB/s - 1:20 left` on the Downloads page
+  and the queue drawer. Jobs that cannot report a live rate fall back to the
+  average measured from elapsed time.
+
+
 ## [0.2.42] - 2026-11-16
 
 ### Fixed

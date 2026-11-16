@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { api, pickers } from "../api";
 import type { FmEntry } from "../types";
 import type { PageProps } from "../App";
-import { Btn, Chip, Empty, fmtBytes } from "../ui";
+import { Btn, Chip, Empty, fmtBytes, progressText } from "../ui";
 
 export default function Downloads({ snap, reload, toast, refreshKey }: PageProps) {
   const [dir, setDir] = useState("");
@@ -75,7 +75,11 @@ export default function Downloads({ snap, reload, toast, refreshKey }: PageProps
                 </Chip>
                 <div className="grow">
                   <div className="title">{job.label}</div>
-                  <div className="sub">{job.message || "queued"}</div>
+                  <div className="sub">
+                    {job.state === "running"
+                      ? progressText(job) || job.message || "queued"
+                      : job.message || "queued"}
+                  </div>
                   {job.state === "running" ? (
                     <div className="bar live" style={{ marginTop: 6 }}>
                       <div
