@@ -38,6 +38,13 @@ pub fn parse_files(bytes: &[u8]) -> Result<Vec<TorrentFile>> {
         .ok_or_else(|| Error::Invalid("torrent: no info dictionary".into()))?;
 
     if let Some(files) = info.get("files").and_then(Value::as_list) {
+        // aria2 writes multi-file torrents under `<info.name>/`, so the stored
+        // path must include it for the post-download lookup to find the file.
+        let root_name = info
+            .get("name")
+            .and_then(Value::as_bytes)
+            .map(|b| String::from_utf8_lossy(b).into_owned())
+            .unwrap_or_default();
         let mut out = Vec::with_capacity(files.len());
         for (pos, entry) in files.iter().enumerate() {
             let path = entry
@@ -55,6 +62,11 @@ pub fn parse_files(bytes: &[u8]) -> Result<Vec<TorrentFile>> {
             if path.is_empty() {
                 continue;
             }
+            let path = if root_name.is_empty() {
+                path
+            } else {
+                format!("{root_name}/{path}")
+            };
             // Keep the torrent's own numbering even when a row is skipped.
             let index = (pos + 1) as u32;
             let length = entry.get("length").and_then(Value::as_int).unwrap_or(0).max(0) as u64;
@@ -279,14 +291,14 @@ mod tests {
         assert_eq!(parsed[0].index, 1);
         assert_eq!(
             parsed[0].path,
-            "Redump/Sony - PlayStation Portable/007 - From Russia with Love (Europe).zip"
+            "PSP/Redump/Sony - PlayStation Portable/007 - From Russia with Love (Europe).zip"
         );
         assert_eq!(parsed[0].length, 268435456);
         assert_eq!(parsed[1].index, 2);
-        assert_eq!(parsed[1].path, "Redump/Sony - PlayStation Portable/Ape Escape P (Europe).iso");
+        assert_eq!(parsed[1].path, "PSP/Redump/Sony - PlayStation Portable/Ape Escape P (Europe).iso");
         assert_eq!(parsed[1].length, 700);
         assert_eq!(parsed[2].index, 3);
-        assert_eq!(parsed[2].path, "Redump/Sony - PlayStation Portable/Readme.txt");
+        assert_eq!(parsed[2].path, "PSP/Redump/Sony - PlayStation Portable/Readme.txt");
         assert_eq!(parsed[2].length, 12);
     }
 

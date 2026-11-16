@@ -21,6 +21,13 @@ All notable changes to GODsend PSP. Newest first.
   torrent downloads on its own. Game Debrid, Internet Archive and
   NoPayStation are unchanged.
 
+### Fixed
+
+- Single-file Minerva downloads account for aria2 keeping the torrent's own
+  folder (`<info.name>/...`), and the selected game is moved flat into the
+  download folder, so it appears on the Downloads page instead of hiding in a
+  nested set directory.
+
 
 ## [0.2.40] - 2026-11-16
 
