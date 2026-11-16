@@ -393,14 +393,20 @@ pub fn import_zip(
     install_zip(zip_path, paths, Layout::Auto, ctx)
 }
 
-fn extract_zip(zip_path: &Path, dest: &Path) -> Result<()> {
+pub(crate) fn extract_zip(zip_path: &Path, dest: &Path) -> Result<()> {
     let file = fs::File::open(zip_path)?;
     let mut archive = zip::ZipArchive::new(file)?;
     for i in 0..archive.len() {
         let mut entry = archive.by_index(i)?;
         let Some(name) = entry.enclosed_name() else {
-            continue; // path traversal guard
+            continue; // path traversal guard ("../escape.iso" never lands)
         };
+        if name.components().any(|c| {
+            let part = c.as_os_str().to_string_lossy();
+            part.starts_with('.') || part.eq_ignore_ascii_case("__macosx")
+        }) {
+            continue; // __MACOSX, ._* and .DS_Store
+        }
         let target = dest.join(name);
         if entry.is_dir() {
             fs::create_dir_all(&target)?;
@@ -530,7 +536,7 @@ fn install_auto(dir: &Path, paths: &PspPaths) -> Result<InstallReport> {
 }
 
 /// Find directories (up to `max_depth`) that directly contain an EBOOT.PBP.
-fn find_eboot_dirs(dir: &Path, max_depth: usize, depth: usize) -> Vec<PathBuf> {
+pub(crate) fn find_eboot_dirs(dir: &Path, max_depth: usize, depth: usize) -> Vec<PathBuf> {
     let mut out = Vec::new();
     if depth > max_depth {
         return out;
@@ -556,7 +562,7 @@ fn find_eboot_dirs(dir: &Path, max_depth: usize, depth: usize) -> Vec<PathBuf> {
 }
 
 /// Copy a directory tree (creates the destination fresh).
-fn copy_tree(src: &Path, dest: &Path) -> Result<()> {
+pub(crate) fn copy_tree(src: &Path, dest: &Path) -> Result<()> {
     if dest.exists() {
         fs::remove_dir_all(dest)?;
     }
@@ -564,7 +570,7 @@ fn copy_tree(src: &Path, dest: &Path) -> Result<()> {
 }
 
 /// Merge a directory tree over an existing destination.
-fn merge_tree(src: &Path, dest: &Path) -> Result<()> {
+pub(crate) fn merge_tree(src: &Path, dest: &Path) -> Result<()> {
     fs::create_dir_all(dest)?;
     for entry in fs::read_dir(src)?.flatten() {
         let name = entry.file_name().to_string_lossy().to_string();
