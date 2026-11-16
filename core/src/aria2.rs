@@ -7,11 +7,13 @@ use crate::transfer::JobContext;
 use std::path::{Path, PathBuf};
 use std::process::Command;
 
-/// Find aria2c: explicit config path, app-bundled resources, then PATH.
+/// Find aria2c: explicit path, app-bundled resources, PATH, then the usual
+/// package-manager locations. GUI apps on macOS do not inherit the shell
+/// PATH, so `/opt/homebrew/bin` must be checked explicitly.
 pub fn find_aria2(configured: &str) -> Option<PathBuf> {
     if !configured.is_empty() {
         let p = PathBuf::from(configured);
-        if p.is_file() {
+        if p.is_file() && is_aria2(&p) {
             return Some(p);
         }
     }
@@ -27,7 +29,27 @@ pub fn find_aria2(configured: &str) -> Option<PathBuf> {
             }
         }
     }
-    crate::media::which_bin("aria2c")
+    if let Some(found) = crate::media::which_bin("aria2c") {
+        if is_aria2(&found) {
+            return Some(found);
+        }
+    }
+    let name = if cfg!(windows) { "aria2c.exe" } else { "aria2c" };
+    for dir in ["/opt/homebrew/bin", "/usr/local/bin", "/usr/bin", "/snap/bin"] {
+        let candidate = PathBuf::from(dir).join(name);
+        if candidate.is_file() {
+            return Some(candidate);
+        }
+    }
+    None
+}
+
+/// Guard against a wrong binary being passed in (the old code handed the
+/// configured ffmpeg path to the aria2 lookup).
+fn is_aria2(path: &Path) -> bool {
+    path.file_name()
+        .map(|name| name.to_string_lossy().to_lowercase().contains("aria2"))
+        .unwrap_or(false)
 }
 
 /// Default download directory: config override, else `<Downloads>/godsend-psp`.
@@ -51,19 +73,19 @@ pub fn download(
     url: &str,
     dest_dir: &Path,
     dest_name: &str,
-    config: &Config,
+    _config: &Config,
     ctx: &JobContext,
 ) -> Result<PathBuf> {
     std::fs::create_dir_all(dest_dir)?;
     let dest = dest_dir.join(dest_name);
     let dest_str = dest.to_string_lossy().to_string();
-    ctx.message(if find_aria2(&config.ffmpeg_path).is_some() || find_aria2("").is_some() {
+    ctx.message(if find_aria2("").is_some() {
         "downloading (aria2c, 16 connections)"
     } else {
         "downloading (single connection; install aria2c for speed)"
     });
 
-    if let Some(aria2) = find_aria2("").or_else(|| find_aria2(&config.ffmpeg_path)) {
+    if let Some(aria2) = find_aria2("") {
         return run_aria2(&aria2, url, dest_dir, &dest_str, ctx);
     }
     run_fallback(url, &dest, ctx)
@@ -106,15 +128,16 @@ pub fn download_selected(
     dest_dir: &Path,
     expect_path: &str,
     select_file: u32,
-    config: &Config,
+    _config: &Config,
     ctx: &JobContext,
 ) -> Result<PathBuf> {
     std::fs::create_dir_all(dest_dir)?;
-    let aria2 = find_aria2("")
-        .or_else(|| find_aria2(&config.ffmpeg_path))
-        .ok_or_else(|| {
-            Error::Other("aria2c is required to download a single file from a torrent".into())
-        })?;
+    let aria2 = find_aria2("").ok_or_else(|| {
+        Error::Other(
+            "aria2c is required to download one file from a torrent. Install it (brew install aria2 or apt install aria2) or put it in /opt/homebrew/bin, /usr/local/bin or /usr/bin."
+                .into(),
+        )
+    })?;
     ctx.message("downloading one file (aria2c torrent selection)");
 
     let mut command = base_command(&aria2, dest_dir);
@@ -315,5 +338,13 @@ mod tests {
         assert_eq!(safe_relative("../../escape.zip"), Some(PathBuf::from("escape.zip")));
         assert_eq!(safe_relative(""), None);
         assert_eq!(safe_relative("/"), None);
+    }
+
+    #[test]
+    fn aria2_guard_rejects_other_binaries() {
+        assert!(is_aria2(Path::new("/opt/homebrew/bin/aria2c")));
+        assert!(is_aria2(Path::new("C:/tools/aria2c.exe")));
+        assert!(!is_aria2(Path::new("/opt/homebrew/bin/ffmpeg")));
+        assert!(!is_aria2(Path::new("/usr/bin/curl")));
     }
 }
