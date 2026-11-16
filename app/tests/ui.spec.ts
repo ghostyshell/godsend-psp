@@ -29,10 +29,23 @@ test("store page wires the debrid index", async ({ page }) => {
 test("store r-roms and NoPayStation tabs list fixtures", async ({ page }) => {
   await page.getByRole("button", { name: "Store", exact: true }).click();
   await page.getByRole("tab", { name: "r-roms" }).click();
-  await expect(page.getByText("PSP Redump .iso (Part 1)")).toBeVisible();
+  await expect(page.getByText("Ape Escape - On the Loose (USA)")).toBeVisible();
   await page.getByRole("tab", { name: "NoPayStation" }).click();
   await expect(page.getByText("LocoRoco 2").first()).toBeVisible();
   await expect(page.getByText("UCUS98662")).toBeVisible();
+});
+
+test("store Minerva lists individual games and filters them", async ({ page }) => {
+  await page.getByRole("button", { name: "Store", exact: true }).click();
+  await page.getByRole("tab", { name: "Minerva" }).click();
+  await expect(page.getByText("007 - From Russia with Love (Europe, Australia)")).toBeVisible();
+  await expect(page.getByText("Daxter (USA)")).toBeVisible();
+  await expect(
+    page.getByText("Minerva_Myrient - Redump - Sony - PlayStation Portable.torrent#17"),
+  ).toHaveCount(0);
+  await page.getByLabel("Store search").fill("russia");
+  await expect(page.getByText("Daxter (USA)")).toHaveCount(0);
+  await expect(page.getByText("007 - From Russia with Love (Europe, Australia)")).toBeVisible();
 });
 
 test("downloads page lists local files", async ({ page }) => {

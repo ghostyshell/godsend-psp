@@ -3,6 +3,25 @@
 All notable changes to GODsend PSP. Newest first.
 
 
+## [0.2.41] - 2026-11-16
+
+### Changed
+
+- Store Minerva and r-roms now list individual games instead of whole
+  collections. Both tabs show one flat, searchable list of titles with a
+  per-game Download, so getting one game never means pulling a whole set.
+- The Minerva index is built from the set torrent's file list (about 3 MB)
+  and the r-roms index from Internet Archive item metadata. Each index is
+  cached in memory for 10 minutes, so switching tabs and re-searching does
+  not refetch anything. The list renders the first 300 matches and asks you
+  to type to narrow it.
+- New bencode reader in `core/src/torrent.rs` parses `.torrent` file lists
+  with no new dependency (depth and 32 MB size caps). aria2 now takes
+  `--select-file` (1-based, `--follow-torrent=mem`) so one file inside a
+  torrent downloads on its own. Game Debrid, Internet Archive and
+  NoPayStation are unchanged.
+
+
 ## [0.2.40] - 2026-11-16
 
 ### Fixed

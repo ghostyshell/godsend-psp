@@ -397,9 +397,23 @@ async function invoke(cmd: string, args: Record<string, any> = {}): Promise<unkn
         return {
           kind: "rroms",
           items: [
-            { id: "sony_playstation_portable_part1", title: "PSP Redump .iso (Part 1)", url: "https://archive.org/download/sony_playstation_portable_part1", kind: "ia_item" },
-            { id: "PSP-DLC/PSP DLC", title: "PSP DLC", url: "https://archive.org/download/PSP-DLC/PSP%20DLC/", kind: "ia_item" },
-            { id: "psp-homebrew-pack.zip", title: "PSP homebrew pack", url: "https://example.invalid/psp-homebrew-pack.zip", kind: "zip" },
+            { id: "sony_playstation_portable_part1/Ape Escape - On the Loose (USA).zip", title: "Ape Escape - On the Loose (USA)", size_bytes: 310 * MB, container: "PSP Redump .iso (Part 1)", source: "r-roms" },
+            { id: "sony_playstation_portable_part1/Daxter (Europe).zip", title: "Daxter (Europe)", size_bytes: 780 * MB, container: "PSP Redump .iso (Part 1)", source: "r-roms" },
+            { id: "PSP-DLC/PSP DLC/LocoRoco 2 DLC (USA).zip", title: "LocoRoco 2 DLC (USA)", size_bytes: 24 * MB, container: "PSP DLC", source: "r-roms" },
+            { id: "PSP-DLC/PSP DLC/Patapon 2 DLC (USA).zip", title: "Patapon 2 DLC (USA)", size_bytes: 18 * MB, container: "PSP DLC", source: "r-roms" },
+            { id: "sony_playstation_portable_part2/Wipeout Pure (USA).zip", title: "Wipeout Pure (USA)", size_bytes: 420 * MB, container: "PSP Redump .iso (Part 2)", source: "r-roms" },
+          ],
+        };
+      }
+      if (args.source === "minerva") {
+        return {
+          kind: "minerva",
+          items: [
+            { id: "Minerva_Myrient - Redump - Sony - PlayStation Portable.torrent#17", title: "007 - From Russia with Love (Europe, Australia)", size_bytes: 712 * MB, container: "Redump - Sony - PlayStation Portable", source: "minerva" },
+            { id: "Minerva_Myrient - Redump - Sony - PlayStation Portable.torrent#203", title: "Ape Escape P (Europe)", size_bytes: 498 * MB, container: "Redump - Sony - PlayStation Portable", source: "minerva" },
+            { id: "Minerva_Myrient - Redump - Sony - PlayStation Portable.torrent#311", title: "Daxter (USA)", size_bytes: 803 * MB, container: "Redump - Sony - PlayStation Portable", source: "minerva" },
+            { id: "Minerva_Myrient - Redump - Sony - PlayStation Portable.torrent#1024", title: "God of War - Chains of Olympus (USA)", size_bytes: 1450 * MB, container: "Redump - Sony - PlayStation Portable", source: "minerva" },
+            { id: "Minerva_Myrient - No-Intro - Sony - PlayStation Portable (PSN).torrent#44", title: "LocoRoco 2 (PSN)", size_bytes: 640 * MB, container: "No-Intro - Sony - PlayStation Portable (PSN)", source: "minerva" },
           ],
         };
       }
@@ -440,6 +454,10 @@ async function invoke(cmd: string, args: Record<string, any> = {}): Promise<unkn
       }
       return { kind: "gamesearch", hit: null };
     case "store_download":
+      // Per-game store rows are index-backed; the mock has nothing to fetch.
+      if (args.source === "minerva" || args.source === "rroms") {
+        return 0;
+      }
       return startJob("download", String(args.id));
     case "downloads_list":
       return {

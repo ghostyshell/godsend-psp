@@ -842,11 +842,11 @@ fn store_search(state: State<'_, AppState>, query: String, source: String, limit
             Ok(serde_json::json!({ "kind": "ia", "items": items }))
         }
         "minerva" => {
-            let sets = godsend_core::sources::minerva_sets()?;
-            Ok(serde_json::json!({ "kind": "minerva", "items": sets }))
+            let items = godsend_core::sources::minerva_games()?;
+            Ok(serde_json::json!({ "kind": "minerva", "items": items }))
         }
         "rroms" => {
-            let items = godsend_core::sources::rroms_items()?;
+            let items = godsend_core::sources::rroms_games()?;
             Ok(serde_json::json!({ "kind": "rroms", "items": items }))
         }
         "nps" => {
@@ -901,23 +901,53 @@ fn store_download(app: AppHandle, state: State<'_, AppState>, source: String, id
     let app2 = app.clone();
     let job_id = match source.as_str() {
         "minerva" => {
-            let url = godsend_core::sources::minerva_download(&id)
-                .ok_or_else(|| Error::Invalid("bad minerva id".into()))?;
-            let label = id.clone();
             let dest_dir = godsend_core::aria2::download_dir(&config);
-            state.jobs.spawn(
-                "download",
-                &format!("torrent {label}"),
-                move |job| {
-                    let _ = app2.emit("job://done", job);
-                },
-                move |ctx| {
-                    ctx.check_cancel()?;
-                    let path = godsend_core::aria2::download(&url, &dest_dir, &label, &config, ctx)?;
-                    ctx.message(format!("torrent saved to {}", path.display()));
-                    Ok(())
-                },
-            )
+            if let Some((set, number)) = id.split_once('#') {
+                // Per-game id: "<torrent name>#<1-based file index>".
+                let index: u32 = number
+                    .parse()
+                    .map_err(|_| Error::Invalid("bad minerva game id".into()))?;
+                let url = godsend_core::sources::minerva_download(set)
+                    .ok_or_else(|| Error::Invalid("bad minerva id".into()))?;
+                let file = godsend_core::torrent::fetch_files(&url)?
+                    .into_iter()
+                    .find(|entry| entry.index == index)
+                    .ok_or_else(|| Error::NotFound(format!("minerva file {index}")))?;
+                let expect = file.path;
+                let label = godsend_core::sources::game_title(&expect);
+                state.jobs.spawn(
+                    "download",
+                    &label,
+                    move |job| {
+                        let _ = app2.emit("job://done", job);
+                    },
+                    move |ctx| {
+                        ctx.check_cancel()?;
+                        let path = godsend_core::aria2::download_selected(
+                            &url, &dest_dir, &expect, index, &config, ctx,
+                        )?;
+                        ctx.message(format!("downloaded {}", path.display()));
+                        Ok(())
+                    },
+                )
+            } else {
+                let url = godsend_core::sources::minerva_download(&id)
+                    .ok_or_else(|| Error::Invalid("bad minerva id".into()))?;
+                let label = id.clone();
+                state.jobs.spawn(
+                    "download",
+                    &format!("torrent {label}"),
+                    move |job| {
+                        let _ = app2.emit("job://done", job);
+                    },
+                    move |ctx| {
+                        ctx.check_cancel()?;
+                        let path = godsend_core::aria2::download(&url, &dest_dir, &label, &config, ctx)?;
+                        ctx.message(format!("torrent saved to {}", path.display()));
+                        Ok(())
+                    },
+                )
+            }
         }
         "ia" => {
             // id = "<item>/<file name>"; resolve to a direct IA url
@@ -946,38 +976,75 @@ fn store_download(app: AppHandle, state: State<'_, AppState>, source: String, id
             )
         }
         "rroms" => {
-            // id is an r-roms item; archive.org items expand to their files.
-            let files = godsend_core::sources::rroms_files(&id)?;
-            let label = format!("r-roms {id}");
-            let count = files.len();
             let dest_dir = godsend_core::aria2::download_dir(&config);
-            state.jobs.spawn(
-                "download",
-                &label,
-                move |job| {
-                    let _ = app2.emit("job://done", job);
-                },
-                move |ctx| {
-                    for (index, file) in files.iter().enumerate() {
+            // Per-game ids are "<item id>/<file name>". An item id can carry a
+            // folder segment of its own, so match the longest registered id
+            // that prefixes this one instead of splitting at the first slash.
+            let per_game = godsend_core::sources::rroms_items()?
+                .into_iter()
+                .filter(|item| id.starts_with(&format!("{}/", item.id)))
+                .max_by_key(|item| item.id.len());
+            if let Some(item) = per_game {
+                let name = id[item.id.len() + 1..].to_string();
+                let file = godsend_core::sources::rroms_files(&item.id)?
+                    .into_iter()
+                    .find(|entry| entry.name == name)
+                    .ok_or_else(|| Error::NotFound(name.clone()))?;
+                let url = godsend_core::sources::ia_signed_url(&file.url, &config);
+                let base = file
+                    .name
+                    .rsplit('/')
+                    .next()
+                    .filter(|base| !base.is_empty())
+                    .unwrap_or(&file.name);
+                let label = godsend_core::media::fat_safe_name(base);
+                state.jobs.spawn(
+                    "download",
+                    &label.clone(),
+                    move |job| {
+                        let _ = app2.emit("job://done", job);
+                    },
+                    move |ctx| {
                         ctx.check_cancel()?;
-                        if count > 1 {
-                            ctx.message(format!("file {}/{}: {}", index + 1, count, file.name));
-                        }
-                        let name = file
-                            .name
-                            .rsplit('/')
-                            .next()
-                            .filter(|name| !name.is_empty())
-                            .unwrap_or(&id);
-                        let name = godsend_core::media::fat_safe_name(name);
-                        let url = godsend_core::sources::ia_signed_url(&file.url, &config);
-                        godsend_core::aria2::download(&url, &dest_dir, &name, &config, ctx)
+                        let path = godsend_core::aria2::download(&url, &dest_dir, &label, &config, ctx)
                             .map_err(|err| Error::Other(config.redact(&err.to_string())))?;
-                    }
-                    ctx.message(format!("downloaded {count} file(s) to {}", dest_dir.display()));
-                    Ok(())
-                },
-            )
+                        ctx.message(format!("downloaded {}", path.display()));
+                        Ok(())
+                    },
+                )
+            } else {
+                // Whole-set id: archive.org items expand to their files.
+                let files = godsend_core::sources::rroms_files(&id)?;
+                let label = format!("r-roms {id}");
+                let count = files.len();
+                state.jobs.spawn(
+                    "download",
+                    &label,
+                    move |job| {
+                        let _ = app2.emit("job://done", job);
+                    },
+                    move |ctx| {
+                        for (index, file) in files.iter().enumerate() {
+                            ctx.check_cancel()?;
+                            if count > 1 {
+                                ctx.message(format!("file {}/{}: {}", index + 1, count, file.name));
+                            }
+                            let name = file
+                                .name
+                                .rsplit('/')
+                                .next()
+                                .filter(|name| !name.is_empty())
+                                .unwrap_or(&id);
+                            let name = godsend_core::media::fat_safe_name(name);
+                            let url = godsend_core::sources::ia_signed_url(&file.url, &config);
+                            godsend_core::aria2::download(&url, &dest_dir, &name, &config, ctx)
+                                .map_err(|err| Error::Other(config.redact(&err.to_string())))?;
+                        }
+                        ctx.message(format!("downloaded {count} file(s) to {}", dest_dir.display()));
+                        Ok(())
+                    },
+                )
+            }
         }
         "nps" => {
             let entry = godsend_core::sources::nps_entry(&id)?;

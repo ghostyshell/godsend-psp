@@ -3,7 +3,11 @@
 
 use crate::config::Config;
 use crate::error::{Error, Result};
+use crate::torrent;
 use serde::{Deserialize, Serialize};
+use std::collections::HashMap;
+use std::sync::{Mutex, OnceLock};
+use std::time::{Duration, Instant};
 
 fn agent() -> ureq::Agent {
     ureq::AgentBuilder::new()
@@ -916,6 +920,121 @@ pub fn minerva_download(id: &str) -> Option<String> {
     Some(format!("{MINERVA_ASSETS}/{}", urlencode(id)))
 }
 
+// ---------- Store games (a flat per-game view of the collections) ----------
+
+/// One game inside a collection, ready for a per-game store row.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct StoreGame {
+    /// `<set>#<file index>` for Minerva, `<item>/<file name>` for r-roms.
+    pub id: String,
+    pub title: String,
+    pub size_bytes: u64,
+    /// Human name of the collection the game came from.
+    pub container: String,
+    pub source: String,
+}
+
+const GAME_CACHE_TTL: Duration = Duration::from_secs(600);
+
+type GameCache = Mutex<HashMap<&'static str, (Instant, Vec<StoreGame>)>>;
+
+fn game_cache() -> &'static GameCache {
+    static CACHE: OnceLock<GameCache> = OnceLock::new();
+    CACHE.get_or_init(|| Mutex::new(HashMap::new()))
+}
+
+/// Build a per-game index once, then serve clones for 10 minutes so tab
+/// switches and local filtering never refetch a torrent or IA metadata.
+/// Only successful builds are cached.
+fn store_games(
+    key: &'static str,
+    build: impl FnOnce() -> Result<Vec<StoreGame>>,
+) -> Result<Vec<StoreGame>> {
+    if let Some((at, games)) = game_cache().lock().expect("game cache lock").get(key) {
+        if at.elapsed() < GAME_CACHE_TTL {
+            return Ok(games.clone());
+        }
+    }
+    let games = build()?;
+    game_cache()
+        .lock()
+        .expect("game cache lock")
+        .insert(key, (Instant::now(), games.clone()));
+    Ok(games)
+}
+
+/// File name from a torrent or archive path, with the game container
+/// extension stripped.
+pub fn game_title(path: &str) -> String {
+    let name = path.rsplit('/').next().unwrap_or(path);
+    let lower = name.to_ascii_lowercase();
+    for ext in [".zip", ".7z", ".iso", ".cso", ".pbp", ".chd", ".rvz"] {
+        if lower.ends_with(ext) && name.len() > ext.len() {
+            return name[..name.len() - ext.len()].to_string();
+        }
+    }
+    name.to_string()
+}
+
+fn sort_games(games: &mut [StoreGame]) {
+    games.sort_by(|a, b| a.title.to_lowercase().cmp(&b.title.to_lowercase()));
+}
+
+/// Every game file in every existing Minerva PSP torrent.
+pub fn minerva_games() -> Result<Vec<StoreGame>> {
+    store_games("minerva", || {
+        let mut out = Vec::new();
+        for set in minerva_sets()? {
+            for file in torrent::fetch_files(&set.url)? {
+                let title = game_title(&file.path);
+                if title.is_empty() {
+                    continue;
+                }
+                out.push(StoreGame {
+                    id: format!("{}#{}", set.id, file.index),
+                    title,
+                    size_bytes: file.length,
+                    container: set.title.clone(),
+                    source: "minerva".into(),
+                });
+            }
+        }
+        sort_games(&mut out);
+        Ok(out)
+    })
+}
+
+/// Every game file inside the r-roms Internet Archive items.
+pub fn rroms_games() -> Result<Vec<StoreGame>> {
+    store_games("rroms", || {
+        let mut out = Vec::new();
+        for item in rroms_items()?.into_iter().filter(|item| item.kind == "ia_item") {
+            // Some linked items hold no game files (DLC folders, docs); skip
+            // them, but still fail loudly when Internet Archive itself is down.
+            let files = match rroms_files(&item.id) {
+                Ok(files) => files,
+                Err(Error::NotFound(_)) => continue,
+                Err(err) => return Err(err),
+            };
+            for file in files {
+                let title = game_title(&file.name);
+                if title.is_empty() {
+                    continue;
+                }
+                out.push(StoreGame {
+                    id: format!("{}/{}", item.id, file.name),
+                    title,
+                    size_bytes: file.size_bytes,
+                    container: item.title.clone(),
+                    source: "r-roms".into(),
+                });
+            }
+        }
+        sort_games(&mut out);
+        Ok(out)
+    })
+}
+
 /// List the downloadable game files inside an IA item.
 pub fn ia_item_files(id: &str) -> Result<Vec<IaFile>> {
     let url = format!("https://archive.org/metadata/{}", urlencode(id));
@@ -1089,5 +1208,58 @@ broken row without tabs\n";
             zrif: None,
         };
         assert_eq!(nps_pkg_name(&entry), "Example_ Game_One [NPUH10001].pkg");
+    }
+
+    #[test]
+    fn game_titles_strip_container_extensions() {
+        assert_eq!(
+            game_title("Redump/Sony - PlayStation Portable/007 - From Russia with Love (Europe).zip"),
+            "007 - From Russia with Love (Europe)"
+        );
+        assert_eq!(game_title("Ape Escape P (USA).ISO"), "Ape Escape P (USA)");
+        assert_eq!(game_title("game.pbp"), "game");
+        assert_eq!(game_title("game.chd"), "game");
+        assert_eq!(game_title("no-extension"), "no-extension");
+    }
+
+    /// Plausible game title: at least a few letters spread over two words.
+    fn plausible_game_title(title: &str) -> bool {
+        let words = title
+            .split_whitespace()
+            .filter(|word| word.chars().any(|ch| ch.is_ascii_alphabetic()))
+            .count();
+        title.len() >= 5 && words >= 2
+    }
+
+    #[test]
+    #[ignore = "network: builds the live Minerva game index"]
+    fn minerva_games_live() {
+        let games = minerva_games().expect("minerva game index");
+        assert!(!games.is_empty(), "minerva game index is empty");
+        assert!(
+            games.iter().any(|game| plausible_game_title(&game.title)),
+            "no plausible game title in the minerva index"
+        );
+        println!("minerva games: {}", games.len());
+        let containers: Vec<&str> = games.iter().take(3).map(|game| game.container.as_str()).collect();
+        println!("containers: {containers:?}");
+        let samples: Vec<&str> = games.iter().take(5).map(|game| game.title.as_str()).collect();
+        println!("samples: {samples:?}");
+    }
+
+    #[test]
+    #[ignore = "network: builds the live r-roms game index"]
+    fn rroms_games_live() {
+        let games = rroms_games().expect("r-roms game index");
+        assert!(!games.is_empty(), "r-roms game index is empty");
+        assert!(
+            games.iter().any(|game| plausible_game_title(&game.title)),
+            "no plausible game title in the r-roms index"
+        );
+        println!("r-roms games: {}", games.len());
+        let containers: Vec<&str> = games.iter().take(3).map(|game| game.container.as_str()).collect();
+        println!("containers: {containers:?}");
+        let samples: Vec<&str> = games.iter().take(5).map(|game| game.title.as_str()).collect();
+        println!("samples: {samples:?}");
     }
 }
