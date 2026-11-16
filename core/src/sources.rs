@@ -29,6 +29,7 @@ pub struct GameLink {
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct GameHit {
+    #[serde(default)]
     pub id: String,
     #[serde(rename = "gameSlug", alias = "slug")]
     pub slug: String,
@@ -69,15 +70,27 @@ pub fn gamesearch(base: &str, query: &str, limit: u32) -> Result<Vec<GameHit>> {
     if !query.is_empty() {
         url.push_str(&format!("&q={}", urlencode(query)));
     }
-    let hits: serde_json::Value = agent().get(&url).call()?.into_json()?;
-    let list = hits
-        .as_array()
+    let body: serde_json::Value = agent().get(&url).call()?.into_json()?;
+    // The live index wraps rows in { games: [...], limit, offset }; older
+    // builds returned a bare array, so keep accepting both.
+    let list = body
+        .get("games")
+        .and_then(|games| games.as_array())
+        .or_else(|| body.as_array())
         .cloned()
         .unwrap_or_default();
+    parse_game_hits(&list)
+}
+
+/// Parse a list of game rows, filling in the derived fields the UI needs.
+fn parse_game_hits(list: &[serde_json::Value]) -> Result<Vec<GameHit>> {
     let mut out = Vec::new();
     for v in list {
         // The index may return bare game rows or link rows; accept both.
-        let mut hit: GameHit = serde_json::from_value(v)?;
+        let mut hit: GameHit = serde_json::from_value(v.clone())?;
+        if hit.id.is_empty() {
+            hit.id = hit.slug.clone();
+        }
         if hit.title.is_empty() {
             hit.title = hit.slug.replace('-', " ");
         }
@@ -102,6 +115,9 @@ pub fn gamesearch_detail(base: &str, slug: &str) -> Result<GameHit> {
     // Either the game object directly or { game: {...}, links: [...] }.
     let game = v.get("game").cloned().unwrap_or_else(|| v.clone());
     let mut hit: GameHit = serde_json::from_value(game)?;
+    if hit.id.is_empty() {
+        hit.id = hit.slug.clone();
+    }
     if hit.title.is_empty() {
         hit.title = hit.slug.replace('-', " ");
     }
@@ -1098,6 +1114,54 @@ mod tests {
     fn urlencoding() {
         assert_eq!(urlencode("PSP ISO collection"), "PSP%20ISO%20collection");
         assert_eq!(urlencode("a+b/c"), "a%2Bb%2Fc");
+    }
+
+    #[test]
+    fn gamesearch_parses_the_live_envelope() {
+        // Mirrors https://game-debrid.link/api/games?platform=psp&limit=2:
+        // an envelope, no per-row `id`, and a rawgCover image.
+        let body = r#"{
+            "games": [
+                {
+                    "slug": "pes-2008-pro-evolution-soccer-usa",
+                    "title": "PES 2008 - Pro Evolution Soccer (USA)",
+                    "platform": "psp",
+                    "source": "rroms",
+                    "linkCount": 1,
+                    "rawgCover": "https://media.rawg.io/media/games/e41/e41d8f1826d550f382a97b72f54e5614.jpg"
+                }
+            ],
+            "limit": 2,
+            "offset": 0
+        }"#;
+        let body: serde_json::Value = serde_json::from_str(body).expect("fixture json");
+        let rows = body
+            .get("games")
+            .and_then(|games| games.as_array())
+            .cloned()
+            .unwrap_or_default();
+        let hits = parse_game_hits(&rows).expect("parse hits");
+        assert_eq!(hits.len(), 1);
+        let hit = &hits[0];
+        assert_eq!(hit.id, hit.slug);
+        assert_eq!(hit.id, "pes-2008-pro-evolution-soccer-usa");
+        assert_eq!(hit.title, "PES 2008 - Pro Evolution Soccer (USA)");
+        assert_eq!(hit.platform, "psp");
+        assert_eq!(
+            hit.rawg_cover.as_deref(),
+            Some("https://media.rawg.io/media/games/e41/e41d8f1826d550f382a97b72f54e5614.jpg")
+        );
+    }
+
+    #[test]
+    fn gamesearch_accepts_a_bare_array() {
+        let rows: Vec<serde_json::Value> = serde_json::from_str(
+            r#"[{"slug":"daxter-usa","title":"Daxter (USA)","platform":"psp"}]"#,
+        )
+        .expect("fixture json");
+        let hits = parse_game_hits(&rows).expect("parse hits");
+        assert_eq!(hits.len(), 1);
+        assert_eq!(hits[0].id, "daxter-usa");
     }
 
     #[test]

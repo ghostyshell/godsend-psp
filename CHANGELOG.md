@@ -3,6 +3,23 @@
 All notable changes to GODsend PSP. Newest first.
 
 
+## [0.2.46] - 2026-11-17
+
+### Fixed
+
+- Game Debrid no longer loads empty. The service returns a `{"games": [...]}`
+  envelope, and its rows omit the `id` field, so the parser saw zero games and
+  would have rejected every row. The envelope is unwrapped (bare arrays still
+  work) and the slug fills in a missing id.
+
+### Changed
+
+- Store opens on the Minerva tab by default.
+- Minerva downloads check the debrid cache before touching the torrent. A
+  cached file is resolved through Real-Debrid or TorBox and fetched as a direct
+  link; an uncached file, or a failed cache check, goes straight to the torrent
+  so nothing waits on a server-side debrid download.
+
 ## [0.2.45] - 2026-11-17
 
 ### Fixed

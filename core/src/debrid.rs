@@ -340,6 +340,143 @@ pub fn resolve_torrent_file(
     ))
 }
 
+// ---------- cache checks (is the file already on the provider?) ----------
+
+/// Look up a hash key tolerating case differences between the magnet hash
+/// and the provider's echo of it.
+fn hash_entry<'a>(body: &'a serde_json::Value, hash: &str) -> Option<&'a serde_json::Value> {
+    body.as_object()?
+        .iter()
+        .find(|(key, _)| key.eq_ignore_ascii_case(hash))
+        .map(|(_, entry)| entry)
+}
+
+/// Flatten Real-Debrid's instantAvailability groups into the (file id,
+/// filename) rows that `matching_file` understands.
+fn rd_availability_files(body: &serde_json::Value, hash: &str) -> Vec<(u64, String)> {
+    let mut out = Vec::new();
+    let Some(groups) = hash_entry(body, hash).and_then(|entry| entry.get("rd")) else {
+        return out;
+    };
+    let Some(groups) = groups.as_array() else {
+        return out;
+    };
+    for group in groups {
+        let Some(files) = group.as_object() else {
+            continue;
+        };
+        for (id, meta) in files {
+            let Ok(id) = id.parse::<u64>() else {
+                continue;
+            };
+            let name = meta
+                .get("filename")
+                .and_then(|value| value.as_str())
+                .unwrap_or("")
+                .to_string();
+            out.push((id, name));
+        }
+    }
+    out
+}
+
+/// True when any instantAvailability group holds the requested file.
+fn rd_cached(body: &serde_json::Value, hash: &str, file_path: &str, file_index: u32) -> bool {
+    let files = rd_availability_files(body, hash);
+    !files.is_empty() && matching_file(&files, file_path, file_index).is_some()
+}
+
+/// TorBox checkcached data: `None` means the hash entry is missing or null
+/// (not cached). `Some(None)` means cached with no file list. `Some(Some(..))`
+/// is the provider's file rows.
+fn tb_cached_files(
+    data: &serde_json::Value,
+    hash: &str,
+) -> Option<Option<Vec<(u64, String)>>> {
+    let entry = hash_entry(data, hash)?;
+    if entry.is_null() {
+        return None;
+    }
+    let files = entry.get("files").and_then(|value| value.as_array()).map(|rows| {
+        rows.iter()
+            .enumerate()
+            .map(|(position, row)| {
+                let id = row
+                    .get("id")
+                    .and_then(|value| value.as_u64())
+                    .unwrap_or(position as u64);
+                let name = row
+                    .get("name")
+                    .and_then(|value| value.as_str())
+                    .unwrap_or("")
+                    .to_string();
+                (id, name)
+            })
+            .collect::<Vec<_>>()
+    });
+    Some(files)
+}
+
+/// True only when the hash entry exists and, when a file list came back,
+/// one row matches the requested file.
+fn tb_cached(data: &serde_json::Value, hash: &str, file_path: &str, file_index: u32) -> bool {
+    match tb_cached_files(data, hash) {
+        None => false,
+        Some(None) => true,
+        Some(Some(files)) => matching_file(&files, file_path, file_index).is_some(),
+    }
+}
+
+/// Check whether the provider already has the file, so the caller can resolve
+/// a direct link instead of waiting on a server-side torrent download.
+pub fn is_torrent_file_cached(
+    hash: &str,
+    file_path: &str,
+    file_index: u32,
+    rd_key: &str,
+    tb_key: &str,
+) -> Result<bool> {
+    let client = ureq::AgentBuilder::new()
+        .timeout(Duration::from_secs(20))
+        .build();
+    if !rd_key.is_empty() {
+        let res = client
+            .get(&format!("{RD_API}/torrents/instantAvailability/{hash}"))
+            .set("Authorization", &format!("Bearer {rd_key}"))
+            .call();
+        let body: serde_json::Value = match res {
+            Ok(r) => r.into_json()?,
+            Err(ureq::Error::Status(code, _)) => {
+                return Err(Error::Http(format!("real-debrid {code}")))
+            }
+            Err(e) => return Err(Error::Http(format!("real-debrid: {e}"))),
+        };
+        return Ok(rd_cached(&body, hash, file_path, file_index));
+    }
+    if !tb_key.is_empty() {
+        let res = client
+            .get(&format!(
+                "{TB_API}/torrents/checkcached?hash={hash}&format=list&list_files=true"
+            ))
+            .set("Authorization", &format!("Bearer {tb_key}"))
+            .call();
+        let env: TbEnvelope = match res {
+            Ok(r) => r.into_json()?,
+            Err(ureq::Error::Status(code, _)) => {
+                return Err(Error::Http(format!("torbox {code}")))
+            }
+            Err(e) => return Err(Error::Http(format!("torbox: {e}"))),
+        };
+        if !env.success {
+            return Ok(false);
+        }
+        return Ok(tb_cached(&env.data, hash, file_path, file_index));
+    }
+    Err(Error::Other(
+        "checking the debrid cache needs a connected debrid account (Settings > Debrid)".into(),
+    ))
+}
+
 fn tb_torrent_rows(data: serde_json::Value) -> Result<Vec<TbTorrent>> {
     if data.is_array() {
         serde_json::from_value(data).map_err(|e| Error::Http(format!("torbox list: {e}")))
@@ -462,5 +599,91 @@ mod tests {
     fn windows_paths_and_empty_lists_are_safe() {
         assert_eq!(file_basename("a\\b\\game.iso"), "game.iso");
         assert_eq!(matching_file(&[], "game.iso", 1), None);
+    }
+
+    #[test]
+    fn rd_instant_availability_matches_the_file() {
+        let body: serde_json::Value = serde_json::from_str(
+            r#"{
+                "0123456789abcdef0123456789abcdef01234567": {
+                    "rd": [
+                        {
+                            "0": {"filename": "007 - From Russia with Love (Europe).zip", "filesize": 746586112},
+                            "1": {"filename": "Daxter (USA).zip", "filesize": 842006528}
+                        }
+                    ]
+                }
+            }"#,
+        )
+        .expect("fixture json");
+        let hash = "0123456789abcdef0123456789abcdef01234567";
+        assert!(rd_cached(&body, hash, "PSP/Daxter (USA).zip", 2));
+        assert!(rd_cached(&body, hash, "Daxter (USA).zip", 2));
+        // Index fallback: file 1 is id 0.
+        assert!(rd_cached(&body, hash, "renamed.iso", 1));
+        assert!(!rd_cached(&body, hash, "Patapon (USA).zip", 9));
+    }
+
+    #[test]
+    fn rd_instant_availability_empty_means_not_cached() {
+        let body: serde_json::Value = serde_json::from_str(
+            r#"{"0123456789abcdef0123456789abcdef01234567": {"rd": []}}"#,
+        )
+        .expect("fixture json");
+        assert!(!rd_cached(
+            &body,
+            "0123456789abcdef0123456789abcdef01234567",
+            "Daxter (USA).zip",
+            1
+        ));
+        // A missing hash is not cached either.
+        assert!(!rd_cached(&body, "ffffffffffffffffffffffffffffffffffffffff", "Daxter (USA).zip", 1));
+    }
+
+    #[test]
+    fn torbox_checkcached_matches_the_file() {
+        let env: TbEnvelope = serde_json::from_str(
+            r#"{
+                "success": true,
+                "data": {
+                    "0123456789abcdef0123456789abcdef01234567": {
+                        "hash": "0123456789abcdef0123456789abcdef01234567",
+                        "files": [
+                            {"id": 0, "name": "007 - From Russia with Love (Europe).zip", "size": 746586112},
+                            {"id": 1, "name": "Daxter (USA).zip", "size": 842006528}
+                        ]
+                    }
+                }
+            }"#,
+        )
+        .expect("fixture json");
+        let hash = "0123456789abcdef0123456789abcdef01234567";
+        assert!(tb_cached(&env.data, hash, "PSP/Daxter (USA).zip", 2));
+        assert!(!tb_cached(&env.data, hash, "Patapon (USA).zip", 9));
+        // Cached without a file list.
+        let bare: serde_json::Value =
+            serde_json::from_str(r#"{"0123456789abcdef0123456789abcdef01234567": {"hash": "x"}}"#)
+                .expect("fixture json");
+        assert!(tb_cached(&bare, hash, "Patapon (USA).zip", 9));
+    }
+
+    #[test]
+    fn torbox_checkcached_null_means_not_cached() {
+        let env: TbEnvelope = serde_json::from_str(
+            r#"{"success": true, "data": {"0123456789abcdef0123456789abcdef01234567": null}}"#,
+        )
+        .expect("fixture json");
+        assert!(!tb_cached(
+            &env.data,
+            "0123456789abcdef0123456789abcdef01234567",
+            "Daxter (USA).zip",
+            1
+        ));
+        assert!(!tb_cached(
+            &serde_json::Value::Object(Default::default()),
+            "0123456789abcdef0123456789abcdef01234567",
+            "Daxter (USA).zip",
+            1
+        ));
     }
 }

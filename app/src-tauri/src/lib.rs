@@ -937,42 +937,70 @@ fn store_download(app: AppHandle, state: State<'_, AppState>, source: String, id
                     },
                     move |ctx| {
                         ctx.check_cancel()?;
-                        // Prefer the connected debrid account: one file out of a
-                        // big public set resolves in seconds instead of P2P.
+                        // Cache-first: only ask the provider to add the torrent
+                        // when the file is already there. Otherwise a fresh game
+                        // would sit in a server-side download for minutes.
                         if !config.rd_api_key.is_empty() || !config.tb_api_key.is_empty() {
                             let provider = if !config.rd_api_key.is_empty() {
                                 "Real-Debrid"
                             } else {
                                 "TorBox"
                             };
-                            ctx.message(format!("resolving via {provider}"));
-                            match godsend_core::debrid::resolve_torrent_file(
-                                &magnet,
+                            match godsend_core::debrid::is_torrent_file_cached(
+                                &hash,
                                 &expect,
                                 index,
                                 &config.rd_api_key,
                                 &config.tb_api_key,
                             ) {
-                                Ok(link) => {
-                                    match godsend_core::aria2::download(
-                                        &link, &dest_dir, &basename, &config, ctx,
+                                Ok(true) => {
+                                    ctx.message(format!(
+                                        "cached on {provider}, fetching direct link"
+                                    ));
+                                    match godsend_core::debrid::resolve_torrent_file(
+                                        &magnet,
+                                        &expect,
+                                        index,
+                                        &config.rd_api_key,
+                                        &config.tb_api_key,
                                     ) {
-                                        Ok(path) => {
-                                            ctx.message(format!("downloaded {}", path.display()));
-                                            return Ok(());
+                                        Ok(link) => {
+                                            match godsend_core::aria2::download(
+                                                &link, &dest_dir, &basename, &config, ctx,
+                                            ) {
+                                                Ok(path) => {
+                                                    ctx.message(format!(
+                                                        "downloaded {}",
+                                                        path.display()
+                                                    ));
+                                                    return Ok(());
+                                                }
+                                                Err(err) => {
+                                                    let reason =
+                                                        config.redact(&err.to_string());
+                                                    ctx.message(format!(
+                                                        "debrid download failed ({reason}); falling back to P2P"
+                                                    ));
+                                                }
+                                            }
                                         }
                                         Err(err) => {
                                             let reason = config.redact(&err.to_string());
                                             ctx.message(format!(
-                                                "debrid download failed ({reason}); falling back to P2P"
+                                                "debrid unavailable ({reason}); falling back to P2P"
                                             ));
                                         }
                                     }
                                 }
+                                Ok(false) => {
+                                    ctx.message(
+                                        "not cached on debrid, downloading via torrent",
+                                    );
+                                }
                                 Err(err) => {
                                     let reason = config.redact(&err.to_string());
                                     ctx.message(format!(
-                                        "debrid unavailable ({reason}); falling back to P2P"
+                                        "cache check failed ({reason}); downloading via torrent"
                                     ));
                                 }
                             }
