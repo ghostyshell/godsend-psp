@@ -3,6 +3,23 @@
 All notable changes to GODsend PSP. Newest first.
 
 
+## [0.2.38] - 2026-11-16
+
+### Changed
+
+- Homebrew art redone: ICON0 is now a transparent glyph that sits on the XMB
+  wave instead of a pasted rectangle, and PIC1 is a designed indigo/cyan
+  backdrop with the wave motif and a faint copy of the same glyph. Both come
+  from one shared layer in `homebrew/common/make-art.py`, which gains a
+  `--preview` contact sheet for checking the icons on the XMB backdrop.
+
+### Fixed
+
+- `scripts/build-homebrew.sh` retries a transient psp-gcc segmentation fault
+  (it runs under amd64 emulation on Apple silicon) instead of failing the
+  build outright.
+
+
 ## [0.2.37] - 2026-11-16
 
 ### Added

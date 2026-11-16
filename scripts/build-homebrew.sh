@@ -74,11 +74,24 @@ ZIP_SIZES=()
 for app in "${APPS[@]}"; do
 	log="$OUT/$app.build.log"
 	echo "== building $app"
-	if ! docker run --rm \
-		--user "$(id -u):$(id -g)" \
-		-v "$HOMEBREW:/src" \
-		-w "/src/$app" \
-		"$IMAGE" make clean all >"$log" 2>&1; then
+	# psp-gcc runs under amd64 emulation here and occasionally segfaults in
+	# LTO. Retry with a clean tree before treating it as a real failure.
+	ok=0
+	for attempt in 1 2 3; do
+		if docker run --rm \
+			--user "$(id -u):$(id -g)" \
+			-v "$HOMEBREW:/src" \
+			-w "/src/$app" \
+			"$IMAGE" make clean all >"$log" 2>&1; then
+			ok=1
+			break
+		fi
+		if ! grep -q "Segmentation fault\|internal compiler error\|Killed" "$log"; then
+			break
+		fi
+		echo "   compiler crashed (attempt $attempt/3), retrying clean"
+	done
+	if [ "$ok" -ne 1 ]; then
 		echo "build failed for $app" >&2
 		cat "$log" >&2
 		exit 1
