@@ -40,8 +40,10 @@ pub struct CatalogEntry {
     pub id: String,
     pub name: String,
     pub description: String,
-    /// `game` | `emu` | `cfw` | `plugin`
+    /// `game` | `emu` | `cfw` | `plugin` | `app`
     pub category: String,
+    /// GitHub repo (`owner/name`). Empty for entries hosted elsewhere, which
+    /// carry a preset `zip_url` instead.
     pub repo: String,
     pub layout: Layout,
     /// Optional note shown in the UI (e.g. "needs gba_bios.bin").
@@ -123,6 +125,60 @@ pub fn bundled_catalog() -> Vec<CatalogEntry> {
             zip_url: None,
             published_at: None,
         },
+        // GODsend apps are built in this repo from PSPSDK source and hosted on
+        // R2, so they carry a preset zip URL and no GitHub repo.
+        CatalogEntry {
+            id: "godsend-cleaner".into(),
+            name: "GODsend Cleaner".into(),
+            description: "Storage report and cleanup for the memory stick: free and used space on ms0:, the largest folders under PSP/ and a sweep of PSP/COMMON cache files plus zero-byte and *.tmp leftovers.".into(),
+            category: "app".into(),
+            repo: String::new(),
+            layout: Layout::PspRoot,
+            note: Some("Cross cleans after a confirmation prompt, Circle exits. SAVEDATA contents are never touched.".into()),
+            prefer: None,
+            latest_tag: Some("1.0".into()),
+            zip_url: Some("https://covers.debrid.in/psp/homebrew/godsend-cleaner.zip".into()),
+            published_at: None,
+        },
+        CatalogEntry {
+            id: "godsend-saves".into(),
+            name: "GODsend Saves".into(),
+            description: "Save manager: lists the folders in ms0:/PSP/SAVEDATA with sizes and copies the selected one to PSP/SAVEDATA/_backups/<name>-<timestamp>.".into(),
+            category: "app".into(),
+            repo: String::new(),
+            layout: Layout::PspRoot,
+            note: Some("Up/Down selects, Cross backs up the save with a plain recursive copy, Circle exits.".into()),
+            prefer: None,
+            latest_tag: Some("1.0".into()),
+            zip_url: Some("https://covers.debrid.in/psp/homebrew/godsend-saves.zip".into()),
+            published_at: None,
+        },
+        CatalogEntry {
+            id: "godsend-sysinfo".into(),
+            name: "GODsend SysInfo".into(),
+            description: "Read-only system report: firmware version, model family, nickname, battery percent and charging state, ms0: space, WLAN MAC address and UMD state.".into(),
+            category: "app".into(),
+            repo: String::new(),
+            layout: Layout::PspRoot,
+            note: Some("Cross redraws the report, Circle exits. Nothing is written to the stick.".into()),
+            prefer: None,
+            latest_tag: Some("1.0".into()),
+            zip_url: Some("https://covers.debrid.in/psp/homebrew/godsend-sysinfo.zip".into()),
+            published_at: None,
+        },
+        CatalogEntry {
+            id: "godsend-netcheck".into(),
+            name: "GODsend NetCheck".into(),
+            description: "Network check: reports the WLAN switch state, connects the configured access point with sceNetApctlConnect and prints the assigned IP, subnet, gateway and DNS plus a pass or fail line.".into(),
+            category: "app".into(),
+            repo: String::new(),
+            layout: Layout::PspRoot,
+            note: Some("Cross checks again, Circle exits and disconnects. No data is transferred.".into()),
+            prefer: None,
+            latest_tag: Some("1.0".into()),
+            zip_url: Some("https://covers.debrid.in/psp/homebrew/godsend-netcheck.zip".into()),
+            published_at: None,
+        },
     ]
 }
 
@@ -134,9 +190,9 @@ pub fn load_catalog() -> Vec<CatalogEntry> {
         if let Ok(cached) = serde_json::from_slice::<Vec<CatalogEntry>>(&bytes) {
             for entry in &mut catalog {
                 if let Some(hit) = cached.iter().find(|c| c.id == entry.id) {
-                    entry.latest_tag = hit.latest_tag.clone();
-                    entry.zip_url = hit.zip_url.clone();
-                    entry.published_at = hit.published_at.clone();
+                    entry.latest_tag = hit.latest_tag.clone().or(entry.latest_tag.clone());
+                    entry.zip_url = hit.zip_url.clone().or(entry.zip_url.clone());
+                    entry.published_at = hit.published_at.clone().or(entry.published_at.clone());
                 }
             }
         }
@@ -174,8 +230,16 @@ pub fn refresh_catalog(catalog: &mut [CatalogEntry]) -> Result<usize> {
         .build();
     let mut updated = 0;
     for entry in catalog.iter_mut() {
+        // Entries hosted outside GitHub (the bundled GODsend apps) already
+        // carry a preset zip_url and have no repo to query.
+        if entry.repo.trim().is_empty() {
+            continue;
+        }
         let Ok(response) = agent
-            .get(&format!("{}/repos/{}/releases/latest", GITHUB_API, entry.repo))
+            .get(&format!(
+                "{}/repos/{}/releases/latest",
+                GITHUB_API, entry.repo
+            ))
             .set("User-Agent", USER_AGENT)
             .set("Accept", "application/vnd.github+json")
             .call()
@@ -193,10 +257,9 @@ pub fn refresh_catalog(catalog: &mut [CatalogEntry]) -> Result<usize> {
             .as_deref()
             .map(|p| p.to_lowercase())
             .and_then(|p| {
-                release
-                    .assets
-                    .iter()
-                    .find(|a| a.name.to_lowercase().contains(&p) && a.name.to_lowercase().ends_with(".zip"))
+                release.assets.iter().find(|a| {
+                    a.name.to_lowercase().contains(&p) && a.name.to_lowercase().ends_with(".zip")
+                })
             })
             .or_else(|| {
                 release
@@ -219,7 +282,10 @@ pub fn download_zip(url: &str, ctx: Option<&JobContext>) -> Result<PathBuf> {
     fs::create_dir_all(&dir)?;
     let file_name = format!(
         "{}.zip",
-        url.rsplit('/').next().unwrap_or("release").replace('/', "_")
+        url.rsplit('/')
+            .next()
+            .unwrap_or("release")
+            .replace('/', "_")
     );
     let dest = dir.join(file_name);
 
@@ -274,7 +340,12 @@ pub struct InstallReport {
 }
 
 /// Install a homebrew/CFW zip onto the stick.
-pub fn install_zip(zip_path: &Path, paths: &PspPaths, layout: Layout, ctx: Option<&JobContext>) -> Result<InstallReport> {
+pub fn install_zip(
+    zip_path: &Path,
+    paths: &PspPaths,
+    layout: Layout,
+    ctx: Option<&JobContext>,
+) -> Result<InstallReport> {
     paths.validate()?;
     let staging = crate::config::cache_dir().join("staging");
     let extract_dir = staging.join(format!("hb-{}", std::process::id()));
@@ -293,7 +364,11 @@ pub fn install_zip(zip_path: &Path, paths: &PspPaths, layout: Layout, ctx: Optio
     }
 
     let detected = detect_layout(&extract_dir);
-    let use_layout = if layout == Layout::Auto { detected } else { layout };
+    let use_layout = if layout == Layout::Auto {
+        detected
+    } else {
+        layout
+    };
     let mut report = match use_layout {
         Layout::Ark => install_ark(&extract_dir, paths)?,
         Layout::PspRoot => install_psp_root(&extract_dir, paths)?,
@@ -310,7 +385,11 @@ pub fn install_zip(zip_path: &Path, paths: &PspPaths, layout: Layout, ctx: Optio
 }
 
 /// Import a local zip with auto layout detection.
-pub fn import_zip(zip_path: &Path, paths: &PspPaths, ctx: Option<&JobContext>) -> Result<InstallReport> {
+pub fn import_zip(
+    zip_path: &Path,
+    paths: &PspPaths,
+    ctx: Option<&JobContext>,
+) -> Result<InstallReport> {
     install_zip(zip_path, paths, Layout::Auto, ctx)
 }
 
@@ -368,7 +447,9 @@ fn install_ark(dir: &Path, paths: &PspPaths) -> Result<InstallReport> {
             continue;
         }
         let lower = name.to_lowercase();
-        if lower.starts_with("ark_01234") || (lower.starts_with("ark") && lower.contains("savedata")) {
+        if lower.starts_with("ark_01234")
+            || (lower.starts_with("ark") && lower.contains("savedata"))
+        {
             let dest = paths.savedata().join(&name);
             copy_tree(&entry.path(), &dest)?;
             report.installed.push(rel(&dest, paths));
@@ -397,7 +478,10 @@ fn install_psp_root(dir: &Path, paths: &PspPaths) -> Result<InstallReport> {
     }
     for entry in fs::read_dir(dir)?.flatten() {
         let name = entry.file_name().to_string_lossy().to_string();
-        if name.eq_ignore_ascii_case("psp") || name.starts_with('.') || name.eq_ignore_ascii_case("__macosx") {
+        if name.eq_ignore_ascii_case("psp")
+            || name.starts_with('.')
+            || name.eq_ignore_ascii_case("__macosx")
+        {
             continue;
         }
         // Loose files at the archive root (e.g. readme) go to GAME/<name>.
@@ -426,7 +510,8 @@ fn install_eboot_dirs(dir: &Path, paths: &PspPaths) -> Result<InstallReport> {
     }
     if report.installed.is_empty() {
         return Err(Error::Invalid(
-            "archive has no EBOOT.PBP folder; try importing as a plain zip or check the layout".into(),
+            "archive has no EBOOT.PBP folder; try importing as a plain zip or check the layout"
+                .into(),
         ));
     }
     Ok(report)
@@ -483,7 +568,8 @@ fn merge_tree(src: &Path, dest: &Path) -> Result<()> {
     fs::create_dir_all(dest)?;
     for entry in fs::read_dir(src)?.flatten() {
         let name = entry.file_name().to_string_lossy().to_string();
-        if name.starts_with('.') || name.starts_with("._") || name.eq_ignore_ascii_case("__macosx") {
+        if name.starts_with('.') || name.starts_with("._") || name.eq_ignore_ascii_case("__macosx")
+        {
             continue;
         }
         let from = entry.path();
@@ -581,7 +667,11 @@ fn name_matches(candidate: &str, needle: &str) -> bool {
 }
 
 /// Cancel-aware wrapper used by job threads.
-pub fn install_with_job(entry: &CatalogEntry, paths: &PspPaths, ctx: &JobContext) -> Result<InstallReport> {
+pub fn install_with_job(
+    entry: &CatalogEntry,
+    paths: &PspPaths,
+    ctx: &JobContext,
+) -> Result<InstallReport> {
     ctx.message("fetching release");
     let zip_url = match &entry.zip_url {
         Some(url) => url.clone(),
@@ -611,7 +701,48 @@ mod tests {
         let catalog = bundled_catalog();
         assert!(catalog.iter().any(|e| e.id == "ark-4"));
         assert!(catalog.iter().any(|e| e.repo == "tzubertowski/FrogGBA"));
-        assert!(catalog.iter().all(|e| e.repo.contains('/')));
+        // GitHub entries carry owner/name; locally hosted apps carry a zip URL.
+        assert!(catalog
+            .iter()
+            .all(|e| e.repo.contains('/') || e.zip_url.is_some()));
+    }
+
+    #[test]
+    fn bundled_apps_ship_with_r2_zips() {
+        let catalog = bundled_catalog();
+        for id in [
+            "godsend-cleaner",
+            "godsend-saves",
+            "godsend-sysinfo",
+            "godsend-netcheck",
+        ] {
+            let entry = catalog
+                .iter()
+                .find(|e| e.id == id)
+                .unwrap_or_else(|| panic!("missing {}", id));
+            let want = format!("https://covers.debrid.in/psp/homebrew/{}.zip", id);
+            assert_eq!(entry.category, "app");
+            assert_eq!(entry.layout, Layout::PspRoot);
+            assert!(entry.repo.is_empty());
+            assert_eq!(entry.zip_url.as_deref(), Some(want.as_str()));
+            assert!(entry.name.starts_with("GODsend "));
+        }
+    }
+
+    #[test]
+    fn app_entry_reads_as_installed_from_its_folder() {
+        let dir = std::env::temp_dir().join(format!("godsend-hb-app-{}", std::process::id()));
+        let paths = crate::device::PspPaths::new(&dir);
+        let entry = bundled_catalog()
+            .into_iter()
+            .find(|e| e.id == "godsend-cleaner")
+            .expect("godsend-cleaner entry");
+        assert!(!is_installed(&entry, &paths));
+        let game = paths.game().join("godsend-cleaner");
+        fs::create_dir_all(&game).unwrap();
+        fs::write(game.join("EBOOT.PBP"), b"x").unwrap();
+        assert!(is_installed(&entry, &paths));
+        std::fs::remove_dir_all(&dir).ok();
     }
 
     #[test]

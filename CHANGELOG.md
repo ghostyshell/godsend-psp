@@ -13,6 +13,13 @@ All notable changes to GODsend PSP. Newest first.
   Sony .ptf themes (both remain closed containers).
 - Theme catalog expanded to 24 verified CTF and PTF themes, all hosted on R2
   and served from covers.debrid.in/psp/themes.json.
+- Four PSP utilities built from source in this repo and hosted on R2, listed
+  in Homebrew under All: GODsend Cleaner (space report and PSP/COMMON plus
+  zero-byte / *.tmp cleanup, SAVEDATA untouched), GODsend Saves (save folder
+  backup to PSP/SAVEDATA/_backups), GODsend SysInfo (firmware, battery,
+  space, MAC and UMD report) and GODsend NetCheck (WLAN switch plus apctl
+  connection, IP and gateway check). `scripts/build-homebrew.sh` rebuilds,
+  zips, uploads and verifies them.
 
 
 ## [0.2.34] - 2026-11-16
