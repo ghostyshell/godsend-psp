@@ -46,6 +46,14 @@ test("homebrew catalog renders with install buttons", async ({ page }) => {
   await expect(page.locator(".store-card .name").filter({ hasText: "ARK-4" })).toBeVisible();
 });
 
+test("jailbreak page shows firmware detection", async ({ page }) => {
+  await page.getByRole("button", { name: "Jailbreak" }).click();
+  await expect(page.getByRole("heading", { name: "Firmware detected" })).toBeVisible();
+  await expect(page.locator(".chip").filter({ hasText: "ARK-4" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Migration plan" })).toBeVisible();
+  await expect(page.getByText("New cIPL is permanent")).toBeVisible();
+});
+
 test("inspector queue shows the seeded jobs", async ({ page }) => {
   await expect(page.locator(".queue-card .job-row")).toHaveCount(2);
 });

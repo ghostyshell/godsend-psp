@@ -14,12 +14,14 @@ import {
   Film as FilmIcon,
   Save as SaveIcon,
   Wrench,
+  ShieldAlert,
   Settings as SettingsIcon,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import logo from "./assets/logo.png";
 import Home from "./pages/Home";
 import Library from "./pages/Library";
+import Jailbreak from "./pages/Jailbreak";
 import GameStore from "./pages/GameStore";
 import Downloads from "./pages/Downloads";
 import Files from "./pages/Files";
@@ -33,6 +35,7 @@ import Settings from "./pages/Settings";
 type Page =
   | "home"
   | "library"
+  | "jailbreak"
   | "gamestore"
   | "downloads"
   | "files"
@@ -47,6 +50,7 @@ type Page =
 const NAV: { id: Page; label: string; icon: LucideIcon }[] = [
   { id: "home", label: "Console", icon: House },
   { id: "library", label: "Library", icon: LibraryIcon },
+  { id: "jailbreak", label: "Jailbreak", icon: ShieldAlert },
   { id: "gamestore", label: "Store", icon: StoreIcon },
   { id: "downloads", label: "Downloads", icon: DownloadIcon },
   { id: "files", label: "Files", icon: FolderOpen },
@@ -212,6 +216,7 @@ export default function App() {
       <main className="workspace with-inspector" id="workspace" tabIndex={-1}>
         {page === "home" && <Home {...pageProps} />}
         {page === "library" && <Library {...pageProps} />}
+        {page === "jailbreak" && <Jailbreak {...pageProps} />}
         {page === "gamestore" && <GameStore {...pageProps} />}
         {page === "downloads" && <Downloads {...pageProps} />}
         {page === "files" && <Files {...pageProps} />}

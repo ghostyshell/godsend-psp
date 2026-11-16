@@ -114,9 +114,30 @@ const themes = [
   { name: "Classic Waves.ptf", format: "ptf", size_bytes: 900 * 1024 },
 ];
 
+const cfw = {
+  ark4: true,
+  ark5: false,
+  pro: true,
+  me: false,
+  time_machine: false,
+  recovery: true,
+  iso_driver: true,
+  plugins: ["ms0:/seplugins/cwcheat/cwcheat.prx", "ms0:/seplugins/cxmb/cxmb.prx"],
+};
+
+const cfwPlan = [
+  "Back up PSP/SAVEDATA (saves) and the whole seplugins/ folder to your computer before changing anything.",
+  "Install FasterARK (ARK-5) from the install card. It copies the ARK_UPDATE PSP tree and the cIPL installer onto the stick.",
+  "Eject safely, then boot the ARK Loader on the console and confirm ARK-5 starts from the launcher.",
+  "Run the custom IPL installer inside ARK and choose New cIPL. This writes the firmware to flash and is permanent for the console, so only do it after ARK-5 boots reliably.",
+  "After the first clean ARK-5 boot, retire the old loaders: ARK-4 (PSP/SAVEDATA/ARK_01234 and its loader), PRO CFW (PROUPDATE / FastRecovery). Remove only their loader folders, never the saves.",
+  "Keep the DC10 recovery folder (and TM/ if present). It is the unbrick path if a firmware write goes wrong.",
+  "Re-check plugins in the Plugins tab after the upgrade: ARK-5 still reads the classic seplugins game.txt, vsh.txt and pops.txt lines.",
+];
+
 const catalog = [
   { id: "ark-4", name: "ARK-4", description: "Next generation custom firmware for PSP (and Vita ePSP). Live CFW with custom launcher, plugins, Inferno ISO driver.", category: "cfw", repo: "PSP-Archive/ARK-4", layout: "ark", note: "Copies ARK_01234 to PSP/SAVEDATA and loaders to PSP/GAME.", latest_tag: "v4.20.69 r206", zip_url: "https://example.invalid/ark4.zip", published_at: "2026-05-15T00:23:00Z" },
-  { id: "ark-5", name: "ARK-5", description: "Successor to ARK-4. Fresh rewrite of the ARK custom firmware line.", category: "cfw", repo: "PSP-Arkfive/ARK-5", layout: "ark", note: "New CFW line; check the project wiki for model support.", latest_tag: "r3", zip_url: "https://example.invalid/ark5.zip", published_at: "2026-09-02T10:00:00Z" },
+  { id: "fasterark", name: "ARK-5 (FasterARK)", description: "ARK loader and installer for PSP. Ships the ARK_UPDATE PSP tree plus cIPL installers; the successor path from ARK-4.", category: "cfw", repo: "PSP-Arkfive/FasterARK", layout: "psp_root", note: "Installs the ARK_UPDATE PSP folder. On the console run CustomIPL to install New cIPL; the full variant adds DC10.", latest_tag: "r3", zip_url: "https://example.invalid/fasterark.zip", published_at: "2026-09-02T10:00:00Z" },
   { id: "froggba", name: "FrogGBA", description: "GBA emulator for PSP, based on TempGBA4PSP with gpSP Kai optimizations.", category: "emu", repo: "tzubertowski/FrogGBA", layout: "psp_root", note: "Needs gba_bios.bin dropped into the game folder after install.", latest_tag: "v0.4.0-rc.1", zip_url: "https://example.invalid/froggba.zip", published_at: "2026-08-17T19:30:00Z" },
   { id: "tempgba", name: "TempGBA4PSP-mod", description: "Long-maintained GBA emulator with 2026 fixes, 16:9 full screen and a single-game mode.", category: "emu", repo: "andymcca/TempGBA4PSP-mod", layout: "auto", note: "Needs gba_bios.bin in the emulator folder.", latest_tag: "20260807", zip_url: "https://example.invalid/tempgba.zip", published_at: "2026-08-07T17:40:00Z" },
   { id: "daedalusx64", name: "DaedalusX64", description: "N64 emulator for PSP using the Media Engine for asynchronous audio.", category: "emu", repo: "DaedalusX64/daedalus", layout: "auto", note: null, latest_tag: "1.1.8", zip_url: "https://example.invalid/daedalus.zip", published_at: "2026-10-23T01:19:00Z" },
@@ -124,7 +145,7 @@ const catalog = [
 
 const installed = [
   { id: "ark-4", installed: true },
-  { id: "ark-5", installed: false },
+  { id: "fasterark", installed: false },
   { id: "froggba", installed: true },
   { id: "tempgba", installed: false },
   { id: "daedalusx64", installed: false },
@@ -247,6 +268,10 @@ async function invoke(cmd: string, args: Record<string, any> = {}): Promise<unkn
     }
     case "homebrew_import":
       return startJob("install", "import homebrew.zip");
+    case "cfw_detect":
+      return cfw;
+    case "cfw_plan":
+      return cfwPlan;
     case "music_list":
       return music;
     case "video_list":

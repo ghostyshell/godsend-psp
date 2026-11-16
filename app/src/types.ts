@@ -149,9 +149,21 @@ export interface ThemeEntry {
   size_bytes: number;
 }
 
+export interface CfwState {
+  ark4: boolean;
+  ark5: boolean;
+  pro: boolean;
+  me: boolean;
+  time_machine: boolean;
+  recovery: boolean;
+  iso_driver: boolean;
+  plugins: string[];
+}
+
 export const PAGE_TITLES: Record<string, string> = {
   home: "Console",
   library: "Library",
+  jailbreak: "Jailbreak",
   gamestore: "Store",
   downloads: "Downloads",
   files: "File Manager",

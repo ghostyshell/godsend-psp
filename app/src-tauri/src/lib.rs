@@ -4,6 +4,7 @@
 //! the `job://progress` / `job://done` events, device changes through
 //! `device://changed`.
 
+use godsend_core::cfw::{self, CfwState};
 use godsend_core::config::Config;
 use godsend_core::device::{self, PspPaths, Volume};
 use godsend_core::homebrew::{self, CatalogEntry, InstallReport};
@@ -220,6 +221,18 @@ fn homebrew_import(app: AppHandle, state: State<'_, AppState>, zip: String) -> R
         },
     );
     Ok(job_id)
+}
+
+#[tauri::command]
+fn cfw_detect(state: State<'_, AppState>) -> Result<CfwState> {
+    let (_, paths) = state.paths()?;
+    Ok(cfw::detect(&paths))
+}
+
+#[tauri::command]
+fn cfw_plan(state: State<'_, AppState>) -> Result<Vec<String>> {
+    let (_, paths) = state.paths()?;
+    Ok(cfw::migration_steps(&cfw::detect(&paths)))
 }
 
 #[derive(Debug, Clone, Serialize)]
@@ -1382,6 +1395,8 @@ pub fn run() {
             homebrew_installed,
             homebrew_install,
             homebrew_import,
+            cfw_detect,
+            cfw_plan,
             music_list,
             video_list,
             media_delete,
