@@ -528,13 +528,32 @@ fn iso_convert(app: AppHandle, state: State<'_, AppState>, image_id: String) -> 
         .extension()
         .map(|e| e.to_string_lossy().to_lowercase())
         .unwrap_or_default();
-    let (dest, to_cso) = if ext == "iso" {
-        (file.with_extension("cso"), true)
-    } else if ext == "cso" {
+    if ext != "iso" && ext != "cso" {
+        return Err(Error::Invalid("only iso/cso can be converted".into()));
+    }
+    // Content decides the direction, not the extension.
+    let already_cso = godsend_core::cso::probe(&file)
+        .map(|i| i.is_cso)
+        .unwrap_or(false);
+    let (mut dest, to_cso) = if already_cso {
         (file.with_extension("iso"), false)
     } else {
-        return Err(Error::Invalid("only iso/cso can be converted".into()));
+        (file.with_extension("cso"), true)
     };
+    if dest == file {
+        if already_cso {
+            // A CSO behind a .iso name: keep both files.
+            let stem = file
+                .file_stem()
+                .map(|s| s.to_string_lossy().to_string())
+                .unwrap_or_default();
+            dest = file.with_file_name(format!("{stem}.dec.iso"));
+        } else {
+            return Err(Error::Invalid(
+                "destination would overwrite the source".into(),
+            ));
+        }
+    }
     let level = state.config().cso_level;
     let app2 = app.clone();
     let volume_label = volume.label;

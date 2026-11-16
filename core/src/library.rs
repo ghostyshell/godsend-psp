@@ -181,12 +181,21 @@ pub fn scan_images(paths: &PspPaths) -> Result<Vec<DiscImage>> {
                 .extension()
                 .map(|e| e.to_string_lossy().to_lowercase())
                 .unwrap_or_default();
-            let format = match ext.as_str() {
+            let mut format = match ext.as_str() {
                 "iso" => "iso",
                 "cso" => "cso",
                 "pbp" => "pbp",
                 _ => continue,
             };
+            // Trust the header over the extension. A CSO renamed .iso must not
+            // be offered "Compress to CSO" a second time.
+            if format != "pbp" {
+                if let Ok(info) = crate::cso::probe(&file) {
+                    if info.is_cso {
+                        format = "cso";
+                    }
+                }
+            }
             let name = file
                 .file_name()
                 .map(|n| n.to_string_lossy().to_string())
