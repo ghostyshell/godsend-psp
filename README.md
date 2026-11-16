@@ -21,18 +21,18 @@ Tauri 2 and React.
 <!-- downloads:start -->
 | Build | GoFile (primary) | file.kiwi (backup) | Size |
 | --- | --- | --- | --- |
-| `godsend-psp-0.2.39-linux-x64.AppImage` | [Download](https://gofile.io/d/xqR6CT8g) | [Mirror](https://file.kiwi/c1df8e7b#6z3a0svQ_3FmE_UwKcagAw) | 131.9 MiB |
-| `godsend-psp-cli-0.2.39-linux-x64.tar.gz` | [Download](https://gofile.io/d/3c3AKqLX) | [Mirror](https://file.kiwi/3e688552#6-BsGzdE9DBw26nKEpauWA) | 2.1 MiB |
-| `godsend-psp-cli-0.2.39-macos-arm64.tar.gz` | [Download](https://gofile.io/d/5iRY5qdN) | [Mirror](https://file.kiwi/7d9d2332#scfCXc9yRQVnPg-EvtvyVQ) | 1.9 MiB |
-| `godsend-psp-cli-0.2.39-macos-x64.tar.gz` | [Download](https://gofile.io/d/AI4j5JWE) | [Mirror](https://file.kiwi/b97bc5c2#QuMw6sHbBiKoqAZHmOPwfQ) | 2.0 MiB |
-| `godsend-psp-cli-0.2.39-windows-x64.zip` | [Download](https://gofile.io/d/OT5h95Nv) | [Mirror](https://file.kiwi/70f0520c#bsMza6t3U0BZ-6cjKFxKIQ) | 2.1 MiB |
-| `linux-x64.zip` | [Download](https://gofile.io/d/HPctRRW2) | [Mirror](https://file.kiwi/c4b875a4#8J5FEIAnCOsgcXPZuVugMQ) | 195.9 MiB |
-| `macos-arm64.zip` | [Download](https://gofile.io/d/e43ahWil) | [Mirror](https://file.kiwi/b21f855a#mY4eX0ZexLjIMHpZ6ghR8w) | 46.0 MiB |
-| `macos-x64.zip` | [Download](https://gofile.io/d/LshCDXMK) | [Mirror](https://file.kiwi/eec79030#zJAilGxtD-qKmf1f56sPsg) | 60.9 MiB |
-| `godsend-psp-0.2.39-linux-x64.deb` | [Download](https://gofile.io/d/leO2bxUD) | [Mirror](https://file.kiwi/3b8440a1#87Y5c2AJvVa_o-dZzTuFhg) | 62.7 MiB |
-| `godsend-psp-0.2.39-arm64.dmg` | [Download](https://gofile.io/d/ZOl4ZIQq) | [Mirror](https://file.kiwi/bd042479#7kVlkHjvaT8UAzPHuHUxdQ) | 44.3 MiB |
-| `godsend-psp-0.2.39-x64.dmg` | [Download](https://gofile.io/d/aeO5AHeg) | [Mirror](https://file.kiwi/3b25d270#LDBbYGd8X2Tno80I3mC4eA) | 59.2 MiB |
-| `godsend-psp-0.2.39-x64-setup.exe` | [Download](https://gofile.io/d/yHqrM9Ap) | [Mirror](https://file.kiwi/58d07e3e#A98XKBpUuGLSwMMD_RvZUQ) | 45.1 MiB |
+| `godsend-psp-0.2.40-linux-x64.AppImage` | [Download](https://gofile.io/d/pY3JfooG) | [Mirror](https://file.kiwi/e2ac1c99#uXuh6YnVPFVb044AkN14SA) | 131.9 MiB |
+| `godsend-psp-cli-0.2.40-linux-x64.tar.gz` | [Download](https://gofile.io/d/CKmOcuWu) | [Mirror](https://file.kiwi/65fd8b68#P1CcvxtQAwp3IDclqopRyA) | 2.1 MiB |
+| `godsend-psp-cli-0.2.40-macos-arm64.tar.gz` | [Download](https://gofile.io/d/lcOmlLnH) | [Mirror](https://file.kiwi/873c5d8b#TdM8rNoRJxXv7OqlfMXuLw) | 1.9 MiB |
+| `godsend-psp-cli-0.2.40-macos-x64.tar.gz` | [Download](https://gofile.io/d/H9z98NnF) | [Mirror](https://file.kiwi/932b487f#sRF2dTQRf_0plnnPckGw7w) | 2.0 MiB |
+| `godsend-psp-cli-0.2.40-windows-x64.zip` | [Download](https://gofile.io/d/Sz26aIge) | [Mirror](https://file.kiwi/d46fa037#r68wyqghHauRZpOBUGBoYg) | 2.1 MiB |
+| `linux-x64.zip` | [Download](https://gofile.io/d/V7sGQQ9X) | [Mirror](https://file.kiwi/3983dce4#fLhztrCGbpfNAH5NKFJQ5Q) | 195.9 MiB |
+| `macos-arm64.zip` | [Download](https://gofile.io/d/iGpqCL7z) | [Mirror](https://file.kiwi/9cc86341#LdGyfADFgjwP5YNK_8WSBg) | 46.0 MiB |
+| `macos-x64.zip` | [Download](https://gofile.io/d/NNXQZ9oF) | [Mirror](https://file.kiwi/074d1052#fDMIaczDX08Nka_pCF8tlw) | 60.9 MiB |
+| `godsend-psp-0.2.40-linux-x64.deb` | [Download](https://gofile.io/d/h4VQXYV3) | [Mirror](https://file.kiwi/2053aaa8#NQ5_8ElqKo6Mbeh69OtACw) | 62.7 MiB |
+| `godsend-psp-0.2.40-arm64.dmg` | [Download](https://gofile.io/d/KIxTGTfE) | [Mirror](https://file.kiwi/40b0def4#eQTA0kC47gduIHtmg7dHhw) | 44.3 MiB |
+| `godsend-psp-0.2.40-x64.dmg` | [Download](https://gofile.io/d/ZpTOJ1IO) | [Mirror](https://file.kiwi/b9294767#w3E0KW2yIqlOw4RV-VOagA) | 59.2 MiB |
+| `godsend-psp-0.2.40-x64-setup.exe` | [Download](https://gofile.io/d/ZSMwaE0I) | [Mirror](https://file.kiwi/e28ecf77#7se8XtdLj2FcWUj8ZInVeA) | 45.1 MiB |
 <!-- downloads:end -->
 
 **GoFile** is the primary host and **file.kiwi** is the encrypted backup. Links
