@@ -3,6 +3,9 @@
 All notable changes to GODsend PSP. Newest first.
 
 
+## [0.2.33] - 2026-11-16
+
+
 ## [0.2.32] - 2026-11-16
 
 
@@ -47,6 +50,12 @@ All notable changes to GODsend PSP. Newest first.
 - Hosted PSP catalog pipeline: a validating sync script with `--dry-run`, a
   Playwright scraper driven by `psp-catalog/sources.json`, and a daily launchd
   job that scrapes and syncs at 04:12.
+
+### Changed
+
+- Themes and mods are served from R2 by default
+  (https://covers.debrid.in/psp/...), with psp-mods.debrid.in kept as the
+  mirror. The sync script pushes the catalog to both.
 
 ### Changed
 
