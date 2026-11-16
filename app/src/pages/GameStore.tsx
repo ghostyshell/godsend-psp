@@ -13,7 +13,7 @@ type View =
   | { kind: "ia"; item: IaItem; files: IaFile[] };
 
 export default function Store({ snap, reload, toast, refreshKey }: PageProps) {
-  const [source, setSource] = useState<Source>("gamesearch");
+  const [source, setSource] = useState<Source>("minerva");
   const [query, setQuery] = useState("");
   const [items, setItems] = useState<GameHit[]>([]);
   const [iaItems, setIaItems] = useState<IaItem[]>([]);
@@ -56,7 +56,7 @@ export default function Store({ snap, reload, toast, refreshKey }: PageProps) {
   }
 
   useEffect(() => {
-    void search("", "gamesearch");
+    void search("", "minerva");
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [refreshKey]);
 

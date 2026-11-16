@@ -28,8 +28,21 @@ test("library page lists the fixture games", async ({ page }) => {
 
 test("store page wires the debrid index", async ({ page }) => {
   await page.getByRole("button", { name: "Store", exact: true }).click();
+  await page.getByRole("tab", { name: "Game Debrid" }).click();
   await expect(page.getByText("LocoRoco 2")).toBeVisible();
   await expect(page.getByText("Wipeout Pure")).toBeVisible();
+});
+
+test("store opens on the Minerva index", async ({ page }) => {
+  await page.getByRole("button", { name: "Store", exact: true }).click();
+  await expect(page.getByRole("tab", { name: "Minerva" })).toHaveAttribute(
+    "aria-selected",
+    "true",
+  );
+  // Individual game rows from the Minerva fixtures, not the torrent set names.
+  await expect(page.getByText("Daxter (USA)")).toBeVisible();
+  await expect(page.getByText("God of War - Chains of Olympus (USA)")).toBeVisible();
+  await expect(page.getByText(/^Minerva_Myrient - /)).toHaveCount(0);
 });
 
 test("store r-roms and NoPayStation tabs list fixtures", async ({ page }) => {
