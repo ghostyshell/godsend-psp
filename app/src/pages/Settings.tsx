@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { api, pickers } from "../api";
+import { VERSION } from "../App";
 import type { PageProps } from "../App";
 import { Btn, Chip, Seg, Toggle } from "../ui";
 
@@ -12,6 +13,8 @@ export default function Settings({ snap, reload, toast, refreshKey }: PageProps)
   const [iaPass, setIaPass] = useState("");
   const [downloadDir, setDownloadDir] = useState("");
   const [debrid, setDebrid] = useState({ realdebrid: false, torbox: false });
+  const [checking, setChecking] = useState(false);
+  const [updateResult, setUpdateResult] = useState<string | null>(null);
 
   const config = snap.config;
 
@@ -43,6 +46,22 @@ export default function Settings({ snap, reload, toast, refreshKey }: PageProps)
     await api.configSet({ ia_password: "" } as never);
     toast("Internet Archive password cleared");
     reload();
+  }
+
+  async function checkUpdates() {
+    setChecking(true);
+    try {
+      const info = await api.updateCheck();
+      setUpdateResult(
+        info.available
+          ? `Update ${info.latest} available${info.artifact ? ` for ${info.artifact.label}` : ""}`
+          : "You are up to date"
+      );
+    } catch (err) {
+      setUpdateResult(`check failed: ${String(err)}`);
+    } finally {
+      setChecking(false);
+    }
   }
 
   return (
@@ -438,6 +457,43 @@ export default function Settings({ snap, reload, toast, refreshKey }: PageProps)
 
       <section className="card panel">
         <div className="panel-head">
+          <h2>Updates</h2>
+          <div className="spacer" />
+          <Chip tone="neutral">v{VERSION}</Chip>
+        </div>
+        <p style={{ margin: "0 0 12px", fontSize: 12.5, color: "var(--text-faint)" }}>
+          The app checks the release feed a few seconds after launch and offers
+          the build for this platform. Downloads use the direct mirror and are
+          checked against the published sha256 before the installer opens.
+        </p>
+        <div className="field">
+          <label>Current version</label>
+          <code style={endpointStyle}>godsend-psp {VERSION}</code>
+        </div>
+        <div className="field">
+          <label>Automatic check at launch</label>
+          <Toggle
+            checked={config.auto_update_check}
+            onChange={async (next) => {
+              await api.configSet({ auto_update_check: next });
+              toast(next ? "update check enabled" : "update check disabled");
+              reload();
+            }}
+            label="Check for a new release a few seconds after launch"
+          />
+        </div>
+        <div style={{ display: "flex", gap: 10, alignItems: "center", flexWrap: "wrap" }}>
+          <Btn onClick={() => void checkUpdates()} disabled={checking}>
+            {checking ? "Checking..." : "Check for updates now"}
+          </Btn>
+          {updateResult ? (
+            <span style={{ fontSize: 12.5, color: "var(--text-dim)" }}>{updateResult}</span>
+          ) : null}
+        </div>
+      </section>
+
+      <section className="card panel">
+        <div className="panel-head">
           <h2>MCP server</h2>
           <div className="spacer" />
           <Chip tone={config.mcp_enabled ? "good" : "neutral"}>
@@ -490,7 +546,7 @@ export default function Settings({ snap, reload, toast, refreshKey }: PageProps)
           <Btn onClick={() => void api.openDataDir()}>Open Data Folder</Btn>
         </div>
         <p style={{ margin: "12px 0 0", fontSize: 12.5, color: "var(--text-faint)" }}>
-          godsend-psp 0.2.46 - Rust engine + Tauri. USB mass storage, no drivers.
+          godsend-psp 0.2.47 - Rust engine + Tauri. USB mass storage, no drivers.
         </p>
       </section>
     </div>

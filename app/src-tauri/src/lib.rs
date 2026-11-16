@@ -15,6 +15,7 @@ use godsend_core::savedata::{self, SaveEntry};
 use godsend_core::themes::{self, ThemeEntry};
 use godsend_core::theme_pack::{self, ThemePack};
 use godsend_core::transfer::{set_progress_hook, Job, JobManager, JobState};
+use godsend_core::update::{self, UpdateInfo};
 use godsend_core::{doctor, Error, Result};
 use serde::Serialize;
 use std::path::{Path, PathBuf};
@@ -1429,6 +1430,99 @@ fn mods_install(app: AppHandle, state: State<'_, AppState>, serial: String, url:
     Ok(job_id)
 }
 
+#[tauri::command]
+fn update_check() -> Result<UpdateInfo> {
+    update::check(env!("CARGO_PKG_VERSION"))
+}
+
+/// Download the platform build, verify it, then hand it to the OS installer.
+#[tauri::command]
+fn update_download(app: AppHandle, state: State<'_, AppState>) -> Result<u64> {
+    let config = state.config();
+    let dest_dir = godsend_core::aria2::download_dir(&config).join("updates");
+    let current = env!("CARGO_PKG_VERSION").to_string();
+    let app2 = app.clone();
+    let job_id = state.jobs.spawn(
+        "update",
+        &format!("GODsend PSP {current}"),
+        move |job| {
+            let _ = app2.emit("job://done", job);
+        },
+        move |ctx| {
+            let info = update::check(&current)?;
+            if !info.available {
+                return Err(Error::Other(format!(
+                    "GODsend PSP {} is up to date",
+                    info.current
+                )));
+            }
+            let artifact = info.artifact.ok_or_else(|| {
+                Error::Other(format!(
+                    "the {} feed lists no build for this platform",
+                    info.latest
+                ))
+            })?;
+            ctx.message(format!("downloading {} ({})", artifact.name, artifact.label));
+            let path = update::download_verified(&artifact, &dest_dir, ctx)?;
+            let note = launch_installer(&path)?;
+            ctx.message(note);
+            Ok(())
+        },
+    );
+    Ok(job_id)
+}
+
+/// Open the verified installer for the current platform and return the
+/// message the job and toast show.
+fn launch_installer(path: &Path) -> Result<String> {
+    #[cfg(target_os = "macos")]
+    {
+        std::process::Command::new("open")
+            .arg(path)
+            .spawn()
+            .map_err(|e| Error::Other(format!("could not open {}: {e}", path.display())))?;
+        Ok(format!(
+            "verified; drag GODsend PSP to Applications from {}",
+            path.display()
+        ))
+    }
+    #[cfg(target_os = "windows")]
+    {
+        std::process::Command::new(path)
+            .spawn()
+            .map_err(|e| Error::Other(format!("could not start {}: {e}", path.display())))?;
+        Ok(format!("verified; installer started from {}", path.display()))
+    }
+    #[cfg(all(unix, not(target_os = "macos")))]
+    {
+        if std::process::Command::new("xdg-open").arg(path).spawn().is_err() {
+            return Ok(format!(
+                "verified; open this file to install: {}",
+                path.display()
+            ));
+        }
+        Ok(format!("verified; opening {}", path.display()))
+    }
+}
+
+/// Check the feed once at launch, off the UI thread, and offer an update.
+fn spawn_update_check(app: AppHandle) {
+    std::thread::spawn(move || {
+        std::thread::sleep(std::time::Duration::from_secs(6));
+        let config = app.state::<AppState>().config();
+        if !config.auto_update_check {
+            return;
+        }
+        match update::check(env!("CARGO_PKG_VERSION")) {
+            Ok(info) if info.available => {
+                let _ = app.emit("update://available", &info);
+            }
+            Ok(_) => {}
+            Err(err) => tracing::debug!("update check skipped: {}", err),
+        }
+    });
+}
+
 /// Cancel flag registry so ffmpeg conversions can observe cancels from the UI.
 static CANCELS: std::sync::OnceLock<Mutex<std::collections::HashMap<u64, Arc<AtomicBool>>>> =
     std::sync::OnceLock::new();
@@ -1593,6 +1687,7 @@ pub fn run() {
                 );
             })));
             spawn_device_watcher(app.handle().clone());
+            spawn_update_check(app.handle().clone());
             Ok(())
         })
         .invoke_handler(tauri::generate_handler![
@@ -1666,6 +1761,8 @@ pub fn run() {
             animation,
             mods_list,
             mods_install,
+            update_check,
+            update_download,
         ])
         .run(tauri::generate_context!())
         .expect("error while running GODsend PSP");

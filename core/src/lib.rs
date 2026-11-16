@@ -29,6 +29,7 @@ pub mod theme_pack;
 pub mod themes;
 pub mod torrent;
 pub mod transfer;
+pub mod update;
 
 pub use config::Config;
 pub use device::{PspPaths, Volume};

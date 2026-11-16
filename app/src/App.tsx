@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { api, listen } from "./api";
 import { applyStoredTheme } from "./theme";
-import type { Job, Snapshot } from "./types";
+import type { Job, Snapshot, UpdateInfo } from "./types";
 import { PAGE_TITLES } from "./types";
 import { Chip, progressText } from "./ui";
 import {
@@ -63,7 +63,7 @@ const NAV: { id: Page; label: string; icon: LucideIcon }[] = [
   { id: "settings", label: "Settings", icon: SettingsIcon },
 ];
 
-const VERSION = "0.2.46";
+export const VERSION = "0.2.47";
 
 export interface PageProps {
   snap: Snapshot;
@@ -77,6 +77,7 @@ export default function App() {
   const [snap, setSnap] = useState<Snapshot | null>(null);
   const [toastMsg, setToastMsg] = useState<string | null>(null);
   const [refreshKey, setRefreshKey] = useState(0);
+  const [update, setUpdate] = useState<UpdateInfo | null>(null);
 
   const toast = useCallback((message: string) => {
     setToastMsg(message);
@@ -143,6 +144,9 @@ export default function App() {
           toast(`${job.label} failed: ${job.message}`);
         }
         setRefreshKey((k) => k + 1);
+      }),
+      listen<UpdateInfo>("update://available", (info) => {
+        setUpdate(info);
       }),
     ];
     return () => {
@@ -230,6 +234,33 @@ export default function App() {
       </nav>
 
       <main className="workspace with-inspector" id="workspace" tabIndex={-1}>
+        {update ? (
+          <div className="update-banner" role="status">
+            <span className="update-banner-text">
+              Update <strong>{update.latest}</strong> available
+              {update.artifact ? (
+                <span className="sub"> {update.artifact.label}</span>
+              ) : null}
+            </span>
+            <div className="spacer" />
+            <button
+              className="btn small primary"
+              onClick={async () => {
+                try {
+                  await api.updateDownload();
+                  toast(`downloading GODsend PSP ${update.latest}`);
+                } catch (err) {
+                  toast(`update failed: ${String(err)}`);
+                }
+              }}
+            >
+              Install
+            </button>
+            <button className="btn small" onClick={() => setUpdate(null)}>
+              Dismiss
+            </button>
+          </div>
+        ) : null}
         {page === "home" && <Home {...pageProps} />}
         {page === "library" && <Library {...pageProps} />}
         {page === "jailbreak" && <Jailbreak {...pageProps} />}

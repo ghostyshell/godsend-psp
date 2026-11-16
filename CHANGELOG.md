@@ -3,6 +3,22 @@
 All notable changes to GODsend PSP. Newest first.
 
 
+## [0.2.47] - 2026-11-17
+
+### Added
+
+- The app checks the release feed a few seconds after launch and offers the
+  build for the running platform in a dismissible banner under the topbar.
+  Settings has an Updates panel with the current version, an on-demand check
+  and an automatic-check toggle, on by default for existing configs.
+- Release artifacts are mirrored to the project R2 bucket and the feed carries
+  a direct `r2` URL plus an exact byte count for every build. The updater
+  downloads from that mirror (falling back to file.kiwi, then GoFile), verifies
+  the byte count and SHA-256, deletes a mismatch and then opens the verified
+  installer: DMG on macOS, setup.exe on Windows, AppImage/deb on Linux.
+- The publish script keeps the three newest release prefixes on R2, sorted by
+  parsed version, and always keeps the version being published.
+
 ## [0.2.46] - 2026-11-17
 
 ### Fixed

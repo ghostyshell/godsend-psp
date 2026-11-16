@@ -10,7 +10,9 @@ let nextCallbackId = 1;
 function emit(event: string, payload: unknown) {
   for (const { event: name, handler } of listeners.values()) {
     if (name === event) {
-      handler({ event, id: nextCallbackId, payload });
+      if (typeof handler === "function") {
+        handler({ event, id: nextCallbackId, payload });
+      }
     }
   }
 }
@@ -59,6 +61,7 @@ const config = {
   mods_base: "",
   mcp_enabled: true,
   mcp_port: 8849,
+  auto_update_check: true,
 };
 
 const games = [
@@ -172,7 +175,7 @@ function snapshot() {
 
 // ---- fake jobs ----
 
-function startJob(kind: string, label: string): number {
+function startJob(kind: string, label: string, finalMessage = "installed on MEMORY STICK"): number {
   const id = ++nextJobId;
   const job = {
     id,
@@ -203,7 +206,7 @@ function startJob(kind: string, label: string): number {
       current.eta_secs = 0;
       current.state = "done";
       current.finished_at = Math.floor(Date.now() / 1000);
-      current.message = "installed on MEMORY STICK";
+      current.message = finalMessage;
       emit("job://progress", { id, done: 100, total: 100, speed: 0, eta: 0 });
       emit("job://done", { ...current });
       clearInterval(timer);
@@ -519,6 +522,32 @@ async function invoke(cmd: string, args: Record<string, any> = {}): Promise<unkn
     case "config_set":
       Object.assign(config, args.patch);
       return config;
+    case "update_check": {
+      if (args.simulate) {
+        const info = {
+          current: "0.2.46",
+          latest: "0.2.47",
+          available: true,
+          artifact: {
+            name: "godsend-psp-0.2.47-arm64.dmg",
+            label: "macOS (Apple Silicon)",
+            size_bytes: 46497151,
+            sha256: "7be4caac9a6c8d61d51e69716e637d57a8b1a59bb7f2bc02572ec487c487dffa",
+            url: "https://covers.debrid.in/psp/releases/0.2.47/godsend-psp-0.2.47-arm64.dmg",
+            fallback_url: "https://file.kiwi/2d322912#e_dAElUlGRHDciLOOugJcA",
+          },
+        };
+        setTimeout(() => emit("update://available", info), 200);
+        return info;
+      }
+      return { current: "0.2.46", latest: "0.2.46", available: false, artifact: null };
+    }
+    case "update_download":
+      return startJob(
+        "update",
+        "GODsend PSP update",
+        "verified; drag GODsend PSP to Applications",
+      );
     case "jobs":
       return jobs;
     case "job_cancel":
@@ -538,7 +567,10 @@ async function invoke(cmd: string, args: Record<string, any> = {}): Promise<unkn
       return "/Users/demo/Downloads/saves-backup-mock.zip";
     case "plugin:event|listen": {
       const id = nextCallbackId++;
-      listeners.set(id, { event: args.event, handler: args.handler });
+      // transformCallback returns an id; resolve it to the stored handler.
+      const stored =
+        typeof args.handler === "number" ? listeners.get(args.handler)?.handler : undefined;
+      listeners.set(id, { event: args.event, handler: stored ?? args.handler });
       return id;
     }
     case "plugin:event|unlisten":

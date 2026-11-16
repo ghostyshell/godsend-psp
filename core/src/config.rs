@@ -59,6 +59,9 @@ pub struct Config {
     pub mcp_enabled: bool,
     /// Loopback port for the MCP endpoint.
     pub mcp_port: u16,
+    /// Check the release feed a few seconds after launch and offer a build.
+    #[serde(default = "default_true")]
+    pub auto_update_check: bool,
 }
 
 impl Default for Config {
@@ -88,8 +91,13 @@ impl Default for Config {
             mods_base: "https://covers.debrid.in".into(),
             mcp_enabled: true,
             mcp_port: 8849,
+            auto_update_check: true,
         }
     }
+}
+
+fn default_true() -> bool {
+    true
 }
 
 /// `click.godsendpsp.app` style qualifier so the data dir is
