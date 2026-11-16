@@ -5,6 +5,11 @@ All notable changes to GODsend PSP. Newest first.
 
 ## [0.2.34] - 2026-11-16
 
+- Jailbreak page: a dedicated CFW section (separate from Homebrew) with stick
+  detection for ARK-4, ARK-5, PRO, ME, Time Machine, recovery and the ISO
+  driver plus the plugin count, ARK-4 and ARK-5 (FasterARK) install cards, and
+  an ordered ARK-5 migration plan that warns New cIPL is permanent.
+
 
 ## [0.2.33] - 2026-11-16
 

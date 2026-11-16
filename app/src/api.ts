@@ -3,6 +3,7 @@
 
 import type {
   CatalogEntry,
+  CfwState,
   Check,
   Config,
   DiscImage,
@@ -57,6 +58,9 @@ export const api = {
   homebrewInstalled: () => invoke<InstalledEntry[]>("homebrew_installed"),
   homebrewInstall: (id: string) => invoke<number>("homebrew_install", { id }),
   homebrewImport: (zip: string) => invoke<number>("homebrew_import", { zip }),
+
+  cfwDetect: () => invoke<CfwState>("cfw_detect"),
+  cfwPlan: () => invoke<string[]>("cfw_plan"),
 
   musicList: () => invoke<MediaFile[]>("music_list"),
   videoList: () => invoke<MediaFile[]>("video_list"),

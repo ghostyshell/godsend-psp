@@ -4,6 +4,7 @@
 //! a CLI, a Tauri desktop app, or a headless service.
 
 pub mod catalog;
+pub mod cfw;
 pub mod config;
 pub mod debrid;
 pub mod device;
