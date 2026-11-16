@@ -232,6 +232,7 @@ void gs_human_size(u64 bytes, char *out, unsigned int len)
 int gs_ms0_space(u64 *free_bytes, u64 *total_bytes)
 {
 	SceDevInf info;
+	SceDevctlCmd cmd;
 	u64 cluster;
 
 	if (free_bytes != NULL) {
@@ -240,16 +241,21 @@ int gs_ms0_space(u64 *free_bytes, u64 *total_bytes)
 	if (total_bytes != NULL) {
 		*total_bytes = 0;
 	}
+	/* SCE_PR_GETDEV takes SceDevctlCmd (a pointer to the struct) as input. */
 	memset(&info, 0, sizeof(info));
-	if (sceIoDevctl("ms0:", SCE_PR_GETDEV, NULL, 0, &info, sizeof(info)) < 0) {
+	cmd.dev_inf = &info;
+	if (sceIoDevctl("ms0:", SCE_PR_GETDEV, &cmd, sizeof(cmd), NULL, 0) < 0) {
+		return -1;
+	}
+	if (info.sectorSize <= 0 || info.sectorCount <= 0) {
 		return -1;
 	}
 	cluster = (u64)(u32)info.sectorSize * (u64)(u32)info.sectorCount;
 	if (free_bytes != NULL) {
-		*free_bytes = cluster * (u64)(u32)info.freeClusters;
+		*free_bytes = cluster * (u64)info.freeClusters;
 	}
 	if (total_bytes != NULL) {
-		*total_bytes = cluster * (u64)(u32)info.maxClusters;
+		*total_bytes = cluster * (u64)info.maxClusters;
 	}
 	return 0;
 }

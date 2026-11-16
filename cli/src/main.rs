@@ -353,13 +353,30 @@ fn run(cli: Cli) -> godsend_core::Result<()> {
             Ok(())
         }
         Command::Convert { file, level } => {
-            let out = if file.extension().map(|e| e.to_string_lossy().to_lowercase()) == Some("cso".into()) {
+            // Content decides the direction, not the extension.
+            let already_cso = godsend_core::cso::probe(&file)
+                .map(|i| i.is_cso)
+                .unwrap_or(false);
+            let mut out = if already_cso {
                 file.with_extension("iso")
             } else {
                 file.with_extension("cso")
             };
+            if out == file {
+                if already_cso {
+                    let stem = file
+                        .file_stem()
+                        .map(|s| s.to_string_lossy().to_string())
+                        .unwrap_or_default();
+                    out = file.with_file_name(format!("{stem}.dec.iso"));
+                } else {
+                    return Err(godsend_core::Error::Invalid(
+                        "destination would overwrite the source".into(),
+                    ));
+                }
+            }
             let cancel = AtomicBool::new(false);
-            if out.extension().map(|e| e.to_string_lossy().to_lowercase()) == Some("cso".into()) {
+            if !already_cso {
                 godsend_core::cso::iso_to_cso(&file, &out, level, &mut |done, total| print_progress(done, total), &cancel)?;
             } else {
                 godsend_core::cso::cso_to_iso(&file, &out, &mut |done, total| print_progress(done, total), &cancel)?;
