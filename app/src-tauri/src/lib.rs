@@ -918,7 +918,10 @@ fn store_download(app: AppHandle, state: State<'_, AppState>, source: String, id
                 let set_title = set
                     .trim_start_matches("Minerva_Myrient - ")
                     .trim_end_matches(".torrent");
-                let magnet = format!("magnet:?xt=urn:btih:{hash}&dn={set_title}");
+                let magnet = format!(
+                    "magnet:?xt=urn:btih:{hash}&dn={}",
+                    godsend_core::sources::urlencode(set_title)
+                );
                 let expect = file.path;
                 let basename = expect
                     .rsplit('/')
