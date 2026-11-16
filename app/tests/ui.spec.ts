@@ -14,6 +14,12 @@ test("shell landmarks and nav", async ({ page }) => {
   await expect(current).toHaveText(/Console/);
 });
 
+test("macOS header is a drag region", async ({ page }) => {
+  await expect(page.locator("header.topbar[data-tauri-drag-region]")).toHaveCount(1);
+  await expect(page.locator("header.topbar .page-title[data-tauri-drag-region]")).toHaveCount(1);
+  await expect(page.locator("nav.rail button[data-tauri-drag-region]")).toHaveCount(0);
+});
+
 test("library page lists the fixture games", async ({ page }) => {
   await page.getByRole("button", { name: "Library" }).click();
   await expect(page.locator(".tile").first()).toBeVisible();

@@ -186,17 +186,19 @@ export default function App() {
         Skip to content
       </a>
 
-      <header className="topbar">
-        <div className="brand">
-          <img className="mark" src={logo} alt="" aria-hidden="true" />
-          <div>
-            <div className="eyebrow">GODSEND PSP</div>
-            <div className="page-title" aria-live="polite">
+      <header className="topbar" data-tauri-drag-region>
+        <div className="brand" data-tauri-drag-region>
+          <img className="mark" src={logo} alt="" aria-hidden="true" data-tauri-drag-region />
+          <div data-tauri-drag-region>
+            <div className="eyebrow" data-tauri-drag-region>
+              GODSEND PSP
+            </div>
+            <div className="page-title" aria-live="polite" data-tauri-drag-region>
               {PAGE_TITLES[page]}
             </div>
           </div>
         </div>
-        <div className="spacer" />
+        <div className="spacer" data-tauri-drag-region />
         {activePsp ? (
           <Chip tone="good" title={activePsp.mount}>
             PSP Connected

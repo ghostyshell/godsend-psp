@@ -192,7 +192,8 @@ html[data-os="mac"] .shell {
   gap: 14px;
   padding: 0 18px;
   border-bottom: 1px solid var(--line);
-  -webkit-app-region: drag;
+  /* WKWebView ignores -webkit-app-region; the header carries
+     data-tauri-drag-region for Tauri's own drag handler. */
   user-select: none;
 }
 
@@ -244,6 +245,7 @@ html[data-os="mac"] .topbar {
 .topbar button,
 .topbar .chip {
   -webkit-app-region: no-drag;
+  app-region: no-drag;
 }
 
 /* rail */
