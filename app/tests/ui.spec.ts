@@ -63,3 +63,12 @@ test("settings exposes config controls", async ({ page }) => {
   await expect(page.getByText("Music conversion")).toBeVisible();
   await expect(page.getByText("ISO to CSO compression level")).toBeVisible();
 });
+
+test("theme studio creates a pack", async ({ page }) => {
+  await page.getByRole("button", { name: "Mods" }).click();
+  await page.getByRole("tab", { name: "Themes" }).click();
+  await expect(page.getByRole("heading", { name: "Theme Studio" })).toBeVisible();
+  await page.getByLabel("Pack name").fill("Test Pack");
+  await page.getByRole("button", { name: "Create", exact: true }).click();
+  await expect(page.locator(".theme-card .title").filter({ hasText: "Test Pack" })).toBeVisible();
+});

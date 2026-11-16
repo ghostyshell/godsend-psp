@@ -17,6 +17,7 @@ import type {
   SaveEntry,
   Snapshot,
   ThemeEntry,
+  ThemePack,
   Volume,
 } from "./types";
 
@@ -94,6 +95,12 @@ export const api = {
   themeInstallRemote: (name: string, url: string, format: string) =>
     invoke<ThemeEntry>("theme_install_remote", { name, url, format }),
   themeDelete: (name: string) => invoke<void>("theme_delete", { name }),
+
+  themePackCreate: (name: string, accent: string, wallpaper: string | null) =>
+    invoke<ThemePack>("theme_pack_create", { name, accent, wallpaper }),
+  themePacksList: () => invoke<ThemePack[]>("theme_packs_list"),
+  themePackInstall: (zip: string) => invoke<ThemePack>("theme_pack_install", { zip }),
+  themePackDelete: (folder: string) => invoke<void>("theme_pack_delete", { folder }),
 
   doctorRun: () => invoke<Check[]>("doctor_run"),
   configGet: () => invoke<Config>("config_get"),

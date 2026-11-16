@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { api, listen } from "./api";
+import { applyStoredTheme } from "./theme";
 import type { Job, Snapshot } from "./types";
 import { PAGE_TITLES } from "./types";
 import { Chip } from "./ui";
@@ -83,6 +84,11 @@ export default function App() {
   }, []);
 
   const reload = useCallback(() => setRefreshKey((k) => k + 1), []);
+
+  // Apply the saved Theme Studio accent before first paint of the shell.
+  useEffect(() => {
+    applyStoredTheme();
+  }, []);
 
   const loadSnapshot = useCallback(async () => {
     try {
