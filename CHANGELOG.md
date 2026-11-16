@@ -3,6 +3,23 @@
 All notable changes to GODsend PSP. Newest first.
 
 
+## [0.2.40] - 2026-11-16
+
+### Fixed
+
+- GODsend Cleaner now reads ms0 capacity correctly. `SCE_PR_GETDEV` takes a
+  `SceDevctlCmd` holding a pointer to `SceDevInf` as input, not the struct as
+  an output buffer, so the app claimed the stick was not mounted and never
+  showed free or used space.
+- The cleaner report no longer stops at a capacity error. It still lists the
+  largest folders, and the Cross prompt only appears when something is
+  actually reclaimable; with nothing to clean it says "Nothing to clean" and
+  exits.
+- The CLI `convert` command also chooses its direction from the file header
+  now, not the extension, so a CSO named `.iso` decompresses instead of being
+  refused.
+
+
 ## [0.2.39] - 2026-11-16
 
 ### Fixed

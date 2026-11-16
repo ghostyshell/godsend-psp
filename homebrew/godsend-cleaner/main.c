@@ -84,7 +84,7 @@ static void walk(const char *dir, int in_common, int do_delete, int *count, u64 
 	sceIoDclose(fd);
 }
 
-static void draw_report(void)
+static void draw_report(int *reclaim_files_out, u64 *reclaim_bytes_out)
 {
 	u64 free_bytes = 0;
 	u64 total_bytes = 0;
@@ -92,6 +92,7 @@ static void draw_report(void)
 	u64 reclaim_bytes = 0;
 	int reclaim_files = 0;
 	u64 after_bytes = 0;
+	int have_space;
 	int i;
 	struct folder_row rows[6];
 	int row_count = 0;
@@ -103,18 +104,20 @@ static void draw_report(void)
 
 	gs_reset("GODsend Cleaner");
 
-	if (gs_ms0_space(&free_bytes, &total_bytes) < 0) {
+	have_space = gs_ms0_space(&free_bytes, &total_bytes) == 0;
+	if (have_space) {
+		used_bytes = total_bytes > free_bytes ? total_bytes - free_bytes : 0;
+		gs_human_size(free_bytes, free_text, sizeof(free_text));
+		gs_human_size(used_bytes, used_text, sizeof(used_text));
+		gs_human_size(total_bytes, total_text, sizeof(total_text));
+		gs_printf("\nms0:  %s free of %s   (%s used)\n", free_text, total_text, used_text);
+	} else {
 		gs_color(GS_COLOR_BAD);
-		gs_printf("\nms0: did not report its capacity.\n");
+		gs_printf("\nms0: capacity unavailable\n");
 		gs_color(GS_COLOR_DIM);
-		gs_printf("Is the memory stick mounted?\n");
-		return;
+		gs_printf("The device did not answer the capacity query.\n");
+		gs_color(GS_COLOR_TEXT);
 	}
-	used_bytes = total_bytes > free_bytes ? total_bytes - free_bytes : 0;
-	gs_human_size(free_bytes, free_text, sizeof(free_text));
-	gs_human_size(used_bytes, used_text, sizeof(used_text));
-	gs_human_size(total_bytes, total_text, sizeof(total_text));
-	gs_printf("\nms0:  %s free of %s   (%s used)\n", free_text, total_text, used_text);
 
 	for (i = 0; i < (int)(sizeof(FOLDERS) / sizeof(FOLDERS[0])); i++) {
 		char path[GS_PATH_MAX];
@@ -165,15 +168,31 @@ static void draw_report(void)
 	gs_printf("  PSP/COMMON cache + 0-byte + *.tmp files\n");
 	gs_printf("  %d files, %s\n", reclaim_files, reclaim_text);
 
-	after_bytes = free_bytes + reclaim_bytes;
-	gs_human_size(after_bytes, after_text, sizeof(after_text));
-	gs_color(GS_COLOR_GOOD);
-	gs_printf("\nFree after cleanup: %s\n", after_text);
+	if (reclaim_files > 0 && have_space) {
+		after_bytes = free_bytes + reclaim_bytes;
+		gs_human_size(after_bytes, after_text, sizeof(after_text));
+		gs_color(GS_COLOR_GOOD);
+		gs_printf("\nFree after cleanup: %s\n", after_text);
+	} else if (reclaim_files == 0) {
+		gs_color(GS_COLOR_GOOD);
+		gs_printf("\nNothing to clean.\n");
+	}
 	gs_color(GS_COLOR_DIM);
 	gs_printf("SAVEDATA contents are never touched.\n");
 	gs_color(GS_COLOR_TEXT);
-	gs_footer("Cross: clean   Circle: exit");
+	if (reclaim_files > 0) {
+		gs_footer("Cross: clean   Circle: exit");
+	} else {
+		gs_footer("Circle: exit");
+	}
 	gs_present();
+
+	if (reclaim_files_out != NULL) {
+		*reclaim_files_out = reclaim_files;
+	}
+	if (reclaim_bytes_out != NULL) {
+		*reclaim_bytes_out = reclaim_bytes;
+	}
 }
 
 static void do_clean(void)
@@ -207,6 +226,7 @@ int main(void)
 {
 	int reclaim_files = 0;
 	u64 reclaim_bytes = 0;
+	char prompt[64];
 
 	gs_boot("GODsend Cleaner");
 	gs_wait_release(0xFFFFFFFFu);
@@ -222,17 +242,16 @@ int main(void)
 		gs_exit();
 	}
 
-	draw_report();
-	walk(PSP_ROOT, 0, 0, &reclaim_files, &reclaim_bytes);
+	draw_report(&reclaim_files, &reclaim_bytes);
+	(void)reclaim_bytes;
 
 	if (reclaim_files == 0) {
-		gs_footer("Nothing to clean. Circle: exit");
-		gs_present();
 		gs_wait_confirm_cancel();
 		gs_exit();
 	}
 
-	if (!gs_confirm("Delete these leftovers now?")) {
+	snprintf(prompt, sizeof(prompt), "Delete %d leftover file(s) now?", reclaim_files);
+	if (!gs_confirm(prompt)) {
 		gs_color(GS_COLOR_DIM);
 		gs_printf("Cancelled. Nothing was deleted.\n");
 		gs_footer("Cross or Circle: exit");
