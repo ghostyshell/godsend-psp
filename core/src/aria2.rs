@@ -127,14 +127,56 @@ pub fn download_selected(
         return Err(Error::Other(format!("aria2c exited badly: {tail}")));
     }
 
-    let fallback = dest_dir.join(Path::new(expect_path).file_name().unwrap_or_default());
-    let path = safe_relative(expect_path)
+    let basename = Path::new(expect_path)
+        .file_name()
+        .map(|name| name.to_owned())
+        .unwrap_or_default();
+    let found = safe_relative(expect_path)
         .map(|rel| dest_dir.join(rel))
         .filter(|candidate| candidate.is_file())
-        .unwrap_or(fallback);
-    let size = std::fs::metadata(&path).map(|m| m.len()).unwrap_or(0);
+        .or_else(|| find_file(dest_dir, &basename, 4))
+        .ok_or_else(|| {
+            Error::Other(format!(
+                "aria2c finished but {} was not found under {}",
+                basename.to_string_lossy(),
+                dest_dir.display()
+            ))
+        })?;
+    // aria2 keeps the torrent's folder tree. Move the single game up so it
+    // lands flat in the download folder and shows on the Downloads page.
+    let flat = dest_dir.join(&basename);
+    if found != flat {
+        std::fs::rename(&found, &flat)?;
+        let mut parent = found.parent();
+        while let Some(dir) = parent {
+            if dir == dest_dir || !dir.starts_with(dest_dir) || std::fs::remove_dir(dir).is_err() {
+                break;
+            }
+            parent = dir.parent();
+        }
+    }
+    let size = std::fs::metadata(&flat).map(|m| m.len()).unwrap_or(0);
     ctx.progress(size, size);
-    Ok(path)
+    Ok(flat)
+}
+
+/// Case-sensitive search for a file name below `dir`, depth limited.
+fn find_file(dir: &Path, name: &std::ffi::OsStr, depth: usize) -> Option<PathBuf> {
+    if depth == 0 || name.is_empty() {
+        return None;
+    }
+    for entry in std::fs::read_dir(dir).ok()?.flatten() {
+        let path = entry.path();
+        if path.is_file() && path.file_name() == Some(name) {
+            return Some(path);
+        }
+        if path.is_dir() {
+            if let Some(found) = find_file(&path, name, depth - 1) {
+                return Some(found);
+            }
+        }
+    }
+    None
 }
 
 /// The shared aria2c flags for HTTP and torrent downloads. The caller adds
