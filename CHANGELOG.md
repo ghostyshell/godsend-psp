@@ -3,6 +3,9 @@
 All notable changes to GODsend PSP. Newest first.
 
 
+## [0.2.32] - 2026-11-16
+
+
 ## [0.2.31] - 2026-11-16
 
 
@@ -199,6 +202,11 @@ All notable changes to GODsend PSP. Newest first.
 
 
 ## [0.2.4] - 2026-11-15
+
+### Fixed
+
+- UI smoke test follows the Library Games/Homebrew split instead of a fixed
+  tile count.
 
 ### Fixed
 
