@@ -14,9 +14,15 @@ use std::fs::File;
 use std::io::{Read, Seek, SeekFrom, Write};
 use std::path::Path;
 
-pub const CSO_MAGIC: &[u8; 4] = b"CSIO";
+pub const CSO_MAGIC: &[u8; 4] = b"CISO";
+/// Older builds wrote `CSIO`. Files with that header still decompress.
+pub const LEGACY_CSO_MAGIC: &[u8; 4] = b"CSIO";
 const HEADER_SIZE: usize = 24;
 const BLOCK_SIZE: usize = 2048;
+
+fn is_cso_magic(bytes: &[u8]) -> bool {
+    bytes.len() >= 4 && (&bytes[0..4] == CSO_MAGIC || &bytes[0..4] == LEGACY_CSO_MAGIC)
+}
 
 #[derive(Debug, Clone, Serialize)]
 pub struct CsoInfo {
@@ -31,7 +37,7 @@ pub struct CsoInfo {
 pub fn probe(path: &Path) -> Result<CsoInfo> {
     let mut f = File::open(path)?;
     let mut header = [0u8; HEADER_SIZE];
-    if f.read_exact(&mut header).is_err() || &header[0..4] != CSO_MAGIC {
+    if f.read_exact(&mut header).is_err() || !is_cso_magic(&header) {
         return Ok(CsoInfo {
             is_cso: false,
             version: 0,
@@ -62,6 +68,29 @@ fn blocks_count(total_bytes: u64, block_size: u32) -> u64 {
 
 /// Convert a plain `.iso` into a zlib-compressed `.cso`.
 pub fn iso_to_cso(
+    src: &Path,
+    dst: &Path,
+    level: u32,
+    progress: &mut dyn FnMut(u64, u64),
+    cancel: &std::sync::atomic::AtomicBool,
+) -> Result<()> {
+    if probe(src)?.is_cso {
+        return Err(Error::Invalid(
+            "source is already a CSO; decompress it first".into(),
+        ));
+    }
+    // Build beside the destination and rename on success, so an interrupted
+    // job never leaves a half-written CSO on the stick.
+    let tmp = dst.with_extension("cso.part");
+    if let Err(err) = write_cso(src, &tmp, level, progress, cancel) {
+        let _ = std::fs::remove_file(&tmp);
+        return Err(err);
+    }
+    std::fs::rename(&tmp, dst)?;
+    Ok(())
+}
+
+fn write_cso(
     src: &Path,
     dst: &Path,
     level: u32,
@@ -133,10 +162,25 @@ pub fn cso_to_iso(
     progress: &mut dyn FnMut(u64, u64),
     cancel: &std::sync::atomic::AtomicBool,
 ) -> Result<()> {
+    let tmp = dst.with_extension("iso.part");
+    if let Err(err) = write_iso(src, &tmp, progress, cancel) {
+        let _ = std::fs::remove_file(&tmp);
+        return Err(err);
+    }
+    std::fs::rename(&tmp, dst)?;
+    Ok(())
+}
+
+fn write_iso(
+    src: &Path,
+    dst: &Path,
+    progress: &mut dyn FnMut(u64, u64),
+    cancel: &std::sync::atomic::AtomicBool,
+) -> Result<()> {
     let mut input = File::open(src)?;
     let mut header = [0u8; HEADER_SIZE];
     input.read_exact(&mut header)?;
-    if &header[0..4] != CSO_MAGIC {
+    if !is_cso_magic(&header) {
         return Err(Error::Invalid("not a CSO file".into()));
     }
     let hdr_size = u32::from_le_bytes(header[4..8].try_into().unwrap()) as u64;
@@ -233,6 +277,58 @@ mod tests {
         let back = std::fs::read(&iso2_path).unwrap();
         assert_eq!(back, data);
 
+        std::fs::remove_dir_all(&dir).ok();
+    }
+
+    #[test]
+    fn writes_the_real_ciso_magic() {
+        let dir = std::env::temp_dir().join(format!("godsend-cso-magic-{}", std::process::id()));
+        std::fs::create_dir_all(&dir).unwrap();
+        let iso_path = dir.join("m.iso");
+        let cso_path = dir.join("m.cso");
+        std::fs::write(&iso_path, dummy_iso(4)).unwrap();
+        let cancel = AtomicBool::new(false);
+        iso_to_cso(&iso_path, &cso_path, 9, &mut |_, _| {}, &cancel).unwrap();
+        let bytes = std::fs::read(&cso_path).unwrap();
+        assert_eq!(&bytes[0..4], b"CISO", "PSP tools require the CISO magic");
+        std::fs::remove_dir_all(&dir).ok();
+    }
+
+    #[test]
+    fn reads_legacy_csio_header() {
+        let dir = std::env::temp_dir().join(format!("godsend-cso-legacy-{}", std::process::id()));
+        std::fs::create_dir_all(&dir).unwrap();
+        let iso_path = dir.join("l.iso");
+        let cso_path = dir.join("l.cso");
+        let out_path = dir.join("l2.iso");
+        let data = dummy_iso(6);
+        std::fs::write(&iso_path, &data).unwrap();
+        let cancel = AtomicBool::new(false);
+        iso_to_cso(&iso_path, &cso_path, 9, &mut |_, _| {}, &cancel).unwrap();
+
+        let mut bytes = std::fs::read(&cso_path).unwrap();
+        bytes[0..4].copy_from_slice(LEGACY_CSO_MAGIC);
+        std::fs::write(&cso_path, &bytes).unwrap();
+
+        assert!(probe(&cso_path).unwrap().is_cso);
+        cso_to_iso(&cso_path, &out_path, &mut |_, _| {}, &cancel).expect("legacy read");
+        assert_eq!(std::fs::read(&out_path).unwrap(), data);
+        std::fs::remove_dir_all(&dir).ok();
+    }
+
+    #[test]
+    fn refuses_to_compress_a_cso() {
+        let dir = std::env::temp_dir().join(format!("godsend-cso-guard-{}", std::process::id()));
+        std::fs::create_dir_all(&dir).unwrap();
+        let iso_path = dir.join("g.iso");
+        let cso_path = dir.join("g.cso");
+        let again = dir.join("g2.cso");
+        std::fs::write(&iso_path, dummy_iso(4)).unwrap();
+        let cancel = AtomicBool::new(false);
+        iso_to_cso(&iso_path, &cso_path, 9, &mut |_, _| {}, &cancel).unwrap();
+        let err = iso_to_cso(&cso_path, &again, 9, &mut |_, _| {}, &cancel);
+        assert!(err.is_err(), "a CSO must not be compressed again");
+        assert!(!again.exists(), "no partial output on refusal");
         std::fs::remove_dir_all(&dir).ok();
     }
 }

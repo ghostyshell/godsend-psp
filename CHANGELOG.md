@@ -3,6 +3,22 @@
 All notable changes to GODsend PSP. Newest first.
 
 
+## [0.2.39] - 2026-11-16
+
+### Fixed
+
+- CSO files created by the app were unreadable on the console: the header
+  magic was written as `CSIO` instead of `CISO`. New conversions write the
+  correct magic, and files with the old `CSIO` header still decompress.
+- A CSO that is named `.iso` is now identified by its header, so the app
+  offers "To ISO" instead of inviting a second compression. The core codec
+  also refuses to compress a source that is already a CSO.
+- Conversions write to a `.part` file and rename on success, so a cancelled
+  or failed job can no longer leave a truncated CSO or ISO on the stick. The
+  zero-index CSO that showed up as Corrupted Data in the XMB was exactly that
+  failure mode.
+
+
 ## [0.2.38] - 2026-11-16
 
 ### Changed
