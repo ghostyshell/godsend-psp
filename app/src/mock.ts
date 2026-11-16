@@ -114,6 +114,10 @@ const themes = [
   { name: "Classic Waves.ptf", format: "ptf", size_bytes: 900 * 1024 },
 ];
 
+const themePacks: { name: string; accent: string; background: string | null; created_at: string }[] = [
+  { name: "Brass Waves", accent: "#f2c078", background: "wallpaper.png", created_at: "2026-11-10T18:20:00Z" },
+];
+
 const cfw = {
   ark4: true,
   ark5: false,
@@ -347,6 +351,34 @@ async function invoke(cmd: string, args: Record<string, any> = {}): Promise<unkn
       if (i >= 0) themes.splice(i, 1);
       return null;
     }
+    case "theme_packs_list":
+      return themePacks;
+    case "theme_pack_create": {
+      const pack = {
+        name: String(args.name ?? "").trim() || "Untitled pack",
+        accent: String(args.accent || "#6d8bff"),
+        background: args.wallpaper ? "wallpaper.png" : null,
+        created_at: new Date().toISOString().replace(/\.\d+Z$/, "Z"),
+      };
+      themePacks.unshift(pack);
+      return pack;
+    }
+    case "theme_pack_install": {
+      const base = fileName(String(args.zip)).replace(/\.godsend-theme\.zip$/i, "");
+      const pack = {
+        name: base.replace(/-/g, " ") || "Imported pack",
+        accent: "#6d8bff",
+        background: null,
+        created_at: new Date().toISOString().replace(/\.\d+Z$/, "Z"),
+      };
+      themePacks.unshift(pack);
+      return pack;
+    }
+    case "theme_pack_delete": {
+      const i = themePacks.findIndex((p) => mockSlug(p.name) === args.folder);
+      if (i >= 0) themePacks.splice(i, 1);
+      return null;
+    }
     case "doctor_run":
       return doctor;
     case "debrid_status":
@@ -474,7 +506,7 @@ async function invoke(cmd: string, args: Record<string, any> = {}): Promise<unkn
     case "plugin:dialog|open": {
       const options = (args.options ?? {}) as { filters?: { extensions: string[] }[] };
       const ext = options.filters?.[0]?.extensions?.[0] ?? "zip";
-      return [`/Users/demo/Downloads/${ext === "prx" ? "cwcheat.prx" : ext === "iso" ? "Persona 2.iso" : "homebrew-pack.zip"}`];
+      return [`/Users/demo/Downloads/${ext === "prx" ? "cwcheat.prx" : ext === "iso" ? "Persona 2.iso" : ext === "png" ? "wallpaper.png" : "homebrew-pack.zip"}`];
     }
     case "plugin:dialog|save":
       return "/Users/demo/Downloads/saves-backup-mock.zip";
@@ -504,6 +536,10 @@ const SERIAL_FOR: Record<string, string> = {
 
 function fileName(path: string): string {
   return path.split("/").pop() ?? path;
+}
+
+function mockSlug(name: string): string {
+  return name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "") || "theme";
 }
 
 function iconDataUrl(id: string): string {

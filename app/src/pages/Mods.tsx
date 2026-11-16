@@ -1,8 +1,10 @@
 import { useEffect, useState } from "react";
 import { api, pickers } from "../api";
-import type { CatalogEntry, PluginsView, RemoteTheme, ThemeEntry } from "../types";
+import type { CatalogEntry, PluginsView, RemoteTheme, ThemeEntry, ThemePack } from "../types";
 import type { PageProps } from "../App";
 import { Btn, Chip, Empty, Seg, Toggle, confirmDialog, fmtBytes } from "../ui";
+import { clearTheme, loadStoredTheme, selectTheme, slugify, tint } from "../theme";
+import type { StoredTheme } from "../theme";
 
 type Tab = "plugins" | "themes" | "cfw";
 
@@ -156,14 +158,26 @@ function PluginsPanel({ snap, reload, toast, refreshKey }: PageProps) {
 
 /* ---------- themes ---------- */
 
+function packDate(value: string): string {
+  const date = new Date(value);
+  return Number.isNaN(date.getTime()) ? value : date.toLocaleDateString();
+}
+
 function ThemesPanel({ snap, reload, toast, refreshKey }: PageProps) {
   const [themes, setThemes] = useState<ThemeEntry[]>([]);
   const [remote, setRemote] = useState<RemoteTheme[]>([]);
+  const [packs, setPacks] = useState<ThemePack[]>([]);
+  const [active, setActive] = useState<StoredTheme | null>(() => loadStoredTheme());
+  const [name, setName] = useState("");
+  const [accent, setAccent] = useState("#6d8bff");
+  const [wallpaper, setWallpaper] = useState<string | null>(null);
+  const [busy, setBusy] = useState(false);
   const connected = !!snap.volumes.find((v) => v.is_psp);
 
   useEffect(() => {
     if (!connected) {
       setThemes([]);
+      setPacks([]);
       return;
     }
     void api
@@ -174,14 +188,197 @@ function ThemesPanel({ snap, reload, toast, refreshKey }: PageProps) {
       .themesRemote()
       .then(setRemote)
       .catch(() => setRemote([]));
+    void api
+      .themePacksList()
+      .then(setPacks)
+      .catch(() => setPacks([]));
   }, [connected, refreshKey]);
+
+  const createPack = async () => {
+    if (!name.trim() || busy) return;
+    setBusy(true);
+    try {
+      const pack = await api.themePackCreate(name.trim(), accent, wallpaper);
+      setPacks((prev) => [pack, ...prev.filter((p) => p.name !== pack.name)]);
+      toast(`theme pack created: ${pack.name}`);
+      setName("");
+      setWallpaper(null);
+      reload();
+    } catch (err) {
+      toast(`theme pack failed: ${String(err)}`);
+    } finally {
+      setBusy(false);
+    }
+  };
 
   return (
     <>
+      <section className="card panel">
+        <div className="panel-head">
+          <h2>Theme Studio</h2>
+          <div className="spacer" />
+          <Btn
+            disabled={!connected}
+            onClick={async () => {
+              const zip = await pickers.pickFile("Import a .godsend-theme.zip", ["zip"]);
+              if (!zip) return;
+              try {
+                const pack = await api.themePackInstall(zip);
+                toast(`theme pack installed: ${pack.name}`);
+                reload();
+              } catch (err) {
+                toast(`import failed: ${String(err)}`);
+              }
+            }}
+          >
+            Import pack
+          </Btn>
+        </div>
+        <p className="hint">
+          CXMB .ctf and Sony .ptf are closed containers, so packs here are
+          wallpaper plus accent themes. Existing .ctf and .ptf files are still
+          installed and managed below.
+        </p>
+
+        <div className="theme-form">
+          <div className="field">
+            <label htmlFor="theme-pack-name">Pack name</label>
+            <input
+              id="theme-pack-name"
+              type="text"
+              value={name}
+              placeholder="Midnight Brass"
+              onChange={(event) => setName(event.target.value)}
+            />
+          </div>
+          <div className="field narrow">
+            <label htmlFor="theme-pack-accent">Accent</label>
+            <input
+              id="theme-pack-accent"
+              type="color"
+              value={accent}
+              onChange={(event) => setAccent(event.target.value)}
+            />
+          </div>
+          <div className="field">
+            <label>Wallpaper (optional)</label>
+            <div className="theme-pick">
+              <Btn
+                small
+                onClick={async () => {
+                  const file = await pickers.pickFile("Pick a wallpaper", ["png", "jpg", "jpeg"]);
+                  if (file) setWallpaper(file);
+                }}
+              >
+                {wallpaper ? "Change" : "Choose"}
+              </Btn>
+              <span className="meta mono">
+                {wallpaper ? wallpaper.split("/").pop() : "accent only"}
+              </span>
+              {wallpaper ? (
+                <Btn small variant="outline" onClick={() => setWallpaper(null)}>
+                  Clear
+                </Btn>
+              ) : null}
+            </div>
+          </div>
+          <Btn variant="primary" disabled={!connected || !name.trim() || busy} onClick={createPack}>
+            {busy ? "Creating..." : "Create"}
+          </Btn>
+        </div>
+
+        <div
+          className="theme-preview"
+          style={{ background: `linear-gradient(112deg, ${tint(accent, 0.5)}, ${tint(accent, 0.1)})` }}
+        >
+          <span className="swatch" style={{ background: accent }} aria-hidden="true" />
+          <span className="theme-preview-name">{name.trim() || "Untitled pack"}</span>
+          <span className="theme-preview-sub mono">
+            {accent} {wallpaper ? `+ ${wallpaper.split("/").pop()}` : "accent only"}
+          </span>
+        </div>
+      </section>
+
+      {packs.length === 0 ? (
+        <Empty
+          title="No theme packs yet"
+          hint="Create one above; it lands in PSP/PICTURE/<name>/ on the stick."
+        />
+      ) : (
+        <div className="theme-grid">
+          {packs.map((pack) => {
+            const folder = slugify(pack.name);
+            const isActive = active?.folder === folder;
+            return (
+              <article className={`theme-card ${isActive ? "active" : ""}`} key={`${folder}-${pack.created_at}`}>
+                <div className="theme-card-head">
+                  <span className="swatch" style={{ background: pack.accent }} aria-hidden="true" />
+                  <div className="grow">
+                    <div className="title">{pack.name}</div>
+                    <div className="meta">{packDate(pack.created_at)}</div>
+                  </div>
+                  {isActive ? <Chip tone="good">in use</Chip> : null}
+                </div>
+                <div className="meta">
+                  {pack.background ? "wallpaper + accent" : "accent only"}
+                </div>
+                <div className="actions">
+                  <Btn
+                    small
+                    variant={isActive ? "outline" : "primary"}
+                    onClick={() => {
+                      selectTheme(pack, folder);
+                      setActive({ ...pack, folder });
+                    }}
+                  >
+                    Use
+                  </Btn>
+                  <Btn
+                    small
+                    variant="danger"
+                    onClick={async () => {
+                      if (!confirmDialog("Delete theme pack?", `${pack.name} will be removed from PSP/PICTURE/${folder}.`)) {
+                        return;
+                      }
+                      try {
+                        await api.themePackDelete(folder);
+                        if (isActive) {
+                          clearTheme();
+                          setActive(null);
+                        }
+                        setPacks((prev) => prev.filter((p) => p !== pack));
+                        toast(`deleted ${pack.name}`);
+                        reload();
+                      } catch (err) {
+                        toast(`delete failed: ${String(err)}`);
+                      }
+                    }}
+                  >
+                    Delete
+                  </Btn>
+                </div>
+              </article>
+            );
+          })}
+        </div>
+      )}
+
       <div className="card panel">
         <div className="panel-head">
           <h2>XMB themes</h2>
           <div className="spacer" />
+          {active ? (
+            <Btn
+              small
+              onClick={() => {
+                clearTheme();
+                setActive(null);
+                toast("app theme reset");
+              }}
+            >
+              Reset
+            </Btn>
+          ) : null}
           <Btn
             variant="primary"
             disabled={!connected}

@@ -25,6 +25,7 @@ pub mod sfo;
 pub mod sources;
 pub mod store;
 pub mod savedata;
+pub mod theme_pack;
 pub mod themes;
 pub mod transfer;
 

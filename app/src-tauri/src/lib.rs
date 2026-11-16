@@ -13,6 +13,7 @@ use godsend_core::media;
 use godsend_core::plugins::{self, PluginEntry, Section};
 use godsend_core::savedata::{self, SaveEntry};
 use godsend_core::themes::{self, ThemeEntry};
+use godsend_core::theme_pack::{self, ThemePack};
 use godsend_core::transfer::{set_progress_hook, Job, JobManager, JobState};
 use godsend_core::{doctor, Error, Result};
 use serde::Serialize;
@@ -719,6 +720,42 @@ fn theme_delete(state: State<'_, AppState>, name: String) -> Result<()> {
     themes::delete(&paths, &name)
 }
 
+// ---------- Theme Studio packs (wallpaper packs + app accent) ----------
+
+#[tauri::command]
+fn theme_pack_create(
+    state: State<'_, AppState>,
+    name: String,
+    accent: String,
+    wallpaper: Option<String>,
+) -> Result<ThemePack> {
+    let (_, paths) = state.paths()?;
+    // The zip is a by-product kept in the app cache; the pack itself is written
+    // straight into PSP/PICTURE/<slug>/ so it is usable immediately.
+    let out_dir = godsend_core::config::cache_dir().join("theme-packs");
+    let wallpaper_path = wallpaper.as_deref().map(Path::new);
+    let zip = theme_pack::create(&name, &accent, wallpaper_path, &out_dir)?;
+    theme_pack::install(&paths, &zip)
+}
+
+#[tauri::command]
+fn theme_packs_list(state: State<'_, AppState>) -> Result<Vec<ThemePack>> {
+    let (_, paths) = state.paths()?;
+    theme_pack::list(&paths)
+}
+
+#[tauri::command]
+fn theme_pack_install(state: State<'_, AppState>, zip: String) -> Result<ThemePack> {
+    let (_, paths) = state.paths()?;
+    theme_pack::install(&paths, Path::new(&zip))
+}
+
+#[tauri::command]
+fn theme_pack_delete(state: State<'_, AppState>, folder: String) -> Result<()> {
+    let (_, paths) = state.paths()?;
+    theme_pack::delete(&paths, &folder)
+}
+
 #[tauri::command]
 fn doctor_run(state: State<'_, AppState>) -> Vec<doctor::Check> {
     doctor::run(&state.config())
@@ -1421,6 +1458,10 @@ pub fn run() {
             theme_install_remote,
             theme_install,
             theme_delete,
+            theme_pack_create,
+            theme_packs_list,
+            theme_pack_install,
+            theme_pack_delete,
             doctor_run,
             config_get,
             config_set,

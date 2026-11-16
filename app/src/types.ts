@@ -149,6 +149,14 @@ export interface ThemeEntry {
   size_bytes: number;
 }
 
+/** A Theme Studio pack: wallpaper pack plus an app accent (core/src/theme_pack.rs). */
+export interface ThemePack {
+  name: string;
+  accent: string;
+  background: string | null;
+  created_at: string;
+}
+
 export interface CfwState {
   ark4: boolean;
   ark5: boolean;

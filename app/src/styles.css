@@ -1412,3 +1412,177 @@ select:focus-visible {
     animation: none !important;
   }
 }
+
+/* ============================================================
+   Theme Studio: runtime accent + canvas, and pack cards.
+   A selected pack writes --accent / --app-bg on <html> (theme.ts).
+   ============================================================ */
+
+:root {
+  --accent: #6d8bff;
+  --app-bg: #04060c;
+}
+
+body {
+  background: var(--app-bg);
+}
+
+.backdrop {
+  background:
+    radial-gradient(1200px 700px at 78% -10%, color-mix(in srgb, var(--accent) 16%, transparent), transparent 60%),
+    radial-gradient(900px 600px at 8% 110%, rgba(86, 232, 245, 0.08), transparent 60%),
+    var(--app-bg);
+}
+
+.btn.primary {
+  background: linear-gradient(112deg, var(--laser-2), var(--accent) 58%, var(--violet));
+}
+
+.rail-item.on {
+  border-color: color-mix(in srgb, var(--accent) 45%, transparent);
+  background: linear-gradient(110deg, color-mix(in srgb, var(--accent) 14%, transparent), rgba(183, 155, 255, 0.07));
+}
+
+.panel .hint {
+  margin: 0 0 12px;
+  font-size: 12.5px;
+  color: var(--text-faint);
+}
+
+.theme-form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: flex-end;
+  margin-bottom: 14px;
+}
+
+.theme-form .field {
+  margin-bottom: 0;
+  flex: 1 1 200px;
+  min-width: 170px;
+}
+
+.theme-form .field.narrow {
+  flex: 0 0 88px;
+  min-width: 88px;
+}
+
+.field input[type="color"] {
+  appearance: none;
+  width: 100%;
+  height: 36px;
+  padding: 3px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+}
+
+.field input[type="color"]::-webkit-color-swatch-wrapper {
+  padding: 0;
+}
+
+.field input[type="color"]::-webkit-color-swatch {
+  border: 0;
+  border-radius: 6px;
+}
+
+.theme-pick {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 36px;
+}
+
+.theme-pick .meta {
+  font-size: 11.5px;
+  color: var(--text-faint);
+  max-width: 150px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.theme-preview {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--line);
+}
+
+.theme-preview-name {
+  font-family: var(--display, var(--font));
+  font-weight: 600;
+  letter-spacing: 0.01em;
+}
+
+.theme-preview-sub {
+  margin-left: auto;
+  font-size: 11px;
+  color: var(--text-dim);
+}
+
+.swatch {
+  width: 22px;
+  height: 22px;
+  border-radius: 7px;
+  border: 1px solid var(--line-strong);
+  flex: none;
+  display: inline-block;
+}
+
+.theme-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 12px;
+}
+
+.theme-card {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 14px 16px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+}
+
+.theme-card.active {
+  border-color: color-mix(in srgb, var(--accent) 50%, transparent);
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--accent) 22%, transparent);
+}
+
+.theme-card-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.theme-card .grow {
+  flex: 1;
+  min-width: 0;
+}
+
+.theme-card .title {
+  font-weight: 600;
+  font-size: 13.5px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.theme-card .meta {
+  font-family: var(--mono);
+  font-size: 10.5px;
+  letter-spacing: 0.04em;
+  color: var(--text-faint);
+}
+
+.theme-card .actions {
+  display: flex;
+  gap: 8px;
+  margin-top: auto;
+}
