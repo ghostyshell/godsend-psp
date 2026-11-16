@@ -2,6 +2,7 @@
 # Publish automatically when the repo version is ahead of the live feed.
 # Builds all platforms through the workflow, then uploads via publish-release.
 set -euo pipefail
+export PATH="/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:$PATH"
 cd "$(git rev-parse --show-toplevel)"
 V=$(python3 -c 'import json;print(json.load(open("app/src-tauri/tauri.conf.json"))["version"])')
 LIVE=$(curl -fsS "https://ghostyshell.github.io/godsend-psp/downloads.json?v=$(date +%s)" 2>/dev/null \

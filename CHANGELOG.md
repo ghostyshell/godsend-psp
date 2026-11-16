@@ -202,6 +202,11 @@ All notable changes to GODsend PSP. Newest first.
 
 ### Fixed
 
+- The automatic release job resolves gh and friends under launchd by
+  setting an explicit PATH.
+
+### Fixed
+
 - Store source points at the real production index:
   https://game-debrid.link/api. Cover resolution prefers the index RAWG art
   and then the R2 mirror using the index slug.
