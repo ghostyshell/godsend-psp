@@ -3,6 +3,9 @@
 All notable changes to GODsend PSP. Newest first.
 
 
+## [0.2.35] - 2026-11-16
+
+
 ## [0.2.34] - 2026-11-16
 
 - Jailbreak page: a dedicated CFW section (separate from Homebrew) with stick
