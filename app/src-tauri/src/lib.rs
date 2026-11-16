@@ -909,11 +909,22 @@ fn store_download(app: AppHandle, state: State<'_, AppState>, source: String, id
                     .map_err(|_| Error::Invalid("bad minerva game id".into()))?;
                 let url = godsend_core::sources::minerva_download(set)
                     .ok_or_else(|| Error::Invalid("bad minerva id".into()))?;
-                let file = godsend_core::torrent::fetch_files(&url)?
+                let bytes = godsend_core::torrent::fetch_bytes(&url)?;
+                let hash = godsend_core::torrent::info_hash(&bytes)?;
+                let file = godsend_core::torrent::parse_files(&bytes)?
                     .into_iter()
                     .find(|entry| entry.index == index)
                     .ok_or_else(|| Error::NotFound(format!("minerva file {index}")))?;
+                let set_title = set
+                    .trim_start_matches("Minerva_Myrient - ")
+                    .trim_end_matches(".torrent");
+                let magnet = format!("magnet:?xt=urn:btih:{hash}&dn={set_title}");
                 let expect = file.path;
+                let basename = expect
+                    .rsplit('/')
+                    .next()
+                    .unwrap_or(&expect)
+                    .to_string();
                 let label = godsend_core::sources::game_title(&expect);
                 state.jobs.spawn(
                     "download",
@@ -923,6 +934,46 @@ fn store_download(app: AppHandle, state: State<'_, AppState>, source: String, id
                     },
                     move |ctx| {
                         ctx.check_cancel()?;
+                        // Prefer the connected debrid account: one file out of a
+                        // big public set resolves in seconds instead of P2P.
+                        if !config.rd_api_key.is_empty() || !config.tb_api_key.is_empty() {
+                            let provider = if !config.rd_api_key.is_empty() {
+                                "Real-Debrid"
+                            } else {
+                                "TorBox"
+                            };
+                            ctx.message(format!("resolving via {provider}"));
+                            match godsend_core::debrid::resolve_torrent_file(
+                                &magnet,
+                                &expect,
+                                index,
+                                &config.rd_api_key,
+                                &config.tb_api_key,
+                            ) {
+                                Ok(link) => {
+                                    match godsend_core::aria2::download(
+                                        &link, &dest_dir, &basename, &config, ctx,
+                                    ) {
+                                        Ok(path) => {
+                                            ctx.message(format!("downloaded {}", path.display()));
+                                            return Ok(());
+                                        }
+                                        Err(err) => {
+                                            let reason = config.redact(&err.to_string());
+                                            ctx.message(format!(
+                                                "debrid download failed ({reason}); falling back to P2P"
+                                            ));
+                                        }
+                                    }
+                                }
+                                Err(err) => {
+                                    let reason = config.redact(&err.to_string());
+                                    ctx.message(format!(
+                                        "debrid unavailable ({reason}); falling back to P2P"
+                                    ));
+                                }
+                            }
+                        }
                         let path = godsend_core::aria2::download_selected(
                             &url, &dest_dir, &expect, index, &config, ctx,
                         )?;
@@ -1496,10 +1547,16 @@ pub fn run() {
                 }
             }
             let handle = app.handle().clone();
-            set_progress_hook(Some(Arc::new(move |job_id, done, total| {
+            set_progress_hook(Some(Arc::new(move |job_id, done, total, speed, eta| {
                 let _ = handle.emit(
                     "job://progress",
-                    serde_json::json!({ "id": job_id, "done": done, "total": total }),
+                    serde_json::json!({
+                        "id": job_id,
+                        "done": done,
+                        "total": total,
+                        "speed": speed,
+                        "eta": eta
+                    }),
                 );
             })));
             spawn_device_watcher(app.handle().clone());

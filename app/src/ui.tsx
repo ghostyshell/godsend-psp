@@ -2,6 +2,7 @@
 
 import { ReactNode, useEffect, useState } from "react";
 import { api } from "./api";
+import type { Job } from "./types";
 
 export function fmtBytes(bytes: number): string {
   if (!bytes) return "0 B";
@@ -9,6 +10,39 @@ export function fmtBytes(bytes: number): string {
   const i = Math.min(units.length - 1, Math.floor(Math.log(bytes) / Math.log(1024)));
   const value = bytes / Math.pow(1024, i);
   return `${i === 0 ? bytes : value.toFixed(1)} ${units[i]}`;
+}
+
+/** Clock-style remaining time: `1:20`, `1:02:03`. */
+function fmtEta(secs: number): string {
+  const hours = Math.floor(secs / 3600);
+  const mins = Math.floor((secs % 3600) / 60);
+  const rest = Math.floor(secs % 60);
+  if (hours > 0) {
+    return `${hours}:${String(mins).padStart(2, "0")}:${String(rest).padStart(2, "0")}`;
+  }
+  return `${mins}:${String(rest).padStart(2, "0")}`;
+}
+
+/**
+ * One line for a running job: percent, bytes done of total, live speed and
+ * time left. Falls back to the average rate from elapsed time when the
+ * transfer cannot report a live speed, and to nothing when total is unknown.
+ */
+export function progressText(job: Job): string {
+  if (!job.total_bytes) return "";
+  const done = Math.min(job.done_bytes, job.total_bytes);
+  const pct = Math.min(100, Math.round((done / job.total_bytes) * 100));
+  const parts = [`${pct}% - ${fmtBytes(done)} of ${fmtBytes(job.total_bytes)}`];
+  const elapsed = Math.max(1, Math.floor(Date.now() / 1000) - job.started_at);
+  const speed = job.speed_bps || (done > 0 ? Math.round(done / elapsed) : 0);
+  if (speed > 0) {
+    parts.push(`${fmtBytes(speed)}/s`);
+    const eta = job.eta_secs || Math.round((job.total_bytes - done) / speed);
+    if (eta > 0 && done < job.total_bytes) {
+      parts.push(`${fmtEta(eta)} left`);
+    }
+  }
+  return parts.join(" - ");
 }
 
 export function Chip({

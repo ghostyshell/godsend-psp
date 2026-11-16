@@ -7,6 +7,110 @@ use crate::transfer::JobContext;
 use std::path::{Path, PathBuf};
 use std::process::Command;
 
+/// aria2 exits as soon as a torrent finishes instead of seeding at 99-100%.
+const SEED_FLAGS: [&str; 3] = ["--seed-time=0", "--seed-ratio=0.0", "--summary-interval=1"];
+
+/// One parsed aria2 console summary line.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
+pub struct Aria2Summary {
+    pub done: u64,
+    pub total: u64,
+    pub speed: u64,
+    pub eta_secs: u64,
+}
+
+/// Parse a size token such as `1.2GiB`, `300KB` or `42B` into bytes.
+fn parse_size(token: &str) -> Option<u64> {
+    let token = token.trim();
+    if token.is_empty() {
+        return None;
+    }
+    let split = token
+        .find(|c: char| !(c.is_ascii_digit() || c == '.'))
+        .unwrap_or(token.len());
+    let (number, unit) = token.split_at(split);
+    let value = number.parse::<f64>().ok()?;
+    let mult = match unit.trim().to_ascii_lowercase().as_str() {
+        "" | "b" => 1.0,
+        "kb" => 1_000.0,
+        "kib" => 1024.0,
+        "mb" => 1_000_000.0,
+        "mib" => 1024.0 * 1024.0,
+        "gb" => 1_000_000_000.0,
+        "gib" => 1024.0 * 1024.0 * 1024.0,
+        "tb" => 1_000_000_000_000.0,
+        "tib" => 1024.0 * 1024.0 * 1024.0 * 1024.0,
+        _ => return None,
+    };
+    Some((value * mult).round() as u64)
+}
+
+/// Parse an aria2 ETA token: `12s`, `1m20s`, `1h2m`, `1h2m3s`.
+fn parse_eta(token: &str) -> Option<u64> {
+    let token = token.trim();
+    if token.is_empty() || token.starts_with('-') {
+        return None;
+    }
+    let mut secs = 0u64;
+    let mut number = String::new();
+    let mut any = false;
+    for c in token.chars() {
+        if c.is_ascii_digit() {
+            number.push(c);
+        } else {
+            let value = number.parse::<u64>().ok()?;
+            let mult = match c.to_ascii_lowercase() {
+                's' => 1,
+                'm' => 60,
+                'h' => 3600,
+                _ => return None,
+            };
+            secs += value * mult;
+            number.clear();
+            any = true;
+        }
+    }
+    if !number.is_empty() || !any {
+        return None;
+    }
+    Some(secs)
+}
+
+/// Parse an aria2 summary line, e.g.
+/// `[#2089b0 1.2GiB/1.5GiB(78%)CN:16 DL:3.2MiB ETA:1m20s]`.
+/// Returns None when the line does not carry a `<done>/<total>(<pct>%)` pair.
+pub fn parse_summary(line: &str) -> Option<Aria2Summary> {
+    let open = line.find('(')?;
+    let close = open + line[open..].find(')')?;
+    let segment = line[..open]
+        .rsplit(|c: char| c.is_whitespace())
+        .next()
+        .unwrap_or("");
+    let (done_token, total_token) = segment.split_once('/')?;
+    let done = parse_size(done_token)?;
+    let total = parse_size(total_token)?;
+    if total == 0 {
+        return None;
+    }
+    let rest = &line[close + 1..];
+    let speed = rest
+        .find("DL:")
+        .and_then(|pos| rest[pos + 3..].split(|c: char| c.is_whitespace() || c == ']').next())
+        .and_then(parse_size)
+        .unwrap_or(0);
+    let eta_secs = rest
+        .find("ETA:")
+        .and_then(|pos| rest[pos + 4..].split(|c: char| c.is_whitespace() || c == ']').next())
+        .and_then(parse_eta)
+        .unwrap_or(0);
+    Some(Aria2Summary {
+        done,
+        total,
+        speed,
+        eta_secs,
+    })
+}
+
 /// Find aria2c: explicit path, app-bundled resources, PATH, then the usual
 /// package-manager locations. GUI apps on macOS do not inherit the shell
 /// PATH, so `/opt/homebrew/bin` must be checked explicitly.
@@ -99,6 +203,11 @@ fn run_aria2(
     ctx: &JobContext,
 ) -> Result<PathBuf> {
     let mut command = base_command(aria2, dest_dir);
+    // A .torrent or magnet passed here is a whole-torrent download, so exit
+    // the moment the payload completes instead of seeding.
+    if url.starts_with("magnet:") || url.ends_with(".torrent") || url.contains("/torrent/") {
+        command.args(SEED_FLAGS);
+    }
     command
         .arg("-o")
         .arg(Path::new(dest).file_name().expect("dest has file name"))
@@ -141,6 +250,7 @@ pub fn download_selected(
     ctx.message("downloading one file (aria2c torrent selection)");
 
     let mut command = base_command(&aria2, dest_dir);
+    command.args(SEED_FLAGS);
     command
         .arg("--follow-torrent=mem")
         .arg(format!("--select-file={select_file}"))
@@ -244,8 +354,11 @@ fn spawn_and_watch(
                 }
                 return Err(Error::Cancelled(ctx.job_id()));
             }
-            // console readout: `[#8f01 12MiB/1.5GiB(8%)CN:16 DL:3.2MiB]`
-            if let (Some(open), Some(close)) = (line.rfind('('), line.rfind('%')) {
+            // console readout: `[#8f01 12MiB/1.5GiB(8%)CN:16 DL:3.2MiB ETA:1m20s]`
+            if let Some(summary) = parse_summary(&line) {
+                ctx.metrics(summary.done, summary.total, summary.speed, summary.eta_secs);
+            } else if let (Some(open), Some(close)) = (line.rfind('('), line.rfind('%')) {
+                // Fallback for readouts that carry a percentage but no bytes.
                 if close > open {
                     if let Ok(pct) = line[open + 1..close].parse::<u64>() {
                         ctx.progress(pct, 100);
@@ -338,6 +451,36 @@ mod tests {
         assert_eq!(safe_relative("../../escape.zip"), Some(PathBuf::from("escape.zip")));
         assert_eq!(safe_relative(""), None);
         assert_eq!(safe_relative("/"), None);
+    }
+
+    #[test]
+    fn summary_line_parses_mib_and_eta() {
+        let summary =
+            parse_summary("[#2089b0 1.2GiB/1.5GiB(78%)CN:16 DL:3.2MiB ETA:1m20s]").expect("summary");
+        assert_eq!(summary.done, 1_288_490_189);
+        assert_eq!(summary.total, 1_610_612_736);
+        assert_eq!(summary.speed, 3_355_443);
+        assert_eq!(summary.eta_secs, 80);
+    }
+
+    #[test]
+    fn summary_line_without_eta_keeps_speed() {
+        let summary = parse_summary("[#2089b0 123MiB/456MiB(27%)CN:16 DL:1.0MiB]").expect("summary");
+        assert_eq!(summary.done, 128_974_848);
+        assert_eq!(summary.total, 478_150_656);
+        assert_eq!(summary.speed, 1_048_576);
+        assert_eq!(summary.eta_secs, 0);
+    }
+
+    #[test]
+    fn summary_line_parses_plain_kb() {
+        let summary = parse_summary("[#8f01 1200KB/1500KB(80%)CN:4 DL:300KB ETA:12s]").expect("summary");
+        assert_eq!(summary.done, 1_200_000);
+        assert_eq!(summary.total, 1_500_000);
+        assert_eq!(summary.speed, 300_000);
+        assert_eq!(summary.eta_secs, 12);
+        assert_eq!(parse_eta("1h2m"), Some(3720));
+        assert!(parse_summary("no progress here").is_none());
     }
 
     #[test]

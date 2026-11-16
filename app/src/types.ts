@@ -90,6 +90,8 @@ export interface Job {
   state: JobState;
   done_bytes: number;
   total_bytes: number;
+  speed_bps: number;
+  eta_secs: number;
   message: string;
   started_at: number;
   finished_at: number | null;

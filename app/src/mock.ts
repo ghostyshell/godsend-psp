@@ -181,6 +181,8 @@ function startJob(kind: string, label: string): number {
     state: "running",
     done_bytes: 0,
     total_bytes: 100,
+    speed_bps: 0,
+    eta_secs: 0,
     message: "working",
     started_at: Math.floor(Date.now() / 1000),
     finished_at: null as number | null,
@@ -197,16 +199,22 @@ function startJob(kind: string, label: string): number {
     if (done >= 100) {
       done = 100;
       current.done_bytes = 100;
+      current.speed_bps = 0;
+      current.eta_secs = 0;
       current.state = "done";
       current.finished_at = Math.floor(Date.now() / 1000);
       current.message = "installed on MEMORY STICK";
-      emit("job://progress", { id, done: 100, total: 100 });
+      emit("job://progress", { id, done: 100, total: 100, speed: 0, eta: 0 });
       emit("job://done", { ...current });
       clearInterval(timer);
       refreshCounts();
     } else {
+      const speed = Math.round((4 + Math.random() * 6) * MB);
+      const eta = Math.max(1, Math.round(((100 - done) / 100) * 30));
       current.done_bytes = Math.floor(done);
-      emit("job://progress", { id, done: Math.floor(done), total: 100 });
+      current.speed_bps = speed;
+      current.eta_secs = eta;
+      emit("job://progress", { id, done: Math.floor(done), total: 100, speed, eta });
     }
   }, 240);
   return id;
@@ -609,16 +617,25 @@ console.info("[mock] GODsend PSP fixture bridge installed");
 
 export {}; // make this file a module so dynamic import type-checks
 
-// Seed a couple of finished jobs so the inspector is alive.
+// Seed a couple of finished jobs so the inspector is alive, plus one live
+// download so the progress line has bytes, speed and an ETA to render.
 jobs = [
   {
+    id: 3, kind: "download", label: "Ridge Racer 2 (Europe)", state: "running",
+    done_bytes: 78 * MB, total_bytes: 100 * MB, speed_bps: 3 * MB, eta_secs: 8,
+    message: "resolving via Real-Debrid",
+    started_at: Math.floor(Date.now() / 1000) - 20, finished_at: null,
+  },
+  {
     id: 2, kind: "music", label: "01 15 Step.mp3", state: "done",
-    done_bytes: 100, total_bytes: 100, message: "on MEMORY STICK as 01 15 Step.mp3",
+    done_bytes: 100, total_bytes: 100, speed_bps: 0, eta_secs: 0,
+    message: "on MEMORY STICK as 01 15 Step.mp3",
     started_at: Math.floor(Date.now() / 1000) - 600, finished_at: Math.floor(Date.now() / 1000) - 590,
   },
   {
     id: 1, kind: "install", label: "FrogGBA v0.4.0-rc.1", state: "done",
-    done_bytes: 100, total_bytes: 100, message: "installed 2 item(s) onto MEMORY STICK",
+    done_bytes: 100, total_bytes: 100, speed_bps: 0, eta_secs: 0,
+    message: "installed 2 item(s) onto MEMORY STICK",
     started_at: Math.floor(Date.now() / 1000) - 3600, finished_at: Math.floor(Date.now() / 1000) - 3590,
   },
 ];

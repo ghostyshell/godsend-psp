@@ -68,7 +68,16 @@ test("jailbreak page shows firmware detection", async ({ page }) => {
 });
 
 test("inspector queue shows the seeded jobs", async ({ page }) => {
-  await expect(page.locator(".queue-card .job-row")).toHaveCount(2);
+  await expect(page.locator(".queue-card .job-row")).toHaveCount(3);
+});
+
+test("running download shows percent, bytes, speed and time left", async ({ page }) => {
+  await page.getByRole("button", { name: "Downloads" }).click();
+  const row = page.locator(".rows .row").filter({ hasText: "Ridge Racer 2 (Europe)" });
+  await expect(row).toBeVisible();
+  await expect(row.locator(".sub")).toContainText("%");
+  await expect(row.locator(".sub")).toContainText("/s");
+  await expect(row.locator(".sub")).toContainText("of");
 });
 
 test("settings exposes config controls", async ({ page }) => {
