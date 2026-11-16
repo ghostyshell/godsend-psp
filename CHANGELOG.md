@@ -19,6 +19,13 @@ All notable changes to GODsend PSP. Newest first.
 - The publish script keeps the three newest release prefixes on R2, sorted by
   parsed version, and always keeps the version being published.
 
+### Changed
+
+- R2 retention is a standalone command now, `scripts/prune-r2-releases.sh`
+  (`--keep`, `--prefix`, `--dry-run`), called by the publish script. Verified
+  against a throwaway prefix with 0.2.9 through 0.2.12: keep 3 deleted 0.2.9
+  and kept 0.2.10 to 0.2.12, proving the numeric version sort.
+
 ## [0.2.46] - 2026-11-17
 
 ### Fixed

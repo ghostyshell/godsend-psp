@@ -192,32 +192,12 @@ r2_upload() {
 
 prune_r2() {
   [ "$R2_READY" = 1 ] || return 0
-  local listing old keep
-  listing=$(r2_aws s3api list-objects-v2 --bucket "$R2_BUCKET" \
-    --prefix "$R2_PREFIX/" --delimiter "/" \
-    --query 'CommonPrefixes[].Prefix' --output text 2>/dev/null) || {
-    log "WARNING: could not list $R2_PREFIX/ for pruning"
-    return 0
-  }
-  # Sort by parsed x.y.z, not lexically (0.2.9 < 0.2.10).
-  listing=$(printf '%s\n' "$listing" | tr '\t' '\n' \
-    | sed "s#^$R2_PREFIX/##; s#/\$##" \
-    | grep -E '^[0-9]+\.[0-9]+\.[0-9]+$' \
-    | sort -t. -k1,1n -k2,2n -k3,3n || true)
-  keep=$( { printf '%s\n' "$listing" | tail -3; printf '%s\n' "$V"; } )
-  local pruned=0
-  for old in $listing; do
-    if printf '%s\n' "$keep" | grep -qx "$old"; then
-      continue
-    fi
-    log "pruning R2 $R2_PREFIX/$old"
-    if r2_aws s3 rm "s3://$R2_BUCKET/$R2_PREFIX/$old/" --recursive --only-show-errors >/dev/null 2>&1; then
-      pruned=$((pruned + 1))
-    else
-      log "WARNING: could not prune $R2_PREFIX/$old"
-    fi
-  done
-  [ "$pruned" -eq 0 ] || log "pruned $pruned old R2 release(s)"
+  local root
+  root=$(cd "$(dirname "$0")/.." && pwd)
+  if ! R2_BUCKET="$R2_BUCKET" "$root/scripts/prune-r2-releases.sh" \
+      --keep 3 --prefix "$R2_PREFIX"; then
+    log "WARNING: R2 release prune failed; old mirrors left in place"
+  fi
 }
 
 # --- 2. Upload ------------------------------------------------------------------
