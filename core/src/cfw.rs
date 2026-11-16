@@ -86,7 +86,10 @@ pub fn migration_steps(state: &CfwState) -> Vec<String> {
             "Eject safely, then boot the ARK Loader on the console and confirm ARK-5 starts from the launcher.".to_string(),
         );
         steps.push(
-            "Run the custom IPL installer inside ARK and choose New cIPL. This writes the firmware to flash and is permanent for the console, so only do it after ARK-5 boots reliably.".to_string(),
+            "Check the model first: PSP-1000 and PSP-2000 (except TA-088v3) can install New cIPL. PSP-3000, PSP Street (N1000) and PSP-E1000 cannot, and keep running the ARK Loader once per boot instead.".to_string(),
+        );
+        steps.push(
+            "On a cIPL-capable console only: install DC10 as a recovery path, then run CustomIPL inside ARK and choose New cIPL. It writes flash and is permanent, so do it after ARK-5 boots reliably.".to_string(),
         );
     }
 
