@@ -3,6 +3,18 @@
 All notable changes to GODsend PSP. Newest first.
 
 
+## [0.2.49] - 2026-11-17
+
+### Fixed
+
+- Queue cards no longer overflow the 300 px inspector. A long game title
+  could not shrink, so the Cancel button was pushed outside the card. The
+  label now truncates and the button keeps its width.
+- The download progress line (percent, downloaded of total, speed and time
+  left) wraps instead of ending in an ellipsis, so every figure is visible.
+  A UI test checks the cancel button stays inside the card and that neither
+  the card nor the progress line is clipped.
+
 ## [0.2.48] - 2026-11-17
 
 ### Fixed

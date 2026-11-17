@@ -87,7 +87,40 @@ test("jailbreak page shows firmware detection", async ({ page }) => {
 });
 
 test("inspector queue shows the seeded jobs", async ({ page }) => {
-  await expect(page.locator(".queue-card .job-row")).toHaveCount(3);
+  await expect(page.locator(".queue-card .job-row")).toHaveCount(4);
+});
+
+test("queue card keeps the cancel button and the full progress line inside the card", async ({ page }) => {
+  const card = page
+    .locator(".queue-card .job-row")
+    .filter({ hasText: "Naruto - Ultimate Ninja Heroes 2" })
+    .first();
+  await expect(card).toBeVisible();
+  const cancel = card.getByRole("button", { name: "Cancel" });
+  await expect(cancel).toBeVisible();
+
+  const cardBox = await card.boundingBox();
+  const cancelBox = await cancel.boundingBox();
+  expect(cardBox && cancelBox).toBeTruthy();
+  if (cardBox && cancelBox) {
+    expect(cancelBox.x + cancelBox.width).toBeLessThanOrEqual(cardBox.x + cardBox.width + 0.5);
+  }
+
+  const msg = card.locator(".msg");
+  await expect(msg).toContainText("%");
+  await expect(msg).toContainText("/s");
+  await expect(msg).toContainText("left");
+
+  // Nothing may be clipped horizontally or vertically.
+  const overflow = await card.evaluate((el) => {
+    const msg = el.querySelector(".msg") as HTMLElement | null;
+    return {
+      cardX: el.scrollWidth > el.clientWidth + 1,
+      msgX: msg ? msg.scrollWidth > msg.clientWidth + 1 : false,
+      msgY: msg ? msg.scrollHeight > msg.clientHeight + 1 : false,
+    };
+  });
+  expect(overflow).toEqual({ cardX: false, msgX: false, msgY: false });
 });
 
 test("running download shows percent, bytes, speed and time left", async ({ page }) => {

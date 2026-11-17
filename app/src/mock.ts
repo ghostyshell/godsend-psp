@@ -653,6 +653,14 @@ export {}; // make this file a module so dynamic import type-checks
 // download so the progress line has bytes, speed and an ETA to render.
 jobs = [
   {
+    id: 4, kind: "download",
+    label: "Naruto - Ultimate Ninja Heroes 2 - The Phantom Fortress (Europe) (En,Fr,De,Es,It)",
+    state: "running",
+    done_bytes: 641_000_000, total_bytes: 1_600_000_000, speed_bps: 14_000_000, eta_secs: 64,
+    message: "downloading (aria2c, 16 connections)",
+    started_at: Math.floor(Date.now() / 1000) - 46, finished_at: null,
+  },
+  {
     id: 3, kind: "download", label: "Ridge Racer 2 (Europe)", state: "running",
     done_bytes: 78 * MB, total_bytes: 100 * MB, speed_bps: 3 * MB, eta_secs: 8,
     message: "resolving via Real-Debrid",
