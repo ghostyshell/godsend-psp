@@ -520,13 +520,26 @@ html[data-os="mac"] .topbar {
   border: 1px solid var(--line);
   border-radius: var(--radius-sm);
   background: rgba(255, 255, 255, 0.02);
+  overflow: hidden;
 }
 
 .job-row .head {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
   gap: 8px;
+}
+
+/* flex children must be allowed to shrink, otherwise a long game title
+   pushes the cancel button out of the 300px inspector */
+.job-row .head > .label {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.job-row .head > .btn {
+  flex: 0 0 auto;
+  white-space: nowrap;
 }
 
 .job-row .label {
@@ -546,13 +559,15 @@ html[data-os="mac"] .topbar {
 }
 
 .job-row .msg {
-  margin-top: 3px;
+  margin-top: 4px;
   font-family: var(--mono);
   font-size: 10.5px;
+  line-height: 1.45;
   color: var(--text-faint);
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  /* progress has percent, sizes, speed and ETA; let it use the width it
+     needs instead of cutting the ETA off */
+  white-space: normal;
+  overflow-wrap: anywhere;
 }
 
 /* statusbar */
