@@ -3,6 +3,28 @@
 All notable changes to GODsend PSP. Newest first.
 
 
+## [0.2.50] - 2026-11-17
+
+### Changed
+
+- Store rows show a compact container pill (capped at 110 px, full name in
+  the tooltip) that expands on hover, so long collection names no longer
+  dominate the row or crowd the Download button.
+- The Minerva and r-roms Store indexes are prebuilt and served from
+  `https://covers.debrid.in/psp/index/` (about 3,637 and 6,196 games), with a
+  24 hour on-disk cache and the live build as fallback. Opening those tabs no
+  longer downloads a torrent or crawls Internet Archive metadata.
+- The update banner keeps Install and Dismiss on screen at the 1000 px
+  minimum window width and sticks to the top of the scrolling workspace, so
+  the action is still there after scrolling.
+
+### Fixed
+
+- Internet Archive metadata falls back to the plain HTTP endpoint when
+  archive.org:443 is filtered, so the r-roms live build still completes on
+  such networks.
+
+
 ## [0.2.49] - 2026-11-17
 
 ### Fixed

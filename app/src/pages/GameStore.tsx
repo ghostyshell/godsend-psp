@@ -172,9 +172,9 @@ export default function Store({ snap, reload, toast, refreshKey }: PageProps) {
           {source === "gamesearch"
             ? "Debrid index wired to the game-search service. Links are resolved through Real-Debrid or TorBox when connected, then downloaded with aria2c."
             : source === "minerva"
-              ? "Every Redump and No-Intro PSP game inside the Minerva Archive torrents, as individual titles. The first load builds the index from the Minerva torrent (about 3 MB); it is cached for 10 minutes."
+              ? "Every Redump and No-Intro PSP game inside the Minerva Archive torrents, as individual titles. The index is prebuilt and served from the release host, cached on disk for a day; a live build from the torrent is the fallback."
               : source === "rroms"
-                ? "Every game inside the r-roms Internet Archive PSP sets, as individual titles. The first load reads the Internet Archive metadata to build the index; it is cached for 10 minutes."
+                ? "Every game inside the r-roms Internet Archive PSP sets, as individual titles. The index is prebuilt and served from the release host, cached on disk for a day; reading the Internet Archive metadata is the fallback."
                 : source === "nps"
                   ? "NoPayStation PSP packages. Installing a .pkg needs pkg2zip or NoPayStation to decrypt it; the .zrif sidecar is saved next to the download."
                   : "Internet Archive sets in the r/Roms megathread style. Direct downloads, no account needed."}
@@ -346,7 +346,9 @@ export default function Store({ snap, reload, toast, refreshKey }: PageProps) {
           <div className="rows">
             {visibleGames.map((game) => (
               <div className="row" key={game.id}>
-                <Chip tone="laser">{game.container}</Chip>
+                <Chip tone="laser" className="container-pill" title={game.container}>
+                  <span className="container-pill-text">{game.container}</span>
+                </Chip>
                 <div className="grow">
                   <div className="title">{game.title}</div>
                 </div>

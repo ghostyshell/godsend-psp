@@ -146,6 +146,41 @@ test("settings updates section shows the current version and status", async ({ p
   await expect(page.getByText("You are up to date")).toBeVisible();
 });
 
+test("store container pill stays compact and expands on hover", async ({ page }) => {
+  await page.getByRole("button", { name: "Store", exact: true }).click();
+  await page.getByRole("tab", { name: "Minerva" }).click();
+  const pill = page.locator(".chip.container-pill").first();
+  await expect(pill).toBeVisible();
+  await expect(pill).toHaveAttribute(
+    "title",
+    "Redump - Sony - PlayStation Portable",
+  );
+
+  const rest = await pill.boundingBox();
+  expect(rest).toBeTruthy();
+  if (rest) expect(rest.width).toBeLessThan(130);
+
+  await pill.hover();
+  await page.waitForTimeout(400);
+  const expanded = await pill.boundingBox();
+  expect(expanded).toBeTruthy();
+  if (rest && expanded) expect(expanded.width).toBeGreaterThan(rest.width + 20);
+
+  // At the minimum window width the expanded pill must still leave the
+  // Download action inside the row and inside the viewport.
+  await page.setViewportSize({ width: 1000, height: 680 });
+  await page.waitForTimeout(200);
+  await pill.hover();
+  await page.waitForTimeout(400);
+  const row = page.locator(".rows .row").filter({ has: pill }).first();
+  const download = row.getByRole("button", { name: "Download" });
+  const box = await download.boundingBox();
+  expect(box).toBeTruthy();
+  if (box) expect(box.x + box.width).toBeLessThanOrEqual(1000);
+  const overflow = await row.evaluate((el) => el.scrollWidth > el.clientWidth + 1);
+  expect(overflow).toBe(false);
+});
+
 test("update banner offers install and dismiss", async ({ page }) => {
   await page.evaluate(async () => {
     const api = (window as unknown as Record<string, any>).__TAURI_INTERNALS__;
@@ -154,6 +189,44 @@ test("update banner offers install and dismiss", async ({ page }) => {
   const banner = page.locator(".update-banner");
   await expect(banner).toBeVisible();
   await expect(banner).toContainText("Update 0.2.47 available");
+  await banner.getByRole("button", { name: "Dismiss" }).click();
+  await expect(banner).toHaveCount(0);
+});
+
+test("update banner actions stay inside the window at the minimum width", async ({ page }) => {
+  await page.setViewportSize({ width: 1000, height: 680 });
+  await page.goto("/?mock=1", { waitUntil: "load" });
+  await page.waitForTimeout(500);
+  await page.evaluate(async () => {
+    const api = (window as unknown as Record<string, any>).__TAURI_INTERNALS__;
+    await api.invoke("update_check", { simulate: true });
+  });
+  const banner = page.locator(".update-banner");
+  await expect(banner).toBeVisible();
+  expect(page.viewportSize()).toEqual({ width: 1000, height: 680 });
+
+  for (const name of ["Install", "Dismiss"]) {
+    const button = banner.getByRole("button", { name });
+    await expect(button).toBeVisible();
+    await expect(button).toBeEnabled();
+    const box = await button.boundingBox();
+    expect(box).toBeTruthy();
+    if (box) {
+      expect(box.x).toBeGreaterThanOrEqual(0);
+      expect(box.y).toBeGreaterThanOrEqual(0);
+      expect(box.x + box.width).toBeLessThanOrEqual(1000);
+      expect(box.y + box.height).toBeLessThanOrEqual(680);
+    }
+    // The button's own centre must hit the button, not the inspector over it.
+    const hit = await button.evaluate((el) => {
+      const r = el.getBoundingClientRect();
+      const at = document.elementFromPoint(r.x + r.width / 2, r.y + r.height / 2);
+      return !!at && (el === at || el.contains(at));
+    });
+    expect(hit).toBe(true);
+  }
+
+  await banner.getByRole("button", { name: "Install" }).click();
   await banner.getByRole("button", { name: "Dismiss" }).click();
   await expect(banner).toHaveCount(0);
 });
