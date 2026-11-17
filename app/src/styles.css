@@ -672,7 +672,10 @@ html[data-os="mac"] .topbar {
 
 .btn:hover:not(:disabled) {
   border-color: var(--line-laser);
-  background: rgba(255, 255, 255, 0.05);
+  /* background-color, not the background shorthand: the shorthand also
+     clears background-image, which erased the primary gradient and left
+     near-black text on a dark card */
+  background-color: rgba(255, 255, 255, 0.05);
 }
 
 .btn:active:not(:disabled) {
