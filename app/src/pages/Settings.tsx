@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { api, pickers } from "../api";
 import { VERSION } from "../App";
 import type { PageProps } from "../App";
+import type { UpdateInfo } from "../types";
 import { Btn, Chip, Seg, Toggle } from "../ui";
 
 export default function Settings({ snap, reload, toast, refreshKey }: PageProps) {
@@ -15,6 +16,7 @@ export default function Settings({ snap, reload, toast, refreshKey }: PageProps)
   const [debrid, setDebrid] = useState({ realdebrid: false, torbox: false });
   const [checking, setChecking] = useState(false);
   const [updateResult, setUpdateResult] = useState<string | null>(null);
+  const [updateInfo, setUpdateInfo] = useState<UpdateInfo | null>(null);
 
   const config = snap.config;
 
@@ -52,6 +54,7 @@ export default function Settings({ snap, reload, toast, refreshKey }: PageProps)
     setChecking(true);
     try {
       const info = await api.updateCheck();
+      setUpdateInfo(info.available ? info : null);
       setUpdateResult(
         info.available
           ? `Update ${info.latest} available${info.artifact ? ` for ${info.artifact.label}` : ""}`
@@ -486,10 +489,31 @@ export default function Settings({ snap, reload, toast, refreshKey }: PageProps)
           <Btn onClick={() => void checkUpdates()} disabled={checking}>
             {checking ? "Checking..." : "Check for updates now"}
           </Btn>
+          {updateInfo ? (
+            <Btn
+              variant="primary"
+              onClick={async () => {
+                try {
+                  await api.updateDownload();
+                  toast(`downloading GODsend PSP ${updateInfo.latest}`);
+                } catch (err) {
+                  toast(`update failed: ${String(err)}`);
+                }
+              }}
+            >
+              Install {updateInfo.latest}
+            </Btn>
+          ) : null}
           {updateResult ? (
             <span style={{ fontSize: 12.5, color: "var(--text-dim)" }}>{updateResult}</span>
           ) : null}
         </div>
+        {updateInfo ? (
+          <p style={{ margin: "8px 0 0", fontSize: 12.5, color: "var(--text-faint)" }}>
+            Install downloads the build for this platform, verifies its sha256 and opens the
+            installer. The same offer appears in the banner under the top bar.
+          </p>
+        ) : null}
       </section>
 
       <section className="card panel">
@@ -546,7 +570,7 @@ export default function Settings({ snap, reload, toast, refreshKey }: PageProps)
           <Btn onClick={() => void api.openDataDir()}>Open Data Folder</Btn>
         </div>
         <p style={{ margin: "12px 0 0", fontSize: 12.5, color: "var(--text-faint)" }}>
-          godsend-psp 0.2.51 - Rust engine + Tauri. USB mass storage, no drivers.
+          godsend-psp 0.2.52 - Rust engine + Tauri. USB mass storage, no drivers.
         </p>
       </section>
     </div>

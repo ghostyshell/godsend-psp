@@ -523,7 +523,8 @@ async function invoke(cmd: string, args: Record<string, any> = {}): Promise<unkn
       Object.assign(config, args.patch);
       return config;
     case "update_check": {
-      if (args.simulate) {
+      const forced = (window as unknown as Record<string, unknown>).__MOCK_UPDATE__ === true;
+      if (args.simulate || forced) {
         const info = {
           current: "0.2.46",
           latest: "0.2.47",
