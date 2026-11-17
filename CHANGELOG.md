@@ -3,6 +3,18 @@
 All notable changes to GODsend PSP. Newest first.
 
 
+## [0.2.51] - 2026-11-17
+
+### Fixed
+
+- Primary buttons no longer lose their label on hover. The shared hover rule
+  used the `background` shorthand, which also cleared `background-image`,
+  erasing the primary gradient while the text stayed near-black. It now sets
+  only `background-color`, so the gradient and the dark label keep their
+  contrast. This covers Rescan and every other primary button.
+- Added a UI test that hovers a primary and a ghost button and checks the
+  gradient survives and the ghost text stays light.
+
 ## [0.2.50] - 2026-11-17
 
 ### Changed

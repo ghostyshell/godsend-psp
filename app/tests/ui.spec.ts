@@ -20,6 +20,25 @@ test("macOS header is a drag region", async ({ page }) => {
   await expect(page.locator("nav.rail button[data-tauri-drag-region]")).toHaveCount(0);
 });
 
+test("buttons stay legible on hover", async ({ page }) => {
+  const primary = page.getByRole("button", { name: "Rescan" });
+  await expect(primary).toHaveClass(/primary/);
+  await primary.hover();
+  const primaryStyle = await primary.evaluate((el) => {
+    const s = getComputedStyle(el);
+    return { color: s.color, bg: s.backgroundImage };
+  });
+  expect(primaryStyle.bg).not.toBe("none");
+  expect(primaryStyle.bg).toContain("gradient");
+
+  const ghost = page.getByRole("button", { name: "Run Checks" });
+  await ghost.hover();
+  const ghostColor = await ghost.evaluate((el) => getComputedStyle(el).color);
+  const rgb = ghostColor.match(/\d+/g)?.map(Number) ?? [0, 0, 0];
+  const luminance = (rgb[0] + rgb[1] + rgb[2]) / 3;
+  expect(luminance).toBeGreaterThan(120);
+});
+
 test("library page lists the fixture games", async ({ page }) => {
   await page.getByRole("button", { name: "Library" }).click();
   await expect(page.locator(".tile").first()).toBeVisible();
