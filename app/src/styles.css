@@ -419,11 +419,16 @@ html[data-os="mac"] .topbar {
 }
 
 /* Update offer strip: lives inside the workspace column, so the macOS
-   drag region in the topbar never moves. */
+   drag region in the topbar never moves. It sticks to the top of the
+   scrolling workspace so Install never scrolls out of reach. */
 .update-banner {
+  position: sticky;
+  top: 8px;
+  z-index: 6;
   max-width: 980px;
   margin: 0 auto 16px;
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: 10px;
   padding: 10px 14px;
@@ -435,8 +440,21 @@ html[data-os="mac"] .topbar {
 }
 
 .update-banner-text {
+  flex: 1 1 200px;
+  min-width: 0;
   font-size: 13px;
   color: var(--text);
+}
+
+.update-banner-actions {
+  display: flex;
+  flex: 0 0 auto;
+  gap: 8px;
+}
+
+.update-banner-actions .btn {
+  flex: 0 0 auto;
+  white-space: nowrap;
 }
 
 .update-banner-text strong {
@@ -729,6 +747,34 @@ html[data-os="mac"] .topbar {
 .chip.laser { color: var(--laser-2); border-color: var(--line-laser); background: var(--cyan-soft); }
 .chip.live .dot {
   animation: breathe 2.2s var(--ease) infinite;
+}
+
+/* Store container pill: the full collection name stays in the title, the
+   pill shows a compact capped label and reveals the rest on hover/focus. */
+.chip.container-pill {
+  flex: 0 0 auto;
+  max-width: 110px;
+  overflow: hidden;
+  transition: max-width var(--fast) var(--ease);
+}
+
+.chip.container-pill:hover,
+.chip.container-pill:focus,
+.chip.container-pill:focus-visible {
+  /* Wide enough to read most collection names, but never so wide that the
+     Download button leaves the row at the 1000px minimum window width. */
+  max-width: min(320px, calc(100% - 170px));
+}
+
+.chip.container-pill .dot {
+  flex: 0 0 auto;
+}
+
+.container-pill-text {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 @keyframes breathe {

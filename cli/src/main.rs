@@ -8,7 +8,7 @@ use godsend_core::{
     library,
     media::{self, AudioFormat},
     plugins::{self, Section},
-    savedata, themes,
+    savedata, sources, themes,
     transfer::JobManager,
 };
 use std::path::{Path, PathBuf};
@@ -115,6 +115,12 @@ enum Command {
     Doctor,
     /// Serve the loopback MCP endpoint (127.0.0.1) until Ctrl-C.
     Mcp,
+    /// Build the prebuilt Store indexes (minerva.json, rroms.json) for R2.
+    StoreIndex {
+        /// Directory to write minerva.json and rroms.json into.
+        #[arg(long)]
+        out: PathBuf,
+    },
 }
 
 #[derive(Subcommand)]
@@ -494,6 +500,19 @@ fn run(cli: Cli) -> godsend_core::Result<()> {
             loop {
                 std::thread::sleep(std::time::Duration::from_secs(1));
             }
+        }
+        Command::StoreIndex { out } => {
+            std::fs::create_dir_all(&out)?;
+            let built = [
+                ("minerva", sources::build_minerva_games()?),
+                ("rroms", sources::build_rroms_games()?),
+            ];
+            for (kind, games) in built {
+                let path = out.join(format!("{kind}.json"));
+                std::fs::write(&path, serde_json::to_vec(&games)?)?;
+                println!("{kind}: {} games -> {}", games.len(), path.display());
+            }
+            Ok(())
         }
     }
 }

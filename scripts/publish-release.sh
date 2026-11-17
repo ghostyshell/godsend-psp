@@ -280,6 +280,14 @@ done
 
 prune_r2
 
+# --- 1c. Prebuilt Store indexes -----------------------------------------------
+# The Store tabs read these from the covers host instead of rebuilding from a
+# torrent or Internet Archive metadata on every visit. Best effort: a failure
+# leaves the previous index in place and must never block the publish.
+if ! "$REPO/scripts/refresh-store-index.sh"; then
+  log "WARNING: store index refresh failed; published indexes left as-is"
+fi
+
 # --- 3. Rewrite the README table -------------------------------------------------
 python3 -I scripts/patch-release-links.py "$LINKS" "$V" || die "could not patch README"
 

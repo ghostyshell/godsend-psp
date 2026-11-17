@@ -843,11 +843,11 @@ fn store_search(state: State<'_, AppState>, query: String, source: String, limit
             Ok(serde_json::json!({ "kind": "ia", "items": items }))
         }
         "minerva" => {
-            let items = godsend_core::sources::minerva_games()?;
+            let items = godsend_core::sources::minerva_games(&config.covers_base)?;
             Ok(serde_json::json!({ "kind": "minerva", "items": items }))
         }
         "rroms" => {
-            let items = godsend_core::sources::rroms_games()?;
+            let items = godsend_core::sources::rroms_games(&config.covers_base)?;
             Ok(serde_json::json!({ "kind": "rroms", "items": items }))
         }
         "nps" => {

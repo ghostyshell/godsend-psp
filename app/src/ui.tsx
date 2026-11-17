@@ -50,14 +50,19 @@ export function Chip({
   live = false,
   children,
   title,
+  className,
 }: {
   tone?: "neutral" | "good" | "warn" | "bad" | "laser";
   live?: boolean;
   children: ReactNode;
   title?: string;
+  className?: string;
 }) {
   return (
-    <span className={`chip ${tone} ${live ? "live" : ""}`} title={title}>
+    <span
+      className={`chip ${tone} ${live ? "live" : ""}${className ? ` ${className}` : ""}`}
+      title={title}
+    >
       <span className="dot" aria-hidden="true" />
       {children}
     </span>

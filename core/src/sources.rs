@@ -6,8 +6,9 @@ use crate::error::{Error, Result};
 use crate::torrent;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
+use std::path::{Path, PathBuf};
 use std::sync::{Mutex, OnceLock};
-use std::time::{Duration, Instant};
+use std::time::{Duration, Instant, SystemTime};
 
 fn agent() -> ureq::Agent {
     ureq::AgentBuilder::new()
@@ -309,8 +310,7 @@ fn archive_item_files(url: &str) -> Result<Vec<IaFile>> {
             url: url.to_string(),
         }]);
     };
-    let meta_url = format!("https://archive.org/metadata/{}", urlencode(&identifier));
-    let v: serde_json::Value = agent().get(&meta_url).call()?.into_json()?;
+    let v = ia_metadata(&identifier)?;
     let files = v
         .get("files")
         .and_then(|f| f.as_array())
@@ -952,6 +952,9 @@ pub struct StoreGame {
 
 const GAME_CACHE_TTL: Duration = Duration::from_secs(600);
 
+/// How long a prebuilt index on disk stays fresh.
+pub const STORE_INDEX_TTL: Duration = Duration::from_secs(24 * 60 * 60);
+
 type GameCache = Mutex<HashMap<&'static str, (Instant, Vec<StoreGame>)>>;
 
 fn game_cache() -> &'static GameCache {
@@ -959,23 +962,100 @@ fn game_cache() -> &'static GameCache {
     CACHE.get_or_init(|| Mutex::new(HashMap::new()))
 }
 
-/// Build a per-game index once, then serve clones for 10 minutes so tab
-/// switches and local filtering never refetch a torrent or IA metadata.
-/// Only successful builds are cached.
+/// `<data_dir>/store-index`, the on-disk copy of the prebuilt indexes.
+fn store_index_dir() -> PathBuf {
+    crate::config::data_dir().join("store-index")
+}
+
+/// `<data_dir>/store-index/<kind>.json`.
+pub fn store_index_path(kind: &str) -> PathBuf {
+    store_index_dir().join(format!("{kind}.json"))
+}
+
+/// `<base>/psp/index/<kind>.json`, where base is the Config covers base.
+pub fn remote_index_url(base: &str, kind: &str) -> Option<String> {
+    let base = base.trim().trim_end_matches('/');
+    if base.is_empty() {
+        return None;
+    }
+    Some(format!("{base}/psp/index/{kind}.json"))
+}
+
+/// Parse a prebuilt index file (a plain `Vec<StoreGame>`).
+fn parse_store_index(body: &str) -> Result<Vec<StoreGame>> {
+    Ok(serde_json::from_str(body)?)
+}
+
+/// Read a cached index when its mtime is younger than [`STORE_INDEX_TTL`].
+/// A missing, unreadable or stale file reads as `None`, so the caller falls
+/// through to the remote index or a live build.
+fn read_index_at(path: &Path, now: SystemTime) -> Option<Vec<StoreGame>> {
+    let modified = std::fs::metadata(path).ok()?.modified().ok()?;
+    let age = now.duration_since(modified).unwrap_or_default();
+    if age >= STORE_INDEX_TTL {
+        return None;
+    }
+    let body = std::fs::read_to_string(path).ok()?;
+    parse_store_index(&body).ok()
+}
+
+/// Write an index atomically enough for a cache (create dirs, then replace).
+/// Cache writes are best effort; a failure only costs a rebuild next time.
+fn write_index_at(path: &Path, games: &[StoreGame]) -> bool {
+    if let Some(dir) = path.parent() {
+        if std::fs::create_dir_all(dir).is_err() {
+            return false;
+        }
+    }
+    match serde_json::to_vec(games) {
+        Ok(bytes) => std::fs::write(path, bytes).is_ok(),
+        Err(_) => false,
+    }
+}
+
+/// Fetch a prebuilt index from the covers host. Network failures are not
+/// errors here: they mean "no remote index", and a live build follows.
+fn fetch_remote_index(base: &str, kind: &str) -> Option<Vec<StoreGame>> {
+    let url = remote_index_url(base, kind)?;
+    let body = agent()
+        .get(&url)
+        .timeout(Duration::from_secs(10))
+        .call()
+        .ok()?
+        .into_string()
+        .ok()?;
+    parse_store_index(&body).ok()
+}
+
+/// Resolve a store index without rebuilding it every visit:
+/// fresh disk cache -> remote index (write to cache) -> live build (write to
+/// cache). The 10 minute in-process cache stays as the final guard so tab
+/// switches never even hit the disk.
 fn store_games(
-    key: &'static str,
+    kind: &'static str,
+    base: &str,
     build: impl FnOnce() -> Result<Vec<StoreGame>>,
 ) -> Result<Vec<StoreGame>> {
-    if let Some((at, games)) = game_cache().lock().expect("game cache lock").get(key) {
+    if let Some((at, games)) = game_cache().lock().expect("game cache lock").get(kind) {
         if at.elapsed() < GAME_CACHE_TTL {
             return Ok(games.clone());
         }
     }
-    let games = build()?;
+    let path = store_index_path(kind);
+    let games = if let Some(games) = read_index_at(&path, SystemTime::now()) {
+        games
+    } else if let Some(games) = fetch_remote_index(base, kind) {
+        write_index_at(&path, &games);
+        games
+    } else {
+        let games = build()?;
+        write_index_at(&path, &games);
+        games
+    };
     game_cache()
         .lock()
         .expect("game cache lock")
-        .insert(key, (Instant::now(), games.clone()));
+        .insert(kind, (Instant::now(), games.clone()));
     Ok(games)
 }
 
@@ -996,65 +1076,89 @@ fn sort_games(games: &mut [StoreGame]) {
     games.sort_by(|a, b| a.title.to_lowercase().cmp(&b.title.to_lowercase()));
 }
 
-/// Every game file in every existing Minerva PSP torrent.
-pub fn minerva_games() -> Result<Vec<StoreGame>> {
-    store_games("minerva", || {
-        let mut out = Vec::new();
-        for set in minerva_sets()? {
-            for file in torrent::fetch_files(&set.url)? {
-                let title = game_title(&file.path);
-                if title.is_empty() {
-                    continue;
-                }
-                out.push(StoreGame {
-                    id: format!("{}#{}", set.id, file.index),
-                    title,
-                    size_bytes: file.length,
-                    container: set.title.clone(),
-                    source: "minerva".into(),
-                });
+/// Every game file in every existing Minerva PSP torrent, built live.
+pub fn build_minerva_games() -> Result<Vec<StoreGame>> {
+    let mut out = Vec::new();
+    for set in minerva_sets()? {
+        for file in torrent::fetch_files(&set.url)? {
+            let title = game_title(&file.path);
+            if title.is_empty() {
+                continue;
             }
+            out.push(StoreGame {
+                id: format!("{}#{}", set.id, file.index),
+                title,
+                size_bytes: file.length,
+                container: set.title.clone(),
+                source: "minerva".into(),
+            });
         }
-        sort_games(&mut out);
-        Ok(out)
-    })
+    }
+    sort_games(&mut out);
+    Ok(out)
 }
 
-/// Every game file inside the r-roms Internet Archive items.
-pub fn rroms_games() -> Result<Vec<StoreGame>> {
-    store_games("rroms", || {
-        let mut out = Vec::new();
-        for item in rroms_items()?.into_iter().filter(|item| item.kind == "ia_item") {
-            // Some linked items hold no game files (DLC folders, docs); skip
-            // them, but still fail loudly when Internet Archive itself is down.
-            let files = match rroms_files(&item.id) {
-                Ok(files) => files,
-                Err(Error::NotFound(_)) => continue,
-                Err(err) => return Err(err),
-            };
-            for file in files {
-                let title = game_title(&file.name);
-                if title.is_empty() {
-                    continue;
-                }
-                out.push(StoreGame {
-                    id: format!("{}/{}", item.id, file.name),
-                    title,
-                    size_bytes: file.size_bytes,
-                    container: item.title.clone(),
-                    source: "r-roms".into(),
-                });
+/// Every game file in every existing Minerva PSP torrent. Served from the
+/// prebuilt index when one is cached or published; `base` is the covers base.
+pub fn minerva_games(base: &str) -> Result<Vec<StoreGame>> {
+    store_games("minerva", base, build_minerva_games)
+}
+
+/// Every game file inside the r-roms Internet Archive items, built live.
+pub fn build_rroms_games() -> Result<Vec<StoreGame>> {
+    let mut out = Vec::new();
+    for item in rroms_items()?.into_iter().filter(|item| item.kind == "ia_item") {
+        // Some linked items hold no game files (DLC folders, docs); skip
+        // them, but still fail loudly when Internet Archive itself is down.
+        let files = match rroms_files(&item.id) {
+            Ok(files) => files,
+            Err(Error::NotFound(_)) => continue,
+            Err(err) => return Err(err),
+        };
+        for file in files {
+            let title = game_title(&file.name);
+            if title.is_empty() {
+                continue;
             }
+            out.push(StoreGame {
+                id: format!("{}/{}", item.id, file.name),
+                title,
+                size_bytes: file.size_bytes,
+                container: item.title.clone(),
+                source: "r-roms".into(),
+            });
         }
-        sort_games(&mut out);
-        Ok(out)
-    })
+    }
+    sort_games(&mut out);
+    Ok(out)
+}
+
+/// Every game file inside the r-roms Internet Archive items. Served from the
+/// prebuilt index when one is cached or published; `base` is the covers base.
+pub fn rroms_games(base: &str) -> Result<Vec<StoreGame>> {
+    store_games("rroms", base, build_rroms_games)
+}
+
+/// Internet Archive metadata for one item.
+///
+/// archive.org:443 is filtered on some networks, and the metadata is public,
+/// so a refused TLS connection retries the same endpoint over plain HTTP.
+/// The file URLs this feeds still point at https://.
+fn ia_metadata(id: &str) -> Result<serde_json::Value> {
+    let https = format!("https://archive.org/metadata/{}", urlencode(id));
+    match agent().get(&https).call() {
+        Ok(resp) => Ok(resp.into_json()?),
+        Err(ureq::Error::Transport(_)) => {
+            let http = format!("http://archive.org/metadata/{}", urlencode(id));
+            Ok(agent().get(&http).call()?.into_json()?)
+        }
+        Err(err) => Err(err.into()),
+    }
 }
 
 /// List the downloadable game files inside an IA item.
 pub fn ia_item_files(id: &str) -> Result<Vec<IaFile>> {
-    let url = format!("https://archive.org/metadata/{}", urlencode(id));
-    let v: serde_json::Value = agent().get(&url).call()?.into_json()?;
+    let v = ia_metadata(id)?;
     let files = v
         .get("files")
         .and_then(|f| f.as_array())
@@ -1286,6 +1390,76 @@ broken row without tabs\n";
         assert_eq!(game_title("no-extension"), "no-extension");
     }
 
+    #[test]
+    fn store_index_cache_round_trip() {
+        let dir = std::env::temp_dir().join(format!(
+            "godsend-psp-store-index-round-trip-{}",
+            std::process::id()
+        ));
+        let _ = std::fs::remove_dir_all(&dir);
+        let path = dir.join("minerva.json");
+        let games = vec![StoreGame {
+            id: "set#17".into(),
+            title: "Daxter (USA)".into(),
+            size_bytes: 803 * 1024 * 1024,
+            container: "Redump - Sony - PlayStation Portable".into(),
+            source: "minerva".into(),
+        }];
+        assert!(write_index_at(&path, &games), "cache write");
+        let back = read_index_at(&path, SystemTime::now()).expect("fresh cache read");
+        assert_eq!(back.len(), 1);
+        assert_eq!(back[0].id, "set#17");
+        assert_eq!(back[0].title, "Daxter (USA)");
+        assert_eq!(back[0].container, "Redump - Sony - PlayStation Portable");
+        assert_eq!(back[0].source, "minerva");
+        let _ = std::fs::remove_dir_all(&dir);
+    }
+
+    #[test]
+    fn store_index_ignores_a_stale_cache() {
+        let dir = std::env::temp_dir().join(format!(
+            "godsend-psp-store-index-stale-{}",
+            std::process::id()
+        ));
+        let _ = std::fs::remove_dir_all(&dir);
+        let path = dir.join("rroms.json");
+        assert!(write_index_at(&path, &[]), "cache write");
+        assert!(read_index_at(&path, SystemTime::now()).is_some(), "fresh");
+        let after_ttl = SystemTime::now() + STORE_INDEX_TTL + Duration::from_secs(60);
+        assert!(read_index_at(&path, after_ttl).is_none(), "stale is ignored");
+        let _ = std::fs::remove_dir_all(&dir);
+    }
+
+    #[test]
+    fn remote_store_index_parses() {
+        // The published shape: a plain array of StoreGame rows.
+        let body = r#"[
+            {
+                "id": "sony_playstation_portable_part1/Ape Escape - On the Loose (USA).zip",
+                "title": "Ape Escape - On the Loose (USA)",
+                "size_bytes": 325058560,
+                "container": "PSP Redump .iso (Part 1)",
+                "source": "r-roms"
+            },
+            {
+                "id": "Minerva_Myrient - Redump - Sony - PlayStation Portable.torrent#17",
+                "title": "007 - From Russia with Love (Europe)",
+                "size_bytes": 746586112,
+                "container": "Redump - Sony - PlayStation Portable",
+                "source": "minerva"
+            }
+        ]"#;
+        let games = parse_store_index(body).expect("parse remote index");
+        assert_eq!(games.len(), 2);
+        assert_eq!(games[0].container, "PSP Redump .iso (Part 1)");
+        assert_eq!(games[1].source, "minerva");
+        assert_eq!(
+            remote_index_url("https://covers.debrid.in/", "rroms").as_deref(),
+            Some("https://covers.debrid.in/psp/index/rroms.json")
+        );
+        assert_eq!(remote_index_url("  ", "rroms"), None);
+    }
+
     /// Plausible game title: at least a few letters spread over two words.
     fn plausible_game_title(title: &str) -> bool {
         let words = title
@@ -1298,7 +1472,7 @@ broken row without tabs\n";
     #[test]
     #[ignore = "network: builds the live Minerva game index"]
     fn minerva_games_live() {
-        let games = minerva_games().expect("minerva game index");
+        let games = build_minerva_games().expect("minerva game index");
         assert!(!games.is_empty(), "minerva game index is empty");
         assert!(
             games.iter().any(|game| plausible_game_title(&game.title)),
@@ -1314,7 +1488,7 @@ broken row without tabs\n";
     #[test]
     #[ignore = "network: builds the live r-roms game index"]
     fn rroms_games_live() {
-        let games = rroms_games().expect("r-roms game index");
+        let games = build_rroms_games().expect("r-roms game index");
         assert!(!games.is_empty(), "r-roms game index is empty");
         assert!(
             games.iter().any(|game| plausible_game_title(&game.title)),

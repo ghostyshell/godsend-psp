@@ -63,7 +63,7 @@ const NAV: { id: Page; label: string; icon: LucideIcon }[] = [
   { id: "settings", label: "Settings", icon: SettingsIcon },
 ];
 
-export const VERSION = "0.2.49";
+export const VERSION = "0.2.50";
 
 export interface PageProps {
   snap: Snapshot;
@@ -243,22 +243,24 @@ export default function App() {
               ) : null}
             </span>
             <div className="spacer" />
-            <button
-              className="btn small primary"
-              onClick={async () => {
-                try {
-                  await api.updateDownload();
-                  toast(`downloading GODsend PSP ${update.latest}`);
-                } catch (err) {
-                  toast(`update failed: ${String(err)}`);
-                }
-              }}
-            >
-              Install
-            </button>
-            <button className="btn small" onClick={() => setUpdate(null)}>
-              Dismiss
-            </button>
+            <div className="update-banner-actions">
+              <button
+                className="btn small primary"
+                onClick={async () => {
+                  try {
+                    await api.updateDownload();
+                    toast(`downloading GODsend PSP ${update.latest}`);
+                  } catch (err) {
+                    toast(`update failed: ${String(err)}`);
+                  }
+                }}
+              >
+                Install
+              </button>
+              <button className="btn small" onClick={() => setUpdate(null)}>
+                Dismiss
+              </button>
+            </div>
           </div>
         ) : null}
         {page === "home" && <Home {...pageProps} />}
