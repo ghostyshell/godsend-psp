@@ -39,6 +39,15 @@ test("buttons stay legible on hover", async ({ page }) => {
   expect(luminance).toBeGreaterThan(120);
 });
 
+test("settings update check offers an install action", async ({ page }) => {
+  await page.getByRole("button", { name: "Settings" }).click();
+  await page.evaluate(() => {
+    (window as unknown as Record<string, unknown>).__MOCK_UPDATE__ = true;
+  });
+  await page.getByRole("button", { name: "Check for updates now" }).click();
+  await expect(page.getByRole("button", { name: /Install 0\.2\.47/ })).toBeVisible();
+});
+
 test("library page lists the fixture games", async ({ page }) => {
   await page.getByRole("button", { name: "Library" }).click();
   await expect(page.locator(".tile").first()).toBeVisible();

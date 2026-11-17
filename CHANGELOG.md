@@ -3,6 +3,14 @@
 All notable changes to GODsend PSP. Newest first.
 
 
+## [0.2.52] - 2026-11-17
+
+### Fixed
+
+- Checking for updates in Settings now offers an Install button when a new
+  version exists, instead of only printing a line of text. Until now the only
+  action was the banner under the topbar, which narrow windows could hide.
+
 ## [0.2.51] - 2026-11-17
 
 ### Fixed
