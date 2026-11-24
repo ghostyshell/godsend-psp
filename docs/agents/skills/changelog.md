@@ -45,14 +45,14 @@
    `site-store.png`, `site-homebrew.png`.
 3. Commit, then `scripts/publish-release.sh`. It builds on this machine
    (macOS DMG + CLI locally; cross-platform artifacts from `dist/` when
-   present), uploads to GoFile + file.kiwi and repoints the docs. GitHub
+   present), uploads to Cloudflare R2 and repoints the docs. GitHub
    Actions is not part of the release path.
 4. Confirm the live feed check the script prints.
 
 ## Release
 
 `scripts/publish-release.sh` reads the version from `tauri.conf.json` and
-uploads that build to GoFile and file.kiwi. Bump first, publish second.
+uploads that build to Cloudflare R2. Bump first, publish second.
 
 The script also rewrites the README table and `docs/downloads.json`, then
 verifies the live site feed with a cache-busted request
