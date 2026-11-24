@@ -164,8 +164,8 @@
   <section id="downloads">
     <h2>Downloads</h2>
     <p class="muted" id="downloads-note">
-      GoFile is the primary mirror, file.kiwi the encrypted backup. Links are
-      refreshed weekly because free-tier files expire.
+      Builds are hosted on Cloudflare R2, so a link stays valid until the app
+      ships its next version.
     </p>
     <div class="downloads" id="downloads-table">
       <p class="muted">Loading the current links from downloads.json...</p>
@@ -294,11 +294,10 @@
 fetch("downloads.json?v=" + Date.now(), { cache: "no-store" }).then(r => r.json()).then(data => {
   const el = document.getElementById("downloads-table");
   if (!data.artifacts || !data.artifacts.length) return;
-  let html = '<table><thead><tr><th>Build</th><th>GoFile</th><th>file.kiwi</th><th>Size</th></tr></thead><tbody>';
+  let html = '<table><thead><tr><th>Build</th><th>Download</th><th>Size</th></tr></thead><tbody>';
   for (const a of data.artifacts) {
-    const g = a.gofile && a.gofile !== "EMPTY" ? `<a href="${a.gofile}">Download</a>` : "pending";
-    const k = a.kiwi && a.kiwi !== "EMPTY" ? `<a href="${a.kiwi}">Mirror</a>` : "pending";
-    html += `<tr><td><code>${a.name}</code></td><td>${g}</td><td>${k}</td><td>${a.size || ""}</td></tr>`;
+    const g = a.url ? `<a href="${a.url}">Download</a>` : "pending";
+    html += `<tr><td><code>${a.name}</code></td><td>${g}</td><td>${a.size || ""}</td></tr>`;
   }
   html += "</tbody></table>";
   el.innerHTML = html;

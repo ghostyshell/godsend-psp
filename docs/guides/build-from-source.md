@@ -94,5 +94,5 @@ artifacts to a GitHub Release:
 - Windows x64: NSIS setup exe and CLI zip
 - A UI check job runs the Playwright suite on every tag and manual run
 
-The upload script for mirror hosts (GoFile) lives at
+The release upload (Cloudflare R2) lives at
 `scripts/publish-release.sh` and takes the same artifact files.

@@ -43,8 +43,8 @@ offers GODsend 360 style features for the PSP.
   upload" means: bump the version, regenerate screenshots
   (`app/scripts/capture-screens.mjs` against the mock UI), then run
   `scripts/publish-release.sh`, which **builds locally on this machine**
-  (no GitHub Actions), uploads to GoFile + file.kiwi, repoints the README
-  and site, and verifies the live feed. A change is not done with source
+  (no GitHub Actions), uploads to Cloudflare R2, prunes older versions,
+  repoints the README and site, and verifies the live feed. A change is not done with source
   commits alone. The workflow file exists only for optional cross-platform
   builds; it is not part of the release path.
 - **Releases are not done until the live feed proves it.** After running
