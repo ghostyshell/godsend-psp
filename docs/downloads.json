@@ -21,6 +21,15 @@
       "sha256": "95f914c32831ed7627983b5f0de36e2e2432e7bed2ebff7f8dc274b500a377ac"
     },
     {
+      "name": "godsend-psp-cli-0.2.52-linux-x64.tar.gz",
+      "label": "Linux (x86_64, CLI)",
+      "r2": "https://covers.debrid.in/psp/releases/0.2.52/godsend-psp-cli-0.2.52-linux-x64.tar.gz",
+      "url": "https://covers.debrid.in/psp/releases/0.2.52/godsend-psp-cli-0.2.52-linux-x64.tar.gz",
+      "size": "2.1 MiB",
+      "bytes": 2203604,
+      "sha256": "6dbb13fcf9ac3afb9ecc74943430f7ea92585c6c90c424260e33a6a305697419"
+    },
+    {
       "name": "godsend-psp-cli-0.2.52-macos-arm64.tar.gz",
       "label": "macOS (Apple Silicon, CLI)",
       "r2": "https://covers.debrid.in/psp/releases/0.2.52/godsend-psp-cli-0.2.52-macos-arm64.tar.gz",
@@ -44,8 +53,8 @@
       "r2": "https://covers.debrid.in/psp/releases/0.2.52/godsend-psp-cli-0.2.52-windows-x64.zip",
       "url": "https://covers.debrid.in/psp/releases/0.2.52/godsend-psp-cli-0.2.52-windows-x64.zip",
       "size": "2.1 MiB",
-      "bytes": 2192601,
-      "sha256": "fe2d5aaed7799cd6e47526add4ea46cac97a723c954945bd3e1b79f9f03d07ba"
+      "bytes": 2246338,
+      "sha256": "205d349f2111657ed743e058f6c6b66e0685505c9a83f5e214fbd250f44ce1ac"
     }
   ]
 }
