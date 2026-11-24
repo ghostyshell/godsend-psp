@@ -21,6 +21,33 @@
       "sha256": "95f914c32831ed7627983b5f0de36e2e2432e7bed2ebff7f8dc274b500a377ac"
     },
     {
+      "name": "godsend-psp-0.2.52-x64-setup.exe",
+      "label": "Windows (x86_64, installer)",
+      "r2": "https://covers.debrid.in/psp/releases/0.2.52/godsend-psp-0.2.52-x64-setup.exe",
+      "url": "https://covers.debrid.in/psp/releases/0.2.52/godsend-psp-0.2.52-x64-setup.exe",
+      "size": "45.1 MiB",
+      "bytes": 47323177,
+      "sha256": "3023868722c2eeb463d2ff4f0b1a5a017263788f63e6a76ea03e37ac4899c3d8"
+    },
+    {
+      "name": "godsend-psp-0.2.52-linux-x64.AppImage",
+      "label": "Linux (x86_64, AppImage)",
+      "r2": "https://covers.debrid.in/psp/releases/0.2.52/godsend-psp-0.2.52-linux-x64.AppImage",
+      "url": "https://covers.debrid.in/psp/releases/0.2.52/godsend-psp-0.2.52-linux-x64.AppImage",
+      "size": "132.0 MiB",
+      "bytes": 138394104,
+      "sha256": "0597fb5840b01a905412c997918100e34f33e0b30767a983f7081fb1cdb4a462"
+    },
+    {
+      "name": "godsend-psp-0.2.52-linux-x64.deb",
+      "label": "Linux (x86_64, deb)",
+      "r2": "https://covers.debrid.in/psp/releases/0.2.52/godsend-psp-0.2.52-linux-x64.deb",
+      "url": "https://covers.debrid.in/psp/releases/0.2.52/godsend-psp-0.2.52-linux-x64.deb",
+      "size": "62.8 MiB",
+      "bytes": 65861888,
+      "sha256": "4e28b09ff9015120089dba75aa496463390c1a021ce6a8fc756090e350d315a1"
+    },
+    {
       "name": "godsend-psp-cli-0.2.52-linux-x64.tar.gz",
       "label": "Linux (x86_64, CLI)",
       "r2": "https://covers.debrid.in/psp/releases/0.2.52/godsend-psp-cli-0.2.52-linux-x64.tar.gz",

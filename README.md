@@ -23,6 +23,9 @@ Tauri 2 and React.
 | --- | --- | --- |
 | `godsend-psp-0.2.52-arm64.dmg` | [Download](https://covers.debrid.in/psp/releases/0.2.52/godsend-psp-0.2.52-arm64.dmg) | 44.3 MiB |
 | `godsend-psp-0.2.52-x64.dmg` | [Download](https://covers.debrid.in/psp/releases/0.2.52/godsend-psp-0.2.52-x64.dmg) | 59.2 MiB |
+| `godsend-psp-0.2.52-x64-setup.exe` | [Download](https://covers.debrid.in/psp/releases/0.2.52/godsend-psp-0.2.52-x64-setup.exe) | 45.1 MiB |
+| `godsend-psp-0.2.52-linux-x64.AppImage` | [Download](https://covers.debrid.in/psp/releases/0.2.52/godsend-psp-0.2.52-linux-x64.AppImage) | 132.0 MiB |
+| `godsend-psp-0.2.52-linux-x64.deb` | [Download](https://covers.debrid.in/psp/releases/0.2.52/godsend-psp-0.2.52-linux-x64.deb) | 62.8 MiB |
 | `godsend-psp-cli-0.2.52-linux-x64.tar.gz` | [Download](https://covers.debrid.in/psp/releases/0.2.52/godsend-psp-cli-0.2.52-linux-x64.tar.gz) | 2.1 MiB |
 | `godsend-psp-cli-0.2.52-macos-arm64.tar.gz` | [Download](https://covers.debrid.in/psp/releases/0.2.52/godsend-psp-cli-0.2.52-macos-arm64.tar.gz) | 1.9 MiB |
 | `godsend-psp-cli-0.2.52-macos-x64.tar.gz` | [Download](https://covers.debrid.in/psp/releases/0.2.52/godsend-psp-cli-0.2.52-macos-x64.tar.gz) | 2.0 MiB |
