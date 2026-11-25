@@ -2,7 +2,7 @@
 
 All notable changes to GODsend PSP. Newest first.
 
-## [Unreleased]
+## [0.2.53] - 2026-11-25
 
 ### Changed
 
