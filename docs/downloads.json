@@ -1,87 +1,87 @@
 {
-  "version": "0.2.52",
-  "updated": "2026-11-24",
+  "version": "0.2.53",
+  "updated": "2026-11-25",
   "artifacts": [
     {
-      "name": "godsend-psp-0.2.52-arm64.dmg",
+      "name": "godsend-psp-0.2.53-arm64.dmg",
       "label": "macOS (Apple Silicon)",
-      "r2": "https://covers.debrid.in/psp/releases/0.2.52/godsend-psp-0.2.52-arm64.dmg",
-      "url": "https://covers.debrid.in/psp/releases/0.2.52/godsend-psp-0.2.52-arm64.dmg",
-      "size": "44.3 MiB",
-      "bytes": 46484076,
-      "sha256": "b4330482e77070ba70c547ee8ee9d3de68740a8ff0ed7485fce49d2a4a860779"
+      "r2": "https://covers.debrid.in/psp/releases/0.2.53/godsend-psp-0.2.53-arm64.dmg",
+      "url": "https://covers.debrid.in/psp/releases/0.2.53/godsend-psp-0.2.53-arm64.dmg",
+      "size": "44.4 MiB",
+      "bytes": 46576469,
+      "sha256": "8babb1f2835b152343e400c2964a735cd76382e1cef7c4240881e1b1642f5136"
     },
     {
-      "name": "godsend-psp-0.2.52-x64.dmg",
+      "name": "godsend-psp-0.2.53-x64.dmg",
       "label": "macOS (Intel)",
-      "r2": "https://covers.debrid.in/psp/releases/0.2.52/godsend-psp-0.2.52-x64.dmg",
-      "url": "https://covers.debrid.in/psp/releases/0.2.52/godsend-psp-0.2.52-x64.dmg",
-      "size": "59.2 MiB",
-      "bytes": 62125597,
-      "sha256": "95f914c32831ed7627983b5f0de36e2e2432e7bed2ebff7f8dc274b500a377ac"
+      "r2": "https://covers.debrid.in/psp/releases/0.2.53/godsend-psp-0.2.53-x64.dmg",
+      "url": "https://covers.debrid.in/psp/releases/0.2.53/godsend-psp-0.2.53-x64.dmg",
+      "size": "59.3 MiB",
+      "bytes": 62128928,
+      "sha256": "b6f41e9a9aee8dd7b943f55706e809839f3f3c75c1cbb994f6cbc5d50519af90"
     },
     {
-      "name": "godsend-psp-0.2.52-x64-setup.exe",
+      "name": "godsend-psp-0.2.53-x64-setup.exe",
       "label": "Windows (x86_64, installer)",
-      "r2": "https://covers.debrid.in/psp/releases/0.2.52/godsend-psp-0.2.52-x64-setup.exe",
-      "url": "https://covers.debrid.in/psp/releases/0.2.52/godsend-psp-0.2.52-x64-setup.exe",
+      "r2": "https://covers.debrid.in/psp/releases/0.2.53/godsend-psp-0.2.53-x64-setup.exe",
+      "url": "https://covers.debrid.in/psp/releases/0.2.53/godsend-psp-0.2.53-x64-setup.exe",
       "size": "45.1 MiB",
-      "bytes": 47323177,
-      "sha256": "3023868722c2eeb463d2ff4f0b1a5a017263788f63e6a76ea03e37ac4899c3d8"
+      "bytes": 47319844,
+      "sha256": "971ef74352088742812f1925f8abfbdfa279265c01e410cc6cb16b03ed318251"
     },
     {
-      "name": "godsend-psp-0.2.52-linux-x64.AppImage",
-      "label": "Linux (x86_64, AppImage)",
-      "r2": "https://covers.debrid.in/psp/releases/0.2.52/godsend-psp-0.2.52-linux-x64.AppImage",
-      "url": "https://covers.debrid.in/psp/releases/0.2.52/godsend-psp-0.2.52-linux-x64.AppImage",
-      "size": "132.0 MiB",
-      "bytes": 138394104,
-      "sha256": "0597fb5840b01a905412c997918100e34f33e0b30767a983f7081fb1cdb4a462"
-    },
-    {
-      "name": "godsend-psp-0.2.52-linux-x64.deb",
-      "label": "Linux (x86_64, deb)",
-      "r2": "https://covers.debrid.in/psp/releases/0.2.52/godsend-psp-0.2.52-linux-x64.deb",
-      "url": "https://covers.debrid.in/psp/releases/0.2.52/godsend-psp-0.2.52-linux-x64.deb",
-      "size": "62.8 MiB",
-      "bytes": 65861888,
-      "sha256": "4e28b09ff9015120089dba75aa496463390c1a021ce6a8fc756090e350d315a1"
-    },
-    {
-      "name": "godsend-psp-cli-0.2.52-linux-x64.tar.gz",
-      "label": "Linux (x86_64, CLI)",
-      "r2": "https://covers.debrid.in/psp/releases/0.2.52/godsend-psp-cli-0.2.52-linux-x64.tar.gz",
-      "url": "https://covers.debrid.in/psp/releases/0.2.52/godsend-psp-cli-0.2.52-linux-x64.tar.gz",
-      "size": "2.1 MiB",
-      "bytes": 2203604,
-      "sha256": "6dbb13fcf9ac3afb9ecc74943430f7ea92585c6c90c424260e33a6a305697419"
-    },
-    {
-      "name": "godsend-psp-cli-0.2.52-macos-arm64.tar.gz",
+      "name": "godsend-psp-cli-0.2.53-macos-arm64.tar.gz",
       "label": "macOS (Apple Silicon, CLI)",
-      "r2": "https://covers.debrid.in/psp/releases/0.2.52/godsend-psp-cli-0.2.52-macos-arm64.tar.gz",
-      "url": "https://covers.debrid.in/psp/releases/0.2.52/godsend-psp-cli-0.2.52-macos-arm64.tar.gz",
+      "r2": "https://covers.debrid.in/psp/releases/0.2.53/godsend-psp-cli-0.2.53-macos-arm64.tar.gz",
+      "url": "https://covers.debrid.in/psp/releases/0.2.53/godsend-psp-cli-0.2.53-macos-arm64.tar.gz",
       "size": "1.9 MiB",
-      "bytes": 2020016,
-      "sha256": "b0c52863a3642bf24bd15bb87b210b2b46841979508f39aa3b3aae6a34b22ad1"
+      "bytes": 2019503,
+      "sha256": "79237e978cb34d3ad77a22a58118214abf0fd732400d2ec4b9ea70d7590d3655"
     },
     {
-      "name": "godsend-psp-cli-0.2.52-macos-x64.tar.gz",
+      "name": "godsend-psp-cli-0.2.53-macos-x64.tar.gz",
       "label": "macOS (Intel, CLI)",
-      "r2": "https://covers.debrid.in/psp/releases/0.2.52/godsend-psp-cli-0.2.52-macos-x64.tar.gz",
-      "url": "https://covers.debrid.in/psp/releases/0.2.52/godsend-psp-cli-0.2.52-macos-x64.tar.gz",
+      "r2": "https://covers.debrid.in/psp/releases/0.2.53/godsend-psp-cli-0.2.53-macos-x64.tar.gz",
+      "url": "https://covers.debrid.in/psp/releases/0.2.53/godsend-psp-cli-0.2.53-macos-x64.tar.gz",
       "size": "2.0 MiB",
-      "bytes": 2145780,
-      "sha256": "a348be2c5dad67fff68a2ecd80feb4bea8514ccb351228fd293e1b4c4f996daa"
+      "bytes": 2143578,
+      "sha256": "8e48741b8679f12020a6e57e08d5d9405775e4ff51d7d6d7ed35135ce8eb92af"
     },
     {
-      "name": "godsend-psp-cli-0.2.52-windows-x64.zip",
+      "name": "linux-x64.zip",
       "label": "Windows (x86_64, CLI)",
-      "r2": "https://covers.debrid.in/psp/releases/0.2.52/godsend-psp-cli-0.2.52-windows-x64.zip",
-      "url": "https://covers.debrid.in/psp/releases/0.2.52/godsend-psp-cli-0.2.52-windows-x64.zip",
-      "size": "2.1 MiB",
-      "bytes": 2246338,
-      "sha256": "205d349f2111657ed743e058f6c6b66e0685505c9a83f5e214fbd250f44ce1ac"
+      "r2": "https://covers.debrid.in/psp/releases/0.2.53/linux-x64.zip",
+      "url": "https://covers.debrid.in/psp/releases/0.2.53/linux-x64.zip",
+      "size": "26.3 MiB",
+      "bytes": 27590656,
+      "sha256": "e524e407d9797914e22bd9d152d1fab4362aba14542a6adc9f6b2d64642bc7cc"
+    },
+    {
+      "name": "macos-arm64.zip",
+      "label": "Windows (x86_64, CLI)",
+      "r2": "https://covers.debrid.in/psp/releases/0.2.53/macos-arm64.zip",
+      "url": "https://covers.debrid.in/psp/releases/0.2.53/macos-arm64.zip",
+      "size": "46.2 MiB",
+      "bytes": 48413236,
+      "sha256": "9c7ff124c5590c6c9d769489cec06f658f2fb79e28406904825fdaac2161efc7"
+    },
+    {
+      "name": "macos-x64.zip",
+      "label": "Windows (x86_64, CLI)",
+      "r2": "https://covers.debrid.in/psp/releases/0.2.53/macos-x64.zip",
+      "url": "https://covers.debrid.in/psp/releases/0.2.53/macos-x64.zip",
+      "size": "61.0 MiB",
+      "bytes": 63987050,
+      "sha256": "5f0f4b53933a93d2eca524fbbd1c320552a8d1f8997c96fd91fedf91767316d1"
+    },
+    {
+      "name": "windows-x64.zip",
+      "label": "Windows (x86_64, CLI)",
+      "r2": "https://covers.debrid.in/psp/releases/0.2.53/windows-x64.zip",
+      "url": "https://covers.debrid.in/psp/releases/0.2.53/windows-x64.zip",
+      "size": "47.3 MiB",
+      "bytes": 49561070,
+      "sha256": "8bf6134a8c0afd26022f0030f2b44fee423e0254cd97be090b14ba61c97662f2"
     }
   ]
 }
