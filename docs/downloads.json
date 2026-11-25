@@ -1,6 +1,6 @@
 {
   "version": "0.2.53",
-  "updated": "2026-11-25",
+  "updated": "2026-11-26",
   "artifacts": [
     {
       "name": "godsend-psp-0.2.53-arm64.dmg",
@@ -8,8 +8,8 @@
       "r2": "https://covers.debrid.in/psp/releases/0.2.53/godsend-psp-0.2.53-arm64.dmg",
       "url": "https://covers.debrid.in/psp/releases/0.2.53/godsend-psp-0.2.53-arm64.dmg",
       "size": "44.4 MiB",
-      "bytes": 46576469,
-      "sha256": "8babb1f2835b152343e400c2964a735cd76382e1cef7c4240881e1b1642f5136"
+      "bytes": 46576454,
+      "sha256": "6b8aa17ce1dc734048121a213038b7d3732d03860e2cdc6889b434b6ddabdece"
     },
     {
       "name": "godsend-psp-0.2.53-x64.dmg",
@@ -17,8 +17,8 @@
       "r2": "https://covers.debrid.in/psp/releases/0.2.53/godsend-psp-0.2.53-x64.dmg",
       "url": "https://covers.debrid.in/psp/releases/0.2.53/godsend-psp-0.2.53-x64.dmg",
       "size": "59.3 MiB",
-      "bytes": 62128928,
-      "sha256": "b6f41e9a9aee8dd7b943f55706e809839f3f3c75c1cbb994f6cbc5d50519af90"
+      "bytes": 62128950,
+      "sha256": "98cf6c98c9021a11b5f844357c174518a9de5c586f632cccd85b16ed441e7cc4"
     },
     {
       "name": "godsend-psp-0.2.53-x64-setup.exe",
@@ -26,8 +26,35 @@
       "r2": "https://covers.debrid.in/psp/releases/0.2.53/godsend-psp-0.2.53-x64-setup.exe",
       "url": "https://covers.debrid.in/psp/releases/0.2.53/godsend-psp-0.2.53-x64-setup.exe",
       "size": "45.1 MiB",
-      "bytes": 47319844,
-      "sha256": "971ef74352088742812f1925f8abfbdfa279265c01e410cc6cb16b03ed318251"
+      "bytes": 47326989,
+      "sha256": "310af5b56d8a27105073b1d3bc1e0784b3c75e9aa89202a9bad2accfbc11a572"
+    },
+    {
+      "name": "godsend-psp-0.2.53-linux-x64.AppImage",
+      "label": "Linux (x86_64, AppImage)",
+      "r2": "https://covers.debrid.in/psp/releases/0.2.53/godsend-psp-0.2.53-linux-x64.AppImage",
+      "url": "https://covers.debrid.in/psp/releases/0.2.53/godsend-psp-0.2.53-linux-x64.AppImage",
+      "size": "132.0 MiB",
+      "bytes": 138394104,
+      "sha256": "a778ba5b6cb16f8f5d7c55c8bbe15a667eaeb311119e15e030633e0b38324d8d"
+    },
+    {
+      "name": "godsend-psp-0.2.53-linux-x64.deb",
+      "label": "Linux (x86_64, deb)",
+      "r2": "https://covers.debrid.in/psp/releases/0.2.53/godsend-psp-0.2.53-linux-x64.deb",
+      "url": "https://covers.debrid.in/psp/releases/0.2.53/godsend-psp-0.2.53-linux-x64.deb",
+      "size": "62.8 MiB",
+      "bytes": 65861798,
+      "sha256": "07291a9649bd83473451ec3fdf0934d92794fe2da9ab30ba8a07e3b9c33182e8"
+    },
+    {
+      "name": "godsend-psp-cli-0.2.53-linux-x64.tar.gz",
+      "label": "Linux (x86_64, CLI)",
+      "r2": "https://covers.debrid.in/psp/releases/0.2.53/godsend-psp-cli-0.2.53-linux-x64.tar.gz",
+      "url": "https://covers.debrid.in/psp/releases/0.2.53/godsend-psp-cli-0.2.53-linux-x64.tar.gz",
+      "size": "2.1 MiB",
+      "bytes": 2203819,
+      "sha256": "acb64f28031bfb92cc48f41874ae0d553c238311a376cac84312580a07116e94"
     },
     {
       "name": "godsend-psp-cli-0.2.53-macos-arm64.tar.gz",
@@ -36,7 +63,7 @@
       "url": "https://covers.debrid.in/psp/releases/0.2.53/godsend-psp-cli-0.2.53-macos-arm64.tar.gz",
       "size": "1.9 MiB",
       "bytes": 2019503,
-      "sha256": "79237e978cb34d3ad77a22a58118214abf0fd732400d2ec4b9ea70d7590d3655"
+      "sha256": "f0b4f603e4035b4cf2e41ee62c833bc3a7f36730bdd7b897530d8162867f9e1b"
     },
     {
       "name": "godsend-psp-cli-0.2.53-macos-x64.tar.gz",
@@ -45,7 +72,16 @@
       "url": "https://covers.debrid.in/psp/releases/0.2.53/godsend-psp-cli-0.2.53-macos-x64.tar.gz",
       "size": "2.0 MiB",
       "bytes": 2143578,
-      "sha256": "8e48741b8679f12020a6e57e08d5d9405775e4ff51d7d6d7ed35135ce8eb92af"
+      "sha256": "f182948a3b352fa2fe93a90f2652ac12a15af398211a97b4761c829bfe5389ad"
+    },
+    {
+      "name": "godsend-psp-cli-0.2.53-windows-x64.zip",
+      "label": "Windows (x86_64, CLI)",
+      "r2": "https://covers.debrid.in/psp/releases/0.2.53/godsend-psp-cli-0.2.53-windows-x64.zip",
+      "url": "https://covers.debrid.in/psp/releases/0.2.53/godsend-psp-cli-0.2.53-windows-x64.zip",
+      "size": "2.1 MiB",
+      "bytes": 2246310,
+      "sha256": "e0ab7bd97a192f0456de751d6f4fda7642064aa128dd65959a7e08c7918c3e34"
     },
     {
       "name": "linux-x64.zip",
