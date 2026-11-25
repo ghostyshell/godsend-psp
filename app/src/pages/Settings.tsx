@@ -88,6 +88,7 @@ export default function Settings({ snap, reload, toast, refreshKey }: PageProps)
           <label>Real-Debrid API key</label>
           <div style={{ display: "flex", gap: 8 }}>
             <input
+              aria-label="Real-Debrid API key"
               type="password"
               value={rdKey}
               onChange={(e) => setRdKey(e.target.value)}
@@ -110,6 +111,7 @@ export default function Settings({ snap, reload, toast, refreshKey }: PageProps)
           <label>TorBox API key</label>
           <div style={{ display: "flex", gap: 8 }}>
             <input
+              aria-label="TorBox API key"
               type="password"
               value={tbKey}
               onChange={(e) => setTbKey(e.target.value)}
@@ -138,6 +140,7 @@ export default function Settings({ snap, reload, toast, refreshKey }: PageProps)
           <label>game-search base URL</label>
           <div style={{ display: "flex", gap: 8 }}>
             <input
+              aria-label="game-search base URL"
               type="text"
               defaultValue={config.gamesearch_base}
               onBlur={async (e) => {
@@ -153,6 +156,7 @@ export default function Settings({ snap, reload, toast, refreshKey }: PageProps)
         <div className="field">
           <label>R2 covers base (empty = catalog URLs only)</label>
           <input
+            aria-label="R2 covers base (empty = catalog URLs only)"
             type="text"
             defaultValue={config.covers_base}
             placeholder="https://covers.example.com"
@@ -168,6 +172,7 @@ export default function Settings({ snap, reload, toast, refreshKey }: PageProps)
         <div className="field">
           <label>Mods catalog base (empty = mods disabled)</label>
           <input
+            aria-label="Mods catalog base (empty = mods disabled)"
             type="text"
             defaultValue={config.mods_base}
             placeholder="https://covers.example.com"
@@ -189,6 +194,7 @@ export default function Settings({ snap, reload, toast, refreshKey }: PageProps)
           <label>Internet Archive username</label>
           <div style={{ display: "flex", gap: 8 }}>
             <input
+              aria-label="Internet Archive username"
               type="text"
               value={iaEmail}
               onChange={(e) => setIaEmail(e.target.value)}
@@ -205,6 +211,7 @@ export default function Settings({ snap, reload, toast, refreshKey }: PageProps)
           <label>Internet Archive password</label>
           <div style={{ display: "flex", gap: 8 }}>
             <input
+              aria-label="Internet Archive password"
               type="password"
               value={iaPass}
               onChange={(e) => setIaPass(e.target.value)}
@@ -224,6 +231,7 @@ export default function Settings({ snap, reload, toast, refreshKey }: PageProps)
           <label>Internet Archive access key</label>
           <div style={{ display: "flex", gap: 8 }}>
             <input
+              aria-label="Internet Archive access key"
               type="password"
               value={iaKey}
               onChange={(e) => setIaKey(e.target.value)}
@@ -246,6 +254,7 @@ export default function Settings({ snap, reload, toast, refreshKey }: PageProps)
           <label>Internet Archive secret key</label>
           <div style={{ display: "flex", gap: 8 }}>
             <input
+              aria-label="Internet Archive secret key"
               type="password"
               value={iaSecret}
               onChange={(e) => setIaSecret(e.target.value)}
@@ -274,6 +283,7 @@ export default function Settings({ snap, reload, toast, refreshKey }: PageProps)
           <label>Download folder (empty = Downloads/godsend-psp)</label>
           <div style={{ display: "flex", gap: 8 }}>
             <input
+              aria-label="Download folder (empty = Downloads/godsend-psp)"
               type="text"
               value={downloadDir}
               onChange={(e) => setDownloadDir(e.target.value)}

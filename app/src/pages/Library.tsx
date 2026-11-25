@@ -82,7 +82,19 @@ export default function Library({ snap, reload, toast, refreshKey }: PageProps) 
           <div className="grid">
             {(category === "games" ? pspGames : pspHomebrew).map((game) => (
               <div className="tile" key={game.id}>
-                <div className="cover" onClick={() => void openDetail(game.title_id ?? "", game.title)}>
+                <div
+                  className="cover"
+                  role="button"
+                  tabIndex={0}
+                  aria-label={`Open ${game.title}`}
+                  onClick={() => void openDetail(game.title_id ?? "", game.title)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" || e.key === " ") {
+                      e.preventDefault();
+                      void openDetail(game.title_id ?? "", game.title);
+                    }
+                  }}
+                >
                   {covers[game.id] ? (
                     <img src={covers[game.id]} alt={`${game.title} cover`} />
                   ) : (

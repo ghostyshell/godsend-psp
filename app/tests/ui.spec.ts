@@ -267,3 +267,14 @@ test("theme studio creates a pack", async ({ page }) => {
   await page.getByRole("button", { name: "Create", exact: true }).click();
   await expect(page.locator(".theme-card .title").filter({ hasText: "Test Pack" })).toBeVisible();
 });
+
+test("unslop-anything a11y pass", async ({ page }) => {
+  await page.getByRole("button", { name: "Settings" }).click();
+  await expect(page.getByRole("textbox", { name: "TorBox API key" })).toBeVisible();
+  await expect(page.getByRole("textbox", { name: "Internet Archive username" })).toBeVisible();
+  await page.getByRole("button", { name: "Library" }).click();
+  const cover = page.locator(".tile .cover").first();
+  await expect(cover).toHaveAttribute("role", "button");
+  await cover.focus();
+  await expect(cover).toBeFocused();
+});

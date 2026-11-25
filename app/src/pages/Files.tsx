@@ -218,6 +218,18 @@ function BrowserList({
               className="title"
               style={{ cursor: entry.is_dir ? "pointer" : "default" }}
               title={entry.path}
+              {...(entry.is_dir
+                ? {
+                    role: "button",
+                    tabIndex: 0,
+                    onKeyDown: (e: React.KeyboardEvent) => {
+                      if (e.key === "Enter" || e.key === " ") {
+                        e.preventDefault();
+                        onNavigate(entry);
+                      }
+                    },
+                  }
+                : {})}
               onClick={() => onNavigate(entry)}
             >
               {entry.name}

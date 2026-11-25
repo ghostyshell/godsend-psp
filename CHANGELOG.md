@@ -6,6 +6,7 @@ All notable changes to GODsend PSP. Newest first.
 
 ### Changed
 
+- Accessibility pass: form inputs and game covers now have accessible names and keyboard access, and the site shows hover styles on keyboard focus too.
 - Downloads are hosted on Cloudflare R2 under versioned, immutable keys, so a
   link stays valid until the next version. The weekly GoFile/file.kiwi re-upload
   is gone: the scheduled job now only checks the live feed for a version bump,
